@@ -1,0 +1,50 @@
+name: post-to-x
+
+on:
+  schedule:
+    # UTC times. Runs at :07 and :37, from 05:07 to 21:37 UTC
+    # (about 06:00 to 23:30 Italian time, depending on DST)
+    - cron: '7,37 5-21 * * *'
+  workflow_dispatch: # "Run workflow" button for manual tests
+
+permissions:
+  contents: write
+
+concurrency:
+  group: post-to-x
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Rome
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install --no-audit --no-fund
+
+      - name: Post due items
+        run: node post.js
+        env:
+          X_APP_KEY: ${{ secrets.X_APP_KEY }}
+          X_APP_SECRET: ${{ secrets.X_APP_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+
+      # always() so a posted item is moved out of queue/ even if another item failed
+      - name: Save queue state
+        if: always()
+        run: |
+          git config user.name "x-autopost"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A queue posted missed 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "autopost: update queue"
+            git pull --rebase
+            git push
+          fi

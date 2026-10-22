@@ -1,0 +1,11 @@
+{
+  "name": "x-autopost",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "post": "node post.js"
+  },
+  "dependencies": {
+    "twitter-api-v2": "^1.23.0"
+  }
+}

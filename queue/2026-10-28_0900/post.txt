@@ -1,0 +1,11 @@
+GPT-6.1 Sol has officially become the CHEAPEST real world coder
+
+One dev ran 6 real repo changes 20 times each...
+
+Sol cost $6.73 vs $44.10 for Opus 5.5!!
+
+and.... Sol broke a passing test in 5 of 20 runs
+
+CLAUDE BROKE ZERO!!!
+
+Better stick to Claude when there are no "tests"

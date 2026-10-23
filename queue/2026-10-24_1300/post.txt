@@ -1,0 +1,11 @@
+Utopai X has officially become the BEST US video model
+
+Ranked #2 at 1169 only 5 Elo behind Wan 3.0...
+
+It ranks #1 for "audio sync" and physics!!
+
+BUILT ON TOP OF MINIMAX H3!!!
+
+and.... there is NO public API
+
+Better stick to Wan 3.0 for now

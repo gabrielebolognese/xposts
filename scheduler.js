@@ -8,7 +8,7 @@ const QUEUE = path.join(ROOT, 'queue');
 const SLOTS = ['0900', '1100', '1300', '1500']; // Europe/Rome
 const TEXT_FROM = 15 * 60 + 30; // text posts: random times from 15:30 to 21:00, Europe/Rome
 const TEXT_TO = 21 * 60;
-const EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif'];
+const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
 const MAX_IMAGE = 5 * 1024 * 1024;
 const ADDRESS = 'http://localhost:3000';
 
@@ -86,7 +86,7 @@ export function check(md, images, textOnly = false) {
   if (!textOnly) {
     for (const img of images) {
       const lead = img.name.match(/^\d+/);
-      if (!lead || !EXTS.includes(path.extname(img.name).toLowerCase())) {
+      if (!lead || !MIME[path.extname(img.name).toLowerCase()]) {
         errors.push(`${img.name}: name it with the post number, like 1.png (png, jpg, jpeg, webp, gif)`);
         continue;
       }
@@ -132,6 +132,21 @@ function schedule(md, images, textOnly) {
   return { folders };
 }
 
+// Posts in queue/ whose time hasn't come yet (past ones are posted, or being posted, by GitHub)
+function upcoming() {
+  const now = romeTime(Date.now());
+  if (!fs.existsSync(QUEUE)) return [];
+  return fs
+    .readdirSync(QUEUE)
+    .filter((name) => /^\d{4}-\d{2}-\d{2}_\d{4}/.test(name) && name >= now)
+    .sort()
+    .map((name) => {
+      const files = fs.readdirSync(path.join(QUEUE, name));
+      const text = files.includes('post.txt') ? fs.readFileSync(path.join(QUEUE, name, 'post.txt'), 'utf8').trim() : '';
+      return { name, text, image: files.find((f) => MIME[path.extname(f).toLowerCase()]) };
+    });
+}
+
 function serve() {
   http
     .createServer(async (req, res) => {
@@ -142,6 +157,12 @@ function serve() {
       if (req.method === 'GET' && req.url === '/') {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         return res.end(fs.readFileSync(path.join(ROOT, 'scheduler.html')));
+      }
+      // Thumbnails for the Scheduled posts tab: /img/<folder>/<image>, no dots or slashes in the folder part
+      const img = req.method === 'GET' && req.url.match(/^\/img\/([\w-]+)\/([\w-]+\.\w+)$/);
+      if (img && MIME[path.extname(img[2]).toLowerCase()] && fs.existsSync(path.join(QUEUE, img[1], img[2]))) {
+        res.writeHead(200, { 'Content-Type': MIME[path.extname(img[2]).toLowerCase()] });
+        return res.end(fs.readFileSync(path.join(QUEUE, img[1], img[2])));
       }
       // JSON only: browsers won't send a cross-origin JSON POST without CORS, so other sites can't call this
       if (req.method !== 'POST' || req.headers['content-type'] !== 'application/json') {
@@ -159,6 +180,7 @@ function serve() {
           return json({ ...result, slots });
         }
         if (req.url === '/schedule') return json(schedule(body.md, body.images, body.text));
+        if (req.url === '/queue') return json(upcoming());
         if (req.url === '/push') {
           const cmd = `git add queue && git commit -m "schedule ${unpushed} posts" && git pull --rebase && git push`;
           return exec(cmd, { cwd: ROOT }, (err, stdout, stderr) => {

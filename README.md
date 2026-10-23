@@ -49,6 +49,8 @@ Posts fill the slots 09:00, 11:00, 13:00 and 15:00 (Italian time) in order, star
 
 **Text posts** (no images): choose **Text posts** at the top of the page and pick only the `.md` file. They get 2 a day at random times from 15:30 to 21:00 (Italian time), at least 1 hour apart. Text posts already scheduled or posted in that window count toward the 2 a day, so a new batch continues after the old one.
 
+The **Scheduled posts** tab lists every upcoming post in your local `queue/`, by day. Run `git pull` first if you want it to match GitHub exactly.
+
 ## Timing
 
 GitHub's timer is not exact: runs often start 5 to 20 minutes late. Posts go out between your time and about 30 minutes after it. Runs only happen 06:00 to 23:30 Italian time (edit the cron line in `.github/workflows/post.yml` to change that; cron times are UTC).

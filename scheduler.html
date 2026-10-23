@@ -2,72 +2,179 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Schedule posts</title>
+<title>X scheduler</title>
 <style>
-  body { font: 15px system-ui, sans-serif; background: #fff; color: #111; max-width: 700px; margin: 24px auto; padding: 0 16px; }
-  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
-  th, td { border-bottom: 1px solid #ddd; padding: 6px; text-align: left; vertical-align: top; }
-  td.text { white-space: pre-wrap; }
-  td img { width: 80px; }
+  :root { --line: #e3e3e3; --soft: #f5f5f5; --muted: #6b6b6b; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { font: 15px/1.45 system-ui, sans-serif; background: #fff; color: #111; max-width: 700px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 20px; margin: 0 0 12px; }
+  nav { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; font: inherit; color: var(--muted); cursor: pointer; }
+  nav button.on { color: #111; border-bottom-color: #111; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .step h2 { font-size: 15px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .step h2 span { width: 22px; height: 22px; border-radius: 50%; background: #111; color: #fff; font-size: 12px; display: inline-grid; place-items: center; }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opts label { flex: 1 1 200px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; }
+  .opts label:has(input:checked) { border-color: #111; background: var(--soft); }
+  .file { display: block; margin: 4px 0 10px; }
+  .muted, small { color: var(--muted); }
   .err { color: #c00; }
-  .warn { color: #d97000; }
-  pre { white-space: pre-wrap; background: #f4f4f4; padding: 8px; }
+  .warn { color: #b25e00; }
+  .ok { color: #1a7f37; }
+  #msgs p { margin: 4px 0; }
+  button.main { background: #111; color: #fff; border: 0; border-radius: 8px; padding: 10px 16px; font: inherit; cursor: pointer; margin-top: 6px; }
+  button.main:disabled { background: #c8c8c8; cursor: default; }
+  pre { white-space: pre-wrap; background: var(--soft); border-radius: 8px; padding: 10px; font-size: 13px; max-height: 300px; overflow: auto; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .text { white-space: pre-wrap; overflow-wrap: anywhere; }
+  td img, .post img { width: 72px; border-radius: 6px; }
+  .day { font-size: 14px; margin: 20px 0 6px; }
+  .post { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; }
+  .post .time { font-weight: 600; flex: none; }
+  .post { cursor: pointer; }
+  .post .text { flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .post.open .text { display: block; }
+  .tag { flex: none; font-size: 12px; color: var(--muted); background: var(--soft); border-radius: 999px; padding: 1px 8px; }
 </style>
-<h1>Schedule posts</h1>
-<p>
-  <label><input type="radio" name="mode" value="image" checked> Image posts: 09:00, 11:00, 13:00, 15:00</label><br>
-  <label><input type="radio" name="mode" value="text"> Text posts: 2 a day, random times from 15:30 to 21:00</label>
-</p>
-<p>Posts (.md) <input type="file" id="md" accept=".md,.txt"></p>
-<p id="imgrow">Images <input type="file" id="imgs" multiple accept=".png,.jpg,.jpeg,.webp,.gif"></p>
-<div id="msgs"></div>
-<table id="table"></table>
-<p><button id="schedule" disabled>Schedule</button></p>
-<div id="result"></div>
+
+<h1>X scheduler</h1>
+<nav>
+  <button id="tab-new" class="on">Schedule new posts</button>
+  <button id="tab-list">Scheduled posts <span id="count"></span></button>
+</nav>
+
+<main id="new">
+  <section class="step">
+    <h2><span>1</span> Choose the post type</h2>
+    <div class="opts">
+      <label><input type="radio" name="mode" value="image" checked> <b>Image posts</b><br><small>One image each, at 09:00, 11:00, 13:00, 15:00</small></label>
+      <label><input type="radio" name="mode" value="text"> <b>Text posts</b><br><small>No images, 2 a day at random times from 15:30 to 21:00</small></label>
+    </div>
+  </section>
+
+  <section class="step">
+    <h2><span>2</span> Pick the files</h2>
+    <label class="file">Posts file (.md, posts separated by a line with only #--#)<br><input type="file" id="md" accept=".md,.txt"></label>
+    <label class="file" id="imgrow">Images named 1.png, 2.jpg and so on (select them all)<br><input type="file" id="imgs" multiple accept=".png,.jpg,.jpeg,.webp,.gif"></label>
+  </section>
+
+  <section class="step">
+    <h2><span>3</span> Check and schedule</h2>
+    <p id="summary" class="muted">Pick the files in step 2 to see the preview.</p>
+    <div id="msgs"></div>
+    <button id="schedule" class="main" disabled>Schedule</button>
+  </section>
+
+  <section class="step" id="step4" hidden>
+    <h2><span>4</span> Push to GitHub</h2>
+    <p id="done"></p>
+    <details><summary class="muted">Show the folders</summary><ol id="folders"></ol></details>
+    <button id="push" class="main">Push to GitHub</button>
+    <p id="pushed"></p>
+    <pre id="git" hidden></pre>
+  </section>
+
+  <section id="preview" hidden>
+    <h2 class="day">Preview</h2>
+    <table id="table"></table>
+  </section>
+</main>
+
+<main id="list" hidden>
+  <p id="list-summary" class="muted"></p>
+  <div id="posts"></div>
+</main>
+
 <script>
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
   const lines = (list, cls) => list.map((m) => `<p class="${cls}">${esc(m)}</p>`).join('');
+  const day = (name) => new Date(`${name.slice(0, 10)}T12:00:00`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const when = (name) => `${day(name)}, ${name.slice(11, 13)}:${name.slice(13, 15)}`;
+  const span = (names) => (names.length ? `from ${when(names[0])} to ${when(names.at(-1))}` : '');
   const readBase64 = (file) => new Promise((ok, fail) => {
     const r = new FileReader();
     r.onload = () => ok(r.result.split(',')[1]);
     r.onerror = fail;
     r.readAsDataURL(file);
   });
-  async function post(url, body) {
+  async function post(url, body, errorTarget = $('msgs')) {
     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const data = await res.json();
     if (data.error) {
-      $('msgs').innerHTML = lines([data.error], 'err');
+      errorTarget.innerHTML = lines([data.error], 'err');
       throw new Error(data.error);
     }
     return data;
   }
 
+  // Tabs
+  function showTab(list) {
+    $('new').hidden = list;
+    $('list').hidden = !list;
+    $('tab-new').classList.toggle('on', !list);
+    $('tab-list').classList.toggle('on', list);
+    scrollTo(0, 0);
+    if (list) loadList();
+  }
+  // Posts show 3 lines; click one to see all of it
+  $('posts').onclick = (e) => e.target.closest('.post')?.classList.toggle('open');
+  $('tab-new').onclick = () => showTab(false);
+  $('tab-list').onclick = () => showTab(true);
+
+  async function loadList() {
+    const posts = await post('/queue', {}, $('list-summary'));
+    const withImage = posts.filter((p) => p.image).length;
+    $('count').textContent = posts.length ? `(${posts.length})` : '';
+    $('list-summary').textContent = posts.length
+      ? `${posts.length} upcoming: ${withImage} image posts, ${posts.length - withImage} text posts, ${span(posts.map((p) => p.name))}. Click a post to see all of it. Posts whose time has passed are not shown.`
+      : 'Nothing scheduled yet.';
+    let last = '';
+    $('posts').innerHTML = posts.map((p) => {
+      const head = p.name.slice(0, 10) !== last ? `<h3 class="day">${day(p.name)}</h3>` : '';
+      last = p.name.slice(0, 10);
+      return head + `<div class="post"><span class="time">${p.name.slice(11, 13)}:${p.name.slice(13, 15)}</span>` +
+        `<span class="text">${esc(p.text)}</span>` +
+        (p.image ? `<img loading="lazy" src="/img/${p.name}/${p.image}" alt="">` : '<span class="tag">text</span>') + '</div>';
+    }).join('');
+  }
+  loadList();
+
+  // Schedule new posts
   let md = '';
   let files = [];
-
   const textMode = () => document.querySelector('input[name="mode"]:checked').value === 'text';
 
   async function preview() {
     const text = textMode();
     $('imgrow').hidden = text;
     $('schedule').disabled = true;
-    $('msgs').innerHTML = $('table').innerHTML = $('result').innerHTML = '';
+    $('schedule').textContent = 'Schedule';
+    $('step4').hidden = $('preview').hidden = true;
+    $('msgs').innerHTML = '';
+    $('summary').textContent = 'Pick the files in step 2 to see the preview.';
     if (!$('md').files[0] || (!text && !$('imgs').files.length)) return;
     md = await $('md').files[0].text();
     files = text ? [] : [...$('imgs').files];
     const p = await post('/preview', { md, text, images: files.map((f) => ({ name: f.name, size: f.size })) });
+    $('summary').textContent = p.errors.length
+      ? 'Fix the errors in red, then pick the files again.'
+      : `${p.posts.length} ${text ? 'text' : 'image'} posts, ${span(p.slots)}. Full preview below.`;
     $('msgs').innerHTML = lines(p.errors, 'err') + lines(p.warnings, 'warn');
-    $('table').innerHTML = `<tr><th>#</th><th>Scheduled</th>${text ? '' : '<th>Image</th>'}<th>Post</th><th>Chars</th></tr>` +
+    $('table').innerHTML = `<tr><th>#</th><th>When</th>${text ? '' : '<th>Image</th>'}<th>Post</th><th>Chars</th></tr>` +
       p.posts.map((row, i) => {
         const file = files.find((f) => f.name === row.image);
-        const slot = p.slots[i];
-        return `<tr><td>${i + 1}</td><td>${slot.slice(0, 10)} ${slot.slice(11, 13)}:${slot.slice(13)}</td>` +
+        return `<tr><td>${i + 1}</td><td>${when(p.slots[i])}</td>` +
           (text ? '' : `<td>${file ? `<img src="${URL.createObjectURL(file)}" alt="">` : ''}</td>`) +
           `<td class="text">${esc(row.text)}</td><td>${row.chars}</td></tr>`;
       }).join('');
+    $('preview').hidden = false;
     $('schedule').disabled = p.errors.length > 0;
+    if (!p.errors.length) $('schedule').textContent = `Schedule ${p.posts.length} posts`;
   }
   $('md').onchange = preview;
   $('imgs').onchange = preview;
@@ -81,18 +188,27 @@
       $('msgs').innerHTML = lines(r.errors, 'err');
       return;
     }
-    $('result').innerHTML = '<h2>Scheduled</h2><ol>' + r.folders.map((f) => `<li>queue/${f}</li>`).join('') + '</ol>' +
-      '<button id="push">Push to GitHub</button><pre id="git" hidden></pre>';
-    $('push').onclick = async () => {
-      $('push').disabled = true;
-      $('git').hidden = false;
-      $('git').className = '';
-      $('git').textContent = 'Running git...';
-      const g = await post('/push', {});
-      $('git').textContent = g.output;
-      $('git').className = g.ok ? '' : 'err';
-      $('push').disabled = g.ok;
-    };
+    $('done').textContent = `Scheduled ${r.folders.length} posts, ${span(r.folders)}. They are only on this PC until you push them.`;
+    $('folders').innerHTML = r.folders.map((f) => `<li>queue/${f}</li>`).join('');
+    $('push').disabled = false;
+    $('pushed').textContent = '';
+    $('git').hidden = true;
+    $('step4').hidden = false;
+    $('step4').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    loadList();
+  };
+
+  $('push').onclick = async () => {
+    $('push').disabled = true;
+    $('pushed').className = 'muted';
+    $('pushed').textContent = 'Pushing...';
+    $('git').hidden = true;
+    const g = await post('/push', {}, $('pushed'));
+    $('pushed').className = g.ok ? 'ok' : 'err';
+    $('pushed').textContent = g.ok ? 'Pushed. GitHub will post them at their times.' : 'Push failed. Git says:';
+    $('git').textContent = g.output;
+    $('git').hidden = false;
+    $('push').disabled = g.ok;
   };
 </script>
 </html>

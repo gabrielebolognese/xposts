@@ -1,0 +1,8 @@
+developers!!
+
+your codebase doesn't need to be clever.
+
+it needs to be easy
+for the next person to change.
+
+sometimes that person is future you.

@@ -1,0 +1,8 @@
+ai coding tip!!
+
+don't ask ai to build the whole app.
+
+ask it to make one small change
+you can test and understand.
+
+speed without control is debt.

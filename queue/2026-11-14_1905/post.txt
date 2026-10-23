@@ -1,0 +1,6 @@
+developers in 2026!!
+
+the skill isn't prompting anymore.
+
+it's building a system
+that still works when the prompt fails.

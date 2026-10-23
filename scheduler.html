@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schedule posts</title>
+<style>
+  body { font: 15px system-ui, sans-serif; background: #fff; color: #111; max-width: 700px; margin: 24px auto; padding: 0 16px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border-bottom: 1px solid #ddd; padding: 6px; text-align: left; vertical-align: top; }
+  td.text { white-space: pre-wrap; }
+  td img { width: 80px; }
+  .err { color: #c00; }
+  .warn { color: #d97000; }
+  pre { white-space: pre-wrap; background: #f4f4f4; padding: 8px; }
+</style>
+<h1>Schedule posts</h1>
+<p>
+  <label><input type="radio" name="mode" value="image" checked> Image posts: 09:00, 11:00, 13:00, 15:00</label><br>
+  <label><input type="radio" name="mode" value="text"> Text posts: 2 a day, random times from 15:30 to 21:00</label>
+</p>
+<p>Posts (.md) <input type="file" id="md" accept=".md,.txt"></p>
+<p id="imgrow">Images <input type="file" id="imgs" multiple accept=".png,.jpg,.jpeg,.webp,.gif"></p>
+<div id="msgs"></div>
+<table id="table"></table>
+<p><button id="schedule" disabled>Schedule</button></p>
+<div id="result"></div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  const lines = (list, cls) => list.map((m) => `<p class="${cls}">${esc(m)}</p>`).join('');
+  const readBase64 = (file) => new Promise((ok, fail) => {
+    const r = new FileReader();
+    r.onload = () => ok(r.result.split(',')[1]);
+    r.onerror = fail;
+    r.readAsDataURL(file);
+  });
+  async function post(url, body) {
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (data.error) {
+      $('msgs').innerHTML = lines([data.error], 'err');
+      throw new Error(data.error);
+    }
+    return data;
+  }
+
+  let md = '';
+  let files = [];
+
+  const textMode = () => document.querySelector('input[name="mode"]:checked').value === 'text';
+
+  async function preview() {
+    const text = textMode();
+    $('imgrow').hidden = text;
+    $('schedule').disabled = true;
+    $('msgs').innerHTML = $('table').innerHTML = $('result').innerHTML = '';
+    if (!$('md').files[0] || (!text && !$('imgs').files.length)) return;
+    md = await $('md').files[0].text();
+    files = text ? [] : [...$('imgs').files];
+    const p = await post('/preview', { md, text, images: files.map((f) => ({ name: f.name, size: f.size })) });
+    $('msgs').innerHTML = lines(p.errors, 'err') + lines(p.warnings, 'warn');
+    $('table').innerHTML = `<tr><th>#</th><th>Scheduled</th>${text ? '' : '<th>Image</th>'}<th>Post</th><th>Chars</th></tr>` +
+      p.posts.map((row, i) => {
+        const file = files.find((f) => f.name === row.image);
+        const slot = p.slots[i];
+        return `<tr><td>${i + 1}</td><td>${slot.slice(0, 10)} ${slot.slice(11, 13)}:${slot.slice(13)}</td>` +
+          (text ? '' : `<td>${file ? `<img src="${URL.createObjectURL(file)}" alt="">` : ''}</td>`) +
+          `<td class="text">${esc(row.text)}</td><td>${row.chars}</td></tr>`;
+      }).join('');
+    $('schedule').disabled = p.errors.length > 0;
+  }
+  $('md').onchange = preview;
+  $('imgs').onchange = preview;
+  document.querySelectorAll('input[name="mode"]').forEach((r) => (r.onchange = preview));
+
+  $('schedule').onclick = async () => {
+    $('schedule').disabled = true; // stays off so the same posts can't be scheduled twice
+    const images = await Promise.all(files.map(async (f) => ({ name: f.name, data: await readBase64(f) })));
+    const r = await post('/schedule', { md, text: textMode(), images });
+    if (r.errors) {
+      $('msgs').innerHTML = lines(r.errors, 'err');
+      return;
+    }
+    $('result').innerHTML = '<h2>Scheduled</h2><ol>' + r.folders.map((f) => `<li>queue/${f}</li>`).join('') + '</ol>' +
+      '<button id="push">Push to GitHub</button><pre id="git" hidden></pre>';
+    $('push').onclick = async () => {
+      $('push').disabled = true;
+      $('git').hidden = false;
+      $('git').className = '';
+      $('git').textContent = 'Running git...';
+      const g = await post('/push', {});
+      $('git').textContent = g.output;
+      $('git').className = g.ok ? '' : 'err';
+      $('push').disabled = g.ok;
+    };
+  };
+</script>
+</html>

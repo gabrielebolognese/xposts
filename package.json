@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "post": "node post.js"
+    "post": "node post.js",
+    "schedule": "node scheduler.js"
   },
   "dependencies": {
     "twitter-api-v2": "^1.23.0"

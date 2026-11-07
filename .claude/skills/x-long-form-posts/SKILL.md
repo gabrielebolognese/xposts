@@ -7,7 +7,7 @@ description: "Rulebook for the new style of long-form X posts (SaaS, web apps, A
 
 1. Write every post by the rules below.
 2. Put the posts in one .md or .txt posts file, separated by a line with only `#--#` (the format the scheduler already uses).
-3. Run `node .claude/skills/x-long-form-posts/check.mjs <posts file>` and fix every problem it reports. It checks the measurable rules: length, paragraph length, hook case, uppercase hook length, emojis, em dashes, markdown symbols.
+3. Run `node .claude/skills/x-long-form-posts/check.mjs <posts file>` and fix every problem it reports. It checks the measurable rules: length, paragraph length, hook case and position, uppercase hook length, emojis, em dashes, markdown symbols, generic openings, exclamation marks, ellipses and paragraphs fully in capitals.
 4. Go through the checklist in section 14 by hand for the rest.
 5. Show the posts to the user and schedule them only after they approve.
 

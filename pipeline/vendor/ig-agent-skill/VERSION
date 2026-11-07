@@ -1,0 +1,7 @@
+source: https://github.com/Jakeschincariol/instagram-agent-skill
+commit: d03c56bb598be770c60b201f94237e5d1a4268a6
+commit date: 2026-09-13
+vendored: 2026-11-01 (M5), fetched with gh api at that commit; behavior untouched (BUILD_SPEC.md section 10)
+files: LICENSE (MIT), skills/ig-reel/hookscore.py, skills/ig-reel/beats.py, skills/ig-reel/hooks.json,
+       skills/ig-human/humanize.py, skills/ig-human/detect.py, skills/ig-human/slop.json,
+       skills/ig-caption/caption.py, templates/voice.md (as templates/voice.md)

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["scores"],
+  "additionalProperties": false,
+  "properties": {
+    "scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "value", "specificity", "freshness", "demand", "agreement", "novelty", "credibility", "substance_800", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string"},
+          "value": {"type": "integer", "minimum": 0, "maximum": 3},
+          "specificity": {"type": "integer", "minimum": 0, "maximum": 3},
+          "freshness": {"type": "integer", "minimum": 0, "maximum": 3},
+          "demand": {"type": "integer", "minimum": 0, "maximum": 3},
+          "agreement": {"type": "integer", "minimum": 0, "maximum": 3},
+          "novelty": {"type": "integer", "minimum": 0, "maximum": 3},
+          "credibility": {"type": "integer", "minimum": 0, "maximum": 3},
+          "substance_800": {"enum": ["pass", "fail"]},
+          "evidence": {"type": "string", "description": "one short reason per criterion, quoting the sources"}
+        }
+      }
+    }
+  }
+}

@@ -56,3 +56,31 @@ The **Scheduled posts** tab lists every upcoming post in your local `queue/`, by
 ## Timing
 
 GitHub's timer is not exact: runs often start 5 to 20 minutes late. Posts go out between your time and about 30 minutes after it. Runs only happen 06:00 to 23:30 Italian time (edit the cron line in `.github/workflows/post.yml` to change that; cron times are UTC).
+
+## Auto posts
+
+A runner writes long-form posts by itself and adds them to the queue, at most 2 a day: one at a random minute between 09:30 and 10:30, one between 13:30 and 14:30 (Italian time). Start it in Git Bash from this folder:
+
+```
+bash pipeline/run.sh
+```
+
+It keeps going until you press Ctrl+C, then prints how many posts it queued and through which day the auto posts are scheduled. `bash pipeline/run.sh --once` stops after one post. A stopped run picks up where it left off next time.
+
+Each post goes through these stages:
+1. Harvest: new items from `pipeline/sources.txt`.
+2. Scout: ideas, scored and picked with a niche mix.
+3. Research: facts with sources, plus hands-on checks in the public sandbox repo `xposts-sandbox`, which holds no secrets.
+4. Outline.
+5. Value gate.
+6. Writing, following `.claude/skills/x-long-form-posts/SKILL.md`.
+7. Inspection and up to 3 fix rounds.
+8. Queue: commit and push.
+
+Posts that still fail after the fix rounds are not queued: they land in `pipeline/review/` with a NEEDS REVIEW note. While the runner is on, it also starts the posting workflow at the exact minute a post comes due.
+
+- **Sources:** one per line in `pipeline/sources.txt` (types are listed at the top of `pipeline/lib/harvest.py`). Product Hunt, the subreddits and Hacker News are read through public feeds. Reddit sometimes answers "too many requests", and that source is then skipped until the next harvest.
+- **Settings:** models, windows, scores and limits live in `pipeline/config.json`.
+- **Local state (never committed):** `pipeline/data/` (pool, backlog, history), `pipeline/runs/` (every file of every post), `pipeline/logs/`.
+- **Requirements:** the `claude` CLI logged in (it shares your Claude usage limits), `gh` logged in, Python 3.11+ with `jsonschema`, Node 22.
+- **Tests:** `node --test pipeline/tests/next-slot.test.mjs`, `python -m unittest discover -s pipeline/tests -p "test_*.py"`, `bash pipeline/tests/e2e.sh` (fake model and sandbox, no network).

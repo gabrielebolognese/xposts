@@ -1,1 +1,11 @@
 node_modules/
+
+# auto post pipeline: local state, never committed
+pipeline/data/
+pipeline/runs/
+pipeline/review/
+pipeline/logs/
+pipeline/.lock
+__pycache__/
+.env
+.env.*

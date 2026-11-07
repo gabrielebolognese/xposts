@@ -1,0 +1,31 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "pairs"
+ ],
+ "properties": {
+  "pairs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "audience",
+     "grabber"
+    ],
+    "properties": {
+     "audience": {
+      "type": "string"
+     },
+     "grabber": {
+      "type": "string"
+     }
+    }
+   },
+   "minItems": 5,
+   "maxItems": 5
+  }
+ }
+}

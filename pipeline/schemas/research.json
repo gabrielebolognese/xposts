@@ -1,0 +1,95 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "verifiable",
+  "reason",
+  "facts",
+  "checks",
+  "angle"
+ ],
+ "properties": {
+  "verifiable": {
+   "type": "boolean"
+  },
+  "reason": {
+   "type": "string"
+  },
+  "facts": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "claim",
+     "url",
+     "date",
+     "quote",
+     "primary",
+     "core"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^F[0-9]+$"
+     },
+     "claim": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     },
+     "date": {
+      "type": "string"
+     },
+     "quote": {
+      "type": "string",
+      "maxLength": 600
+     },
+     "primary": {
+      "type": "boolean"
+     },
+     "core": {
+      "type": "boolean"
+     }
+    }
+   },
+   "minItems": 1
+  },
+  "checks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "purpose",
+     "script",
+     "expect"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^C[0-9]+$"
+     },
+     "purpose": {
+      "type": "string"
+     },
+     "script": {
+      "type": "string",
+      "maxLength": 6000
+     },
+     "expect": {
+      "type": "string"
+     }
+    }
+   },
+   "maxItems": 3
+  },
+  "angle": {
+   "type": "string"
+  }
+ }
+}

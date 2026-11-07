@@ -1,0 +1,35 @@
+# The sandbox for the auto post pipeline's hands-on checks. This file lives in the public repo xposts-sandbox
+# (copied there by pipeline/bin/setup-sandbox.sh). That repo has no secrets, and this job gets a token with no
+# permissions, so a bad package or script has nothing to steal. Each run is a fresh VM, deleted afterwards.
+name: check
+run-name: check ${{ inputs.id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: run id chosen by the pipeline
+        required: true
+        type: string
+      script:
+        description: base64 encoded bash script
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: run check
+        env:
+          SCRIPT: ${{ inputs.script }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/check" && cd "$RUNNER_TEMP/check"
+          printf '%s' "$SCRIPT" | base64 -d > check.sh
+          bash -x check.sh

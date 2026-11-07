@@ -1,0 +1,134 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "hook_ideas",
+  "intro",
+  "problem_scenario",
+  "cause",
+  "solution_steps",
+  "example",
+  "limitations",
+  "takeaway",
+  "reader_contract",
+  "target_persona",
+  "claims",
+  "original_angle",
+  "visual",
+  "code"
+ ],
+ "properties": {
+  "hook_ideas": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "minItems": 2,
+   "maxItems": 6
+  },
+  "intro": {
+   "type": "string"
+  },
+  "problem_scenario": {
+   "type": "string"
+  },
+  "cause": {
+   "type": "string"
+  },
+  "solution_steps": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1
+  },
+  "example": {
+   "type": "string"
+  },
+  "limitations": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "takeaway": {
+   "type": "string"
+  },
+  "reader_contract": {
+   "type": "string"
+  },
+  "target_persona": {
+   "enum": [
+    "beginner",
+    "practitioner",
+    "expert"
+   ]
+  },
+  "claims": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "text",
+     "fact_ids"
+    ],
+    "properties": {
+     "text": {
+      "type": "string"
+     },
+     "fact_ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "minItems": 1
+  },
+  "original_angle": {
+   "type": "string"
+  },
+  "visual": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "would_help",
+    "kind",
+    "note"
+   ],
+   "properties": {
+    "would_help": {
+     "type": "boolean"
+    },
+    "kind": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  },
+  "code": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "text",
+     "check_id"
+    ],
+    "properties": {
+     "text": {
+      "type": "string"
+     },
+     "check_id": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

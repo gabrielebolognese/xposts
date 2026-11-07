@@ -1,0 +1,217 @@
+{
+ "ideate": {
+  "candidates": [
+   {
+    "audience": "developers using claude code hooks",
+    "problem": "Hook commands can fail silently, so the checks a team relies on never run.",
+    "takeaway": "How to make hook failures visible and safe before relying on them.",
+    "post_type": "mistake and fix",
+    "niche": "ai",
+    "tool": "claude code",
+    "why_now": "hooks are widely used now",
+    "source_ids": []
+   },
+   {
+    "audience": "developers using claude code hooks",
+    "problem": "Some generic thing about productivity that teaches little.",
+    "takeaway": "How to make hook failures visible and safe before relying on them.",
+    "post_type": "mistake and fix",
+    "niche": "saas",
+    "tool": "claude code",
+    "why_now": "hooks are widely used now",
+    "source_ids": []
+   }
+  ]
+ },
+ "score": {
+  "scores": [
+   {
+    "id": "c1",
+    "value": 3,
+    "specificity": 3,
+    "freshness": 2,
+    "demand": 2,
+    "agreement": 2,
+    "novelty": 3,
+    "credibility": 3,
+    "substance_800": "pass",
+    "evidence": "fixture"
+   },
+   {
+    "id": "c2",
+    "value": 1,
+    "specificity": 1,
+    "freshness": 1,
+    "demand": 1,
+    "agreement": 1,
+    "novelty": 1,
+    "credibility": 1,
+    "substance_800": "fail",
+    "evidence": "fixture"
+   }
+  ]
+ },
+ "research": {
+  "verifiable": true,
+  "reason": "",
+  "angle": "a tested failure path",
+  "facts": [
+   {
+    "id": "F1",
+    "claim": "Hooks run shell commands before or after tool use.",
+    "url": "https://docs.example/hooks",
+    "date": "2026-11-01",
+    "quote": "Hooks are shell commands that run at points in the agent loop.",
+    "primary": true,
+    "core": true
+   }
+  ],
+  "checks": [
+   {
+    "id": "C1",
+    "purpose": "a failing hook exits non-zero",
+    "script": "set -euo pipefail\necho ok",
+    "expect": "ok"
+   }
+  ]
+ },
+ "expand": {
+  "hook_ideas": [
+   "silent failures",
+   "test the failure path"
+  ],
+  "intro": "i",
+  "problem_scenario": "p",
+  "cause": "c",
+  "solution_steps": [
+   "exit codes",
+   "logs",
+   "test failure"
+  ],
+  "example": "e",
+  "limitations": [
+   "strict hooks block work"
+  ],
+  "takeaway": "t",
+  "reader_contract": "The reader can make hook failures visible and test them.",
+  "target_persona": "practitioner",
+  "claims": [
+   {
+    "text": "Hooks run commands around tool use.",
+    "fact_ids": [
+     "F1"
+    ]
+   }
+  ],
+  "original_angle": "tested failure path",
+  "visual": {
+   "would_help": false,
+   "kind": "",
+   "note": ""
+  },
+  "code": []
+ },
+ "gate": {
+  "obvious_versions": [
+   "use hooks",
+   "hooks are useful",
+   "automate checks"
+  ],
+  "matches_obvious": false,
+  "obvious_note": "deeper",
+  "personas": {
+   "beginner": {
+    "learns": "what hooks are",
+    "score": 2
+   },
+   "practitioner": {
+    "learns": "test the failure path",
+    "score": 2
+   },
+   "expert": {
+    "learns": "little",
+    "score": 1
+   }
+  },
+  "claims": [
+   {
+    "text": "Hooks run commands around tool use.",
+    "fact_ids": [
+     "F1"
+    ],
+    "supported": true
+   }
+  ],
+  "unmapped": [],
+  "search": {
+   "queries": [
+    "claude code hooks"
+   ],
+   "top_results": [
+    "docs"
+   ],
+   "already_said": false,
+   "original_angle_present": true
+  },
+  "notes": ""
+ },
+ "hooks": {
+  "pairs": [
+   {
+    "audience": "developers using claude code hooks",
+    "grabber": "A SILENT HOOK FAILURE CAN SKIP YOUR CHECKS."
+   },
+   {
+    "audience": "Teams",
+    "grabber": "x"
+   },
+   {
+    "audience": "claude coders",
+    "grabber": "your hooks may never run."
+   },
+   {
+    "audience": "devs",
+    "grabber": "THIS GRABBER IS FAR TOO LONG TO BE AN UPPERCASE HOOK LINE"
+   },
+   {
+    "audience": "agent builders",
+    "grabber": "test the failure path."
+   }
+  ]
+ },
+ "write": {
+  "hook_index": 0,
+  "body": "Hooks let you run your own commands before or after Claude Code uses a tool. Teams use them to block risky edits, run formatters and enforce rules on every change.\n\nThe trouble starts when a hook command fails in a way nobody sees. The agent keeps working, the check never ran, and the team assumes the rule still holds.\n\nThis happens because a hook is just a process. If it crashes, times out or exits with the wrong code, the result depends on how the hook reports the failure.\n\nA safer setup takes three steps:\n1. Make every hook exit with a clear code for pass and fail.\n2. Log each run to a file you can read later.\n3. Test the failure path on purpose before you rely on it.\n\nTrade-offs to keep in mind:\n- Strict hooks stop more mistakes but can block real work when they break.\n- Logging adds a little noise, so keep the lines short and dated.\n\nTreat a hook like production code. If you never watched it fail, you do not know what it does when it fails.",
+  "snippets": [],
+  "numbers": []
+ },
+ "editor": {
+  "paragraphs": [
+   "hooks",
+   "silent failure",
+   "cause",
+   "steps",
+   "trade-offs",
+   "takeaway"
+  ],
+  "repeats": [],
+  "deletions": [],
+  "slop": [],
+  "accuracy": [],
+  "privacy": [],
+  "notes": ""
+ },
+ "fix": {
+  "audience": "developers using claude code hooks",
+  "grabber": "A SILENT HOOK FAILURE CAN SKIP YOUR CHECKS.",
+  "body": "Hooks let you run your own commands before or after Claude Code uses a tool. Teams use them to block risky edits, run formatters and enforce rules on every change.\n\nThe trouble starts when a hook command fails in a way nobody sees. The agent keeps working, the check never ran, and the team assumes the rule still holds.\n\nThis happens because a hook is just a process. If it crashes, times out or exits with the wrong code, the result depends on how the hook reports the failure.\n\nA safer setup takes three steps:\n1. Make every hook exit with a clear code for pass and fail.\n2. Log each run to a file you can read later.\n3. Test the failure path on purpose before you rely on it.\n\nTrade-offs to keep in mind:\n- Strict hooks stop more mistakes but can block real work when they break.\n- Logging adds a little noise, so keep the lines short and dated.\n\nTreat a hook like production code. If you never watched it fail, you do not know what it does when it fails.",
+  "snippets": [],
+  "numbers": [],
+  "changes": "none"
+ },
+ "check_fix": {
+  "give_up": true,
+  "reason": "fixture",
+  "script": ""
+ }
+}

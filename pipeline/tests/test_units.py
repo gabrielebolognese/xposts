@@ -9,7 +9,7 @@ import core  # noqa: E402
 import harvest  # noqa: E402
 import scout  # noqa: E402
 
-CONF = {"hard_min": {"value": 2, "credibility": 2, "novelty": 2}, "similar_ratio": 0.8, "min_total": 15,
+CONF = {"hard_min": {"value": 2, "credibility": 2, "novelty": 2}, "similar_ratio": 0.8, "similar_words": 0.3, "min_total": 15,
         "cooldown_days": 7, "quota_window": 6, "quota_max": {"ai": 2, "saas": 1, "webdev": 1, "video": 1, "design": 1}}
 
 
@@ -48,6 +48,17 @@ class Decide(unittest.TestCase):
         chosen, _, rejected = scout.decide([cand("rls policies leak tenant data!")], hist, CONF)
         self.assertIsNone(chosen)
         self.assertIn("too similar to 2026-11-01_0950", rejected[0]["reason"])
+
+    def test_same_idea_in_other_words_is_rejected(self):
+        dropped = {"status": "dropped", "run": "2026-11-07_1507_gsap", "audience": "developers animating with gsap in frame-seeked renderers",
+                   "problem": "Count-ups and typing effects driven by GSAP onUpdate callbacks freeze when the renderer seeks frames silently.",
+                   "takeaway": "Drive them with tweened properties or setters so every seeked frame renders the right value."}
+        twin = cand("Animations driven by onUpdate callbacks, such as count-ups and typing effects, freeze in frame-seeked GSAP renders.")
+        twin["takeaway"] = "Use tweened properties or pure setters so seeked frames render correctly."
+        other = cand("Stripe webhooks retry and create duplicate charges when idempotency keys are missing.", tool="stripe")
+        chosen, _, rejected = scout.decide([twin, other], [dropped], CONF)
+        self.assertIn("too similar to 2026-11-07_1507_gsap", rejected[0]["reason"])
+        self.assertEqual(chosen["tool"], "stripe")
 
     def test_tool_cooldown_and_new_release(self):
         hist = [{"status": "queued", "problem": "x", "takeaway": "y", "tool": "Claude Code", "at": ago(3), "niche": "ai"}]

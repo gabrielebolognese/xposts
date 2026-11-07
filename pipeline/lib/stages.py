@@ -64,8 +64,9 @@ def post_text(d: dict) -> str:
 # 3. Research and verify ------------------------------------------------------------------------------------------
 
 def results_of(log: str) -> str:
+    """What a check measured: every RESULT line (up to 3000 characters), else the end of its log."""
     lines = [l for l in log.splitlines() if l.startswith("RESULT ")]
-    return ("\n".join(lines) if lines else log[-600:])[-600:]
+    return "\n".join(lines)[:3000] if lines else log[-1500:]
 
 
 def research(run: Path) -> str:
@@ -108,7 +109,11 @@ def research(run: Path) -> str:
 
 def expand(run: Path) -> str:
     notes = state(run).get("gate_notes")
-    extra = f"A reviewer rejected the previous outline. Fix these points in this version:\n{notes}" if notes else ""
+    extra = ""
+    if notes:  # revise the rejected outline instead of starting over, which only trades old claims for new ones
+        extra = (f"A reviewer rejected this outline. Revise it: fix every point below, change nothing else, and add no "
+                 f"new factual claims. Remove a claim you cannot back with a listed fact.\n\nPoints:\n{notes}\n\n"
+                 f"The rejected outline:\n{json.dumps(load(run, 'outline'), ensure_ascii=False, indent=1)}")
     out = ai.call("expand", run / "04-expand", f"expand-{state(run).get('reworks', 0)}", core.render(
         "expand", IDEA=load(run, "idea"), FACTS=(run / "facts.md").read_text(encoding="utf-8"), GATE_NOTES=extra),
         schema="expand")
@@ -123,7 +128,8 @@ def gate(run: Path) -> str:
     ids = {f["id"] for f in facts}
     st = state(run)
     out = ai.call("gate", run / "05-gate", f"gate-{st.get('reworks', 0)}", core.render(
-        "gate", OUTLINE=outline, FACTS=(run / "facts.md").read_text(encoding="utf-8")), schema="gate",
+        "gate", OUTLINE={k: v for k, v in outline.items() if k != "hook_ideas"},
+        FACTS=(run / "facts.md").read_text(encoding="utf-8")), schema="gate",
         tools=["WebSearch"])
     target = outline["target_persona"]
     unsupported = out["unmapped"] + [c["text"] for c in out["claims"] if not c["supported"]]
@@ -134,7 +140,7 @@ def gate(run: Path) -> str:
     if out["personas"][target]["score"] < 2:
         reasons.append(f"the target reader ({target}) learns too little")
     if unsupported:
-        reasons.append(f"{len(set(unsupported))} claims without support: " + "; ".join(sorted(set(unsupported)))[:400])
+        reasons.append(f"{len(set(unsupported))} claims without support: " + "; ".join(sorted(set(unsupported))))
     if out["search"]["already_said"] and not out["search"]["original_angle_present"]:
         reasons.append("the top search results already say this and there is no original angle")
     save(run, f"gate-{st.get('reworks', 0)}", {**out, "reasons": reasons})
@@ -252,9 +258,9 @@ def inspect(run: Path) -> str:
     while True:
         problems, detector = code_problems(run, draft, rnd)
         ed = ai.call("editor", stage, f"editor-{rnd}", core.render(
-            "editor", DETECTOR=detector, POST=post_text(draft), FACTS=facts_text), schema="editor")
-        for kind in ("repeats", "deletions", "slop", "accuracy", "privacy"):
-            problems += [f"editor ({kind}): {x}" for x in ed[kind]]
+            "editor", DETECTOR=detector, POST=post_text(draft), FACTS=facts_text, RULEBOOK=core.rulebook()),
+            schema="editor")
+        problems += [f"editor ({i['kind']}): \"{i['quote'][:200]}\" -> {i['fix']}" for i in ed["issues"] if i["blocking"]]
         save(run, f"inspect-{rnd}", {"problems": problems, "editor": ed, "detector": detector})
         if not problems:
             core.say("PASS", f"inspect round {rnd}: no problems left")

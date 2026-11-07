@@ -4,11 +4,7 @@
  "additionalProperties": false,
  "required": [
   "paragraphs",
-  "repeats",
-  "deletions",
-  "slop",
-  "accuracy",
-  "privacy",
+  "issues",
   "notes"
  ],
  "properties": {
@@ -18,34 +14,38 @@
     "type": "string"
    }
   },
-  "repeats": {
+  "issues": {
    "type": "array",
    "items": {
-    "type": "string"
-   }
-  },
-  "deletions": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "slop": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "accuracy": {
-   "type": "array",
-   "items": {
-    "type": "string"
-   }
-  },
-  "privacy": {
-   "type": "array",
-   "items": {
-    "type": "string"
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "kind",
+     "quote",
+     "fix",
+     "blocking"
+    ],
+    "properties": {
+     "kind": {
+      "enum": [
+       "repeat",
+       "deletion",
+       "slop",
+       "accuracy",
+       "privacy",
+       "structure"
+      ]
+     },
+     "quote": {
+      "type": "string"
+     },
+     "fix": {
+      "type": "string"
+     },
+     "blocking": {
+      "type": "boolean"
+     }
+    }
    }
   },
   "notes": {

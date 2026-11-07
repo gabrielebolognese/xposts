@@ -2,6 +2,8 @@
 
 Write the body of a long-form X post. The full rulebook is below; follow it exactly. First pick the strongest hook pair from the candidates (hook_index, counting from 0); the hook lines are added above your body by code, so the body starts with the first paragraph after the hook.
 
+Tell it as the rulebook's problem-solution arc: open with the problem and why it matters, explain the cause, give the steps that solve it, then the takeaway. Use only the facts the reader needs for that arc; leave the rest out, so the post teaches one thing well instead of listing everything the research found.
+
 Body rules (the hook adds about 60 to 100 characters, so aim the body at 1,100 to 2,100):
 - paragraphs of 100 to 180 characters, never over 250, one idea each, separated by one empty line
 - numbered lists (1. 2. 3.) for steps, bullet lists (- ) for trade-offs, one item per line

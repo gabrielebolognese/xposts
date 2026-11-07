@@ -194,11 +194,14 @@
    "trade-offs",
    "takeaway"
   ],
-  "repeats": [],
-  "deletions": [],
-  "slop": [],
-  "accuracy": [],
-  "privacy": [],
+  "issues": [
+   {
+    "kind": "slop",
+    "quote": "Treat a hook like production code.",
+    "fix": "optional polish",
+    "blocking": false
+   }
+  ],
   "notes": ""
  },
  "fix": {

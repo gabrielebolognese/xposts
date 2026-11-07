@@ -28,11 +28,11 @@ if stage == "ideate":  # the source ids must be real pool ids from the prompt
     for c in out["candidates"]:
         c["source_ids"] = ids[:2]
     first = out["candidates"][0]  # a distinct idea per test scenario: novelty and the tool cooldown never block it
-    first.update(problem=f"{title} breaks things for teams that rely on it.", takeaway=f"How to detect and fix: {title}.",
+    first.update(problem=f"{title}.", takeaway=f"{title}, solved.", audience=f"{title.split()[0].lower()} users",
                  tool=title.split()[0].lower())
 if stage == "gate" and os.environ.get("FAKE_GATE_FAIL"):
     out["matches_obvious"] = True
 if stage == "editor" and os.environ.get("FAKE_EDITOR_FAIL"):
-    out["deletions"] = ["Treat a hook like production code."]
+    out["issues"] = [{"kind": "deletion", "quote": "Treat a hook like production code.", "fix": "cut it", "blocking": True}]
 print(json.dumps({"type": "result", "subtype": "success", "is_error": False, "duration_ms": 5, "num_turns": 1,
                   "result": json.dumps(out), "session_id": "fake-session", "structured_output": out}))

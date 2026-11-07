@@ -13,7 +13,7 @@ Fill in:
 - takeaway: the principle the reader should remember
 - reader_contract: ONE sentence: what the reader knows or can do after reading that they could not before
 - target_persona: beginner, practitioner or expert
-- claims: every factual claim the post will make, each with the ids of the facts that support it. Use only the facts below. A claim with no supporting fact must be removed or softened into clearly labeled opinion.
+- claims: every factual claim the post will make, each with the ids of the facts that support it. Use only the facts below. A claim with no supporting fact must be removed or softened into clearly labeled opinion. Every sentence in the other fields that states a fact must be one of these claims. Do not generalize beyond the facts: no "always", "every", "many tutorials", "most teams" unless a fact says so.
 - original_angle: what this post adds that the usual posts on the topic do not
 - visual: whether a visual would add information (the post goes out as text only, so this is a note, not a request)
 - code: any code the post will show, each tied to the check id that ran it successfully. Posts are plain text on X, so keep code to a few short lines, or describe it instead.

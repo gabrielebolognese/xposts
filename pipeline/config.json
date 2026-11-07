@@ -3,7 +3,16 @@
   "sandbox_repo": "gabrielebolognese/xposts-sandbox",
   "push": true,
   "dispatch": true,
-  "windows": [["09:30", "10:30"], ["13:30", "14:30"]],
+  "windows": [
+    [
+      "09:30",
+      "10:30"
+    ],
+    [
+      "13:30",
+      "14:30"
+    ]
+  ],
   "lead_minutes": 15,
   "runner": {
     "harvest_every_minutes": 120,
@@ -12,32 +21,97 @@
     "dispatch_grace_minutes": 10
   },
   "models": {
-    "ideate": {"model": "sonnet", "effort": "medium"},
-    "score": {"model": "haiku", "effort": "low"},
-    "research": {"model": "opus", "effort": "high"},
-    "expand": {"model": "opus", "effort": "medium"},
-    "gate": {"model": "opus", "effort": "medium"},
-    "write": {"model": "opus", "effort": "high"},
-    "editor": {"model": "sonnet", "effort": "medium"},
-    "fixer": {"model": "sonnet", "effort": "medium"},
-    "limit_fallback": {"model": "opus", "effort": "medium"}
+    "ideate": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "score": {
+      "model": "haiku",
+      "effort": "low"
+    },
+    "research": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "expand": {
+      "model": "opus",
+      "effort": "medium"
+    },
+    "gate": {
+      "model": "opus",
+      "effort": "medium"
+    },
+    "write": {
+      "model": "opus",
+      "effort": "high"
+    },
+    "editor": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "fixer": {
+      "model": "sonnet",
+      "effort": "medium"
+    },
+    "limit_fallback": {
+      "model": "opus",
+      "effort": "medium"
+    }
   },
-  "timeouts": {"call_seconds": 1800, "research_seconds": 2700, "sandbox_seconds": 1200},
-  "retries": {"transient_backoff_seconds": [60, 240, 960], "limit_margin_seconds": 120},
-  "harvest": {"pool_keep_days": 30, "first_run_items": 20, "item_text_chars": 1500},
+  "timeouts": {
+    "call_seconds": 1800,
+    "research_seconds": 2700,
+    "sandbox_seconds": 1200
+  },
+  "retries": {
+    "transient_backoff_seconds": [
+      60,
+      240,
+      960
+    ],
+    "limit_margin_seconds": 120
+  },
+  "harvest": {
+    "pool_keep_days": 30,
+    "first_run_items": 20,
+    "item_text_chars": 1500
+  },
   "scout": {
     "pool_days": 14,
     "max_items": 80,
     "candidates": 8,
     "min_total": 15,
-    "hard_min": {"value": 2, "credibility": 2, "novelty": 2},
+    "hard_min": {
+      "value": 2,
+      "credibility": 2,
+      "novelty": 2
+    },
     "similar_ratio": 0.8,
     "cooldown_days": 7,
     "backlog_decay": 0.9,
     "backlog_days": 14,
-    "backlog_min": 12
+    "backlog_min": 12,
+    "similar_words": 0.3
   },
-  "quota": {"window": 6, "max": {"ai": 2, "saas": 1, "webdev": 1, "video": 1, "design": 1}},
-  "caps": {"sandbox_fix_rounds": 2, "gate_reworks": 1, "inspect_fix_rounds": 3, "run_errors": 2},
-  "inspect": {"min_slop_score": 70, "min_fingerprint_score": 100, "link_timeout_seconds": 15}
+  "quota": {
+    "window": 6,
+    "max": {
+      "ai": 2,
+      "saas": 1,
+      "webdev": 1,
+      "video": 1,
+      "design": 1
+    }
+  },
+  "caps": {
+    "sandbox_fix_rounds": 2,
+    "gate_reworks": 1,
+    "inspect_fix_rounds": 3,
+    "run_errors": 2
+  },
+  "inspect": {
+    "min_slop_score": 70,
+    "min_fingerprint_score": 100,
+    "link_timeout_seconds": 15
+  }
 }

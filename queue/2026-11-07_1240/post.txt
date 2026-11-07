@@ -1,0 +1,28 @@
+developers building multi-tenant saas on postgres
+ONE MISSING WHERE CLAUSE CAN LEAK CUSTOMER DATA.
+
+Most multi-tenant apps keep every customer in the same tables, separated by a tenant_id column. Every query is supposed to filter by it. That "supposed to" is the weak point.
+
+The problem is not the column. It is the one query where someone forgets the filter: a new report, a quick admin fix, a rushed hotfix. Customer A now sees customer B's invoices.
+
+Why it keeps happening: the filter lives in application code, so every new query is a new chance to forget it. Code review catches some of these mistakes. Not all of them.
+
+The fix is to move the rule into the database with Row Level Security (RLS):
+
+1. Enable it on each tenant table: ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+2. Add a policy: CREATE POLICY tenant_isolation ON invoices USING (tenant_id = current_setting('app.tenant_id')::uuid);
+3. At the start of each request, inside a transaction, run: SELECT set_config('app.tenant_id', $1, true);
+
+The true in step 3 makes the setting last only until the transaction ends.
+
+Now Postgres applies the policy to every query on that table. A query that forgets the filter still only sees the current tenant's rows. If a request forgets to set the id, the query fails or returns nothing instead of returning everyone's data.
+
+Two details decide whether this actually protects you:
+- Superusers always skip RLS, and table owners skip it unless you add FORCE ROW LEVEL SECURITY. Connect your app as a separate role that is neither.
+- Keep the setting transaction-local. With a connection pool, a session-wide SET can carry one tenant's id into the next request on the same connection.
+
+Trade-offs to know:
+- The policy adds a condition to every query, so index tenant_id.
+- Jobs that need all tenants, like billing or analytics, need a role with BYPASSRLS. Use it on purpose and nowhere else.
+
+Do not rely on every developer remembering a filter on every query. Make the database apply it for them.

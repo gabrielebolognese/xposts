@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "post": "node post.js",
-    "schedule": "node scheduler.js"
+    "schedule": "node scheduler.js",
+    "from-folder": "node scheduler.js --from ../screenshots"
   },
   "dependencies": {
     "twitter-api-v2": "^1.23.0"

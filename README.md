@@ -49,6 +49,8 @@ Posts fill the slots 09:00, 11:00, 13:00 and 15:00 (Italian time) in order, star
 
 **Text posts** (no images): choose **Text posts** at the top of the page and pick only the posts file. They get 2 a day at random times from 15:30 to 21:00 (Italian time), at least 1 hour apart. Text posts already scheduled or posted in that window count toward the 2 a day, so a new batch continues after the old one.
 
+**From the screenshots folder** (no browser): put one posts file (`.md` or `.txt`) and the images in `../screenshots` (the `screenshots` folder next to this one), then run `npm run from-folder` (or `npm run from-folder -- --text` for text posts). Images named exactly 1 to N go with post 1 to N; any other names are paired in the order the files were created, oldest first. It runs the same checks, schedules, moves the used files to `screenshots/done/<time>/`, and pushes.
+
 The **Scheduled posts** tab lists every upcoming post in your local `queue/`, by day. Run `git pull` first if you want it to match GitHub exactly.
 
 ## Timing

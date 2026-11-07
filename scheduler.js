@@ -132,6 +132,58 @@ function schedule(md, images, textOnly) {
   return { folders };
 }
 
+function push(done) {
+  const cmd = `git add queue && git commit -m "schedule ${unpushed} posts" && git pull --rebase && git push`;
+  exec(cmd, { cwd: ROOT }, (err, stdout, stderr) => {
+    if (!err) unpushed = 0;
+    done(!err, stdout + stderr);
+  });
+}
+
+// Command line: node scheduler.js --from <folder> [--text]
+// Schedules the one .md/.txt posts file and the images in <folder>, moves them to <folder>/done/<time>/, then pushes.
+function fromFolder(folder, textOnly) {
+  const fail = (msg) => {
+    console.error(`error: ${msg}`);
+    process.exitCode = 1;
+  };
+  const names = fs.readdirSync(folder, { withFileTypes: true }).filter((e) => e.isFile()).map((e) => e.name);
+  const docs = names.filter((n) => /\.(md|txt)$/i.test(n));
+  if (docs.length !== 1) return fail(`put exactly one .md or .txt posts file in ${folder} (found ${docs.length})`);
+  const md = fs.readFileSync(path.join(folder, docs[0]), 'utf8');
+
+  const images = (textOnly ? [] : names.filter((n) => MIME[path.extname(n).toLowerCase()])).map((name) => {
+    const stat = fs.statSync(path.join(folder, name));
+    return { name, size: stat.size, time: stat.birthtimeMs || stat.mtimeMs };
+  });
+  // Named exactly 1..N: post N gets image N. Otherwise pair them in the order the files were created (then by name).
+  const nums = images.map((i) => Number(i.name.match(/^\d+/)?.[0] ?? NaN)).sort((a, b) => a - b);
+  const numbered = images.length > 0 && nums.every((n, i) => n === i + 1);
+  if (!numbered) images.sort((a, b) => a.time - b.time || a.name.localeCompare(b.name, undefined, { numeric: true }));
+  images.forEach((img, i) => (img.as = numbered ? img.name : `${i + 1}${path.extname(img.name)}`));
+
+  const { posts, errors, warnings } = check(md, images.map((i) => ({ name: i.as, size: i.size })), textOnly);
+  warnings.forEach((w) => console.log(`warning: ${w}`));
+  if (errors.length) return errors.forEach(fail);
+  const data = images.map((i) => ({ name: i.as, data: fs.readFileSync(path.join(folder, i.name)).toString('base64') }));
+  const { folders } = schedule(md, data, textOnly);
+  folders.forEach((f, i) => {
+    const source = textOnly ? 'text' : images.find((img) => img.as === posts[i].image).name;
+    console.log(`${f}  ${source}  ${posts[i].text.split('\n')[0].slice(0, 50)}`);
+  });
+
+  const done = path.join(folder, 'done', romeTime(Date.now()));
+  fs.mkdirSync(done, { recursive: true });
+  for (const name of [docs[0], ...images.map((i) => i.name)]) fs.renameSync(path.join(folder, name), path.join(done, name));
+  console.log(`Scheduled ${folders.length} posts. Used files moved to ${done}`);
+
+  push((ok, output) => {
+    console.log(output.trim());
+    if (ok) return console.log('Pushed to GitHub.');
+    fail('push failed: the posts are scheduled on this PC only. Fix the problem above, then run git push.');
+  });
+}
+
 // Posts in queue/ whose time hasn't come yet (past ones are posted, or being posted, by GitHub)
 function upcoming() {
   const now = romeTime(Date.now());
@@ -181,13 +233,7 @@ function serve() {
         }
         if (req.url === '/schedule') return json(schedule(body.md, body.images, body.text));
         if (req.url === '/queue') return json(upcoming());
-        if (req.url === '/push') {
-          const cmd = `git add queue && git commit -m "schedule ${unpushed} posts" && git pull --rebase && git push`;
-          return exec(cmd, { cwd: ROOT }, (err, stdout, stderr) => {
-            if (!err) unpushed = 0;
-            json({ ok: !err, output: stdout + stderr });
-          });
-        }
+        if (req.url === '/push') return push((ok, output) => json({ ok, output }));
         res.writeHead(404);
         res.end();
       } catch (err) {
@@ -201,4 +247,8 @@ function serve() {
     });
 }
 
-if (path.basename(process.argv[1] ?? '') === 'scheduler.js') serve();
+if (path.basename(process.argv[1] ?? '') === 'scheduler.js') {
+  const from = process.argv.indexOf('--from');
+  if (from > 0) fromFolder(path.resolve(process.argv[from + 1] ?? '.'), process.argv.includes('--text'));
+  else serve();
+}

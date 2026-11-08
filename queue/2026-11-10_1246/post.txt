@@ -1,0 +1,36 @@
+web devs building video or audio tools
+in the official benchmark, ffmpeg.wasm ran at 0.04x to 0.08x of native FFmpeg speed.
+
+Running FFmpeg in the browser moves media processing off your servers and onto the user's device. Files stay local, and there is no transcoding cluster to pay for.
+
+The catch: a converter ported as is gets a big download, slow jobs and a hard input cap. The single-thread core wasm we measured is 30.7 MB raw, 6.9 MB with brotli level 11.
+
+The speed gap comes from one webm to mp4 job, averaged over 5 runs on one laptop in Chrome 116. Native FFmpeg took 5.2 s, the single-thread core 128.8 s, the multithread core 60.4 s.
+
+SoundBench, a set of browser audio tools, says its two hardest parts were memory limits with large files on mobile and keeping the WASM payload from hurting load time.
+
+Why it happens: ffmpeg.wasm is FFmpeg ported to WebAssembly, shipped as one core wasm file. The maintainers say it is not fully optimized and won't match native FFmpeg, multithread build included.
+
+WebAssembly also caps input at 2 GB. And the faster multithread core needs SharedArrayBuffer, which browsers only expose on a secure, cross-origin isolated page.
+
+Steps for the browser version:
+
+1. Time your own job in the browser and natively before you commit.
+2. Lazy-load the core only when a tool needs it, as SoundBench does.
+3. Serve the wasm with brotli. Gzip level 9 left it bigger in our test, so check what your host actually sends.
+4. Warn users near the 2 GB cap and test large files on mobile.
+5. Start with the single-thread core. It runs in a web worker by default.
+6. Switch to the multithread core (about 2x faster, less stable, heavier on memory and CPU) only once the page is cross-origin isolated.
+
+That takes HTTPS plus two headers: Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp (credentialless also works). Without them the multithread core won't run.
+
+When jobs outgrow the browser, keep the UI. Tauri runs it in the OS webview and can ship native FFmpeg as a per-platform sidecar. A minimal Tauri app can be under 600 KB before you add FFmpeg.
+
+How to Convert (self-reported) made a similar move: it started as a browser WebAssembly converter and is now a fully local Tauri desktop app.
+
+The trade-offs:
+
+- Browser: private, no server bill, 6.9 MB brotli download, 2 GB input cap, 0.04x to 0.08x of native in the official benchmark
+- Tauri: native FFmpeg speed and no WebAssembly 2 GB cap, but per-platform builds and an FFmpeg binary in every install
+
+Start in the browser when privacy and zero server cost matter and files stay small. Move to native FFmpeg when your own timing says users won't wait.

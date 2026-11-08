@@ -1,0 +1,51 @@
+node developers
+YOUR .ENV FILE IS FINE. YOUR IMPORT ORDER ISN'T.
+
+My health endpoint said the feature was configured. Every authenticated route said "Supabase is not configured on the server". Same .env file, two answers.
+
+It stayed broken for a while, across several rounds of work, with every authenticated route failing while the health check stayed green.
+
+The cause: process.loadEnvFile() sat below the imports in index.ts. In ESM, static imports are hoisted, so imported modules run their top-level code before the importing file's body.
+
+So supabase.ts read SUPABASE_URL into a constant while process.env was still empty. Loading the file later didn't help: the constant had already captured undefined.
+
+The health check read env inside a function at call time, so it saw the value. Lazy read says yes, eager read says no.
+
+Minimal repro, run on Node v22.23.4 with "type": "module" and API_KEY=from-env-file in .env. process.loadEnvFile() needs v20.12.0 or v21.7.0:
+
+config.js:
+export const API_KEY = process.env.API_KEY;        // eager: read once at import time
+export const getKey = () => process.env.API_KEY;   // lazy: read at call time
+
+broken.js:
+import { loadEnvFile } from 'node:process';
+import { API_KEY, getKey } from './config.js';
+loadEnvFile();
+
+Logged after loadEnvFile(), API_KEY is undefined, while getKey() and process.env.API_KEY both give from-env-file.
+
+Reading the code never caught it. Testing behavior did: a bogus token got a 503 about configuration instead of a 401 about the token.
+
+1. Best fix: load env before your code runs. Every module sees it, even plain.js, which just imports config.js with no loader:
+
+node --env-file=.env plain.js
+
+Needs v20.6.0. With no .env file in production, use --env-file-if-exists (v22.9.0), because plain --env-file throws on a missing file.
+
+2. Put process.loadEnvFile() alone in env.js and import it first (same v20.12.0 or v21.7.0 requirement):
+
+env.js:
+import { loadEnvFile } from 'node:process';
+loadEnvFile();
+
+fixed.js:
+import './env.js';
+import { API_KEY } from './config.js';
+
+With dotenv, import 'dotenv/config' as the first line does the same (verified on dotenv 18.0.9).
+
+3. Read env inside functions, not top-level constants. It works, but it hides the bug in any module you missed.
+
+Then lock it with a test: the env import comes first, there is exactly one loader, and modules allowed to read env at load time are listed by name, so a new one shows up in a diff.
+
+With static imports, imported modules finish evaluating before the importing module's body runs. When two parts of your app disagree about one .env file, suspect an eager read that ran too early.

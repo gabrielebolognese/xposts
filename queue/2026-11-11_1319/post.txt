@@ -1,0 +1,38 @@
+teams running claude code agents in ci
+if the bash sandbox can't start, commands run unsandboxed by default, and one setting makes claude code exit instead
+
+Picture an Agent SDK agent on a Linux CI runner. It's made up, but each of these three separate failures is documented.
+
+First, its PreToolUse guard on Bash throws on unexpected input. By default the call goes on to the normal permission flow, and the app only gets a warning.
+
+Second, a Write|Edit hook protects .env, but the agent writes .env with a Bash redirect, so the hook never runs. Stopping that write is the sandbox's job.
+
+Third, the team turned the sandbox on, but the runner has no bubblewrap or socat. The sandbox can't start, so commands run unsandboxed anyway.
+
+The cause: the defaults let actions through when something fails, and each control guards one surface. Here is each surface, its setting and its gap:
+
+1. File-tool writes outside the project: set permissions.blockWritesOutsideWorkingDirectories to true (added in 2.1.314, unset by default).
+
+Write, Edit and NotebookEdit then refuse those paths, even in bypassPermissions. Gap: it skips Bash, MCP tools and programs that hooks run.
+
+2. Bash writes: in the sandbox settings, set enabled to true (default false) and failIfUnavailable to true, so a sandbox that can't start makes Claude Code exit.
+
+Also set allowUnsandboxedCommands to false (default true), so Claude can't retry outside the sandbox.
+
+Gap: sandboxed commands can still write to the working and temp directories. Protect paths like .env with sandbox.filesystem.denyWrite, which also adds paths from your Edit deny rules.
+
+3. Crashing SDK guards: set onFailure to "block" on the hook matcher (on_failure in Python). It needs Claude Code 2.1.317 plus TS SDK 0.3.317+ or Python SDK 0.2.177+.
+
+Gap: a guard that catches its own error and returns an empty object isn't failing, so the block never fires. Let errors propagate.
+
+4. Unattended runs stuck on a prompt: turn on permissions.denyInsteadOfPrompting (added in 2.1.319). A call that would wait on a prompt is denied and the turn continues.
+
+Then check your channel: npm stable was 2.1.311 when we checked. A string search found blockWritesOutsideWorkingDirectories and denyInsteadOfPrompting in 0 files of 2.1.311 and 2 of 2.1.319.
+
+Install 2.1.319 and confirm with claude --version.
+
+One side effect of upgrading: with telemetry or feature flags off, including behind LLM gateways, 2.1.319 auto mode asks about or denies calls the server can't check, with no fallback to the built-in classifier.
+
+Set CLAUDE_CODE_AUTO_MODE_SERVER=0 to keep using the classifier. Bedrock, Vertex and Foundry are unchanged.
+
+So harden by surface: file tools, Bash, hooks and prompts each need their own setting, a failure mode that blocks, and a version that ships it.

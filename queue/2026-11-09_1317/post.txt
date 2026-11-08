@@ -1,0 +1,36 @@
+developers using claude code
+on a subscription, an 'ok continue' after more than an hour away can cost 31x a warm message at 400K context, by Anthropic's published cache prices.
+
+Hitting the 5-hour limit early? Check session length. Claude's help center says longer conversations that trigger automatic context management use more of your limit.
+
+Claude Code keeps no memory between requests. Every message re-sends the system prompt, project context, every earlier message and tool result, plus the new one.
+
+Every tool call is another request carrying that history. So a one-line question late in an all-day session still draws usage for the whole conversation.
+
+While the cache is warm, that history is re-read at the cheaper cached rate. By default, only a subscription's main conversation, within plan usage, gets a one-hour cache.
+
+Subagents and other requests get 5 minutes, as do API-key and usage-credit users. Step away longer than your cache lifetime and the next message re-processes the full context.
+
+I modeled input cost with Anthropic's published API prices: 1-hour cache writes 2x base input, 5-minute writes 1.25x, cache reads 0.05x (the Opus 5.5 and Sonnet 5.5 rate).
+
+On a subscription's main conversation, a cold message at 400K (full context written to the 1-hour cache) cost 31x a warm one read from cache. At 100K it was 18.7x.
+
+With the 5-minute cache, the 400K figure was 21.2x. Models that read cache at 0.1x get lower ratios. All of this is modeled input cost, not measured usage.
+
+Growth alone matters less: warm messages cost 1.57x a fresh 20K-token session at 100K, 3.71x at 400K and 6.57x at 800K.
+
+Same 120 requests: four 30-request sessions linked by 5K-token handoff summaries cost about 41% less than one session that keeps growing.
+
+How to cut usage per message:
+
+1. Run /usage to see what is using your limits. It flags long context and cache misses when they drive 10% or more of recent usage.
+2. One task per session. For unrelated work, /clear costs nothing. For continuity, ask for a handoff summary (goal, decisions, files, next step), /clear, paste it in.
+3. Compact at a natural break before you step away, while the cache is warm. Run cold, /compact re-processes the whole conversation uncached.
+4. Compact earlier, for example /autocompact 500k. Sonnet 5+ and Opus 4.7+ default to a 1M window, so sessions can grow very large before auto-compaction runs.
+
+The trade-offs:
+
+- A handoff summary loses detail, so on tightly linked work the new session may re-read files and spend tokens back.
+- Compacting earlier means compacting more often, and each compaction is a large request.
+
+Rule of thumb: before a break longer than your cache lifetime, compact or write a handoff, so you do not come back to a large cold session.

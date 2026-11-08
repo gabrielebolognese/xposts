@@ -8,7 +8,6 @@ Score each candidate post idea from 0 to 3 on every criterion. Be strict: 3 is r
 - demand: do the same pains show up in the sources (Reddit questions, Hacker News comments, GitHub issues, many upvotes)?
 - agreement: do several independent sources point at the same thing?
 - novelty: is it new compared with the account's past posts listed below?
-- credibility: can the claims be verified from primary sources (docs, changelog, code) or a hands-on test?
 - substance_800: "pass" when there is enough real substance for a long post of at least 800 characters without filler, else "fail".
 
 In evidence, give one short reason per criterion, quoting the sources where you can.

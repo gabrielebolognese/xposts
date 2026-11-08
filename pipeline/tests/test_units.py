@@ -8,8 +8,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 import core  # noqa: E402
 import harvest  # noqa: E402
 import scout  # noqa: E402
+import stages  # noqa: E402
 
-CONF = {"hard_min": {"value": 2, "credibility": 2, "novelty": 2}, "similar_ratio": 0.8, "similar_words": 0.3, "min_total": 15,
+CONF = {"hard_min": {"value": 2, "novelty": 2}, "similar_ratio": 0.8, "similar_words": 0.3, "min_total": 15,
         "cooldown_days": 7, "quota_window": 6, "quota_max": {"ai": 2, "saas": 1, "webdev": 1, "video": 1, "design": 1}}
 
 
@@ -78,6 +79,19 @@ class Decide(unittest.TestCase):
         self.assertEqual(chosen["niche"], "design")
         chosen, _, _ = scout.decide([cand("only ai idea", total=20, tool="a")], hist, CONF)
         self.assertEqual(chosen["problem"], "only ai idea")  # nothing under quota: the best one anyway
+
+
+class Links(unittest.TestCase):
+    def test_what_x_would_link_is_found(self):
+        for t in ("see https://nextjs.org/docs.", "www.example.com", "ffmpeg.org", "on GitHub (github.com/remotion-dev).",
+                  "docs.claude.ai", "claude.ai/code", "t.co", "v0.dev", "Xcode.app"):
+            self.assertTrue(stages.links(t), t)
+        self.assertEqual(stages.links("read ffmpeg.org."), ["ffmpeg.org"])
+
+    def test_plain_names_stay_text(self):
+        for t in ("Node.js and Next.js 15.2", "edit next.config.js", "README.md", "run setup.sh", "claude.ai", "Socket.IO",
+                  "e.g. this", "version 2.1.0", "docs/setup.md", "it works. Then"):
+            self.assertEqual(stages.links(t), [], t)
 
 
 class Harvest(unittest.TestCase):

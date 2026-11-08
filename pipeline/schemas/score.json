@@ -8,7 +8,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "value", "specificity", "freshness", "demand", "agreement", "novelty", "credibility", "substance_800", "evidence"],
+        "required": ["id", "value", "specificity", "freshness", "demand", "agreement", "novelty", "substance_800", "evidence"],
         "additionalProperties": false,
         "properties": {
           "id": {"type": "string"},
@@ -18,7 +18,6 @@
           "demand": {"type": "integer", "minimum": 0, "maximum": 3},
           "agreement": {"type": "integer", "minimum": 0, "maximum": 3},
           "novelty": {"type": "integer", "minimum": 0, "maximum": 3},
-          "credibility": {"type": "integer", "minimum": 0, "maximum": 3},
           "substance_800": {"enum": ["pass", "fail"]},
           "evidence": {"type": "string", "description": "one short reason per criterion, quoting the sources"}
         }

@@ -59,23 +59,26 @@ GitHub's timer is not exact: runs often start 5 to 20 minutes late. Posts go out
 
 ## Auto posts
 
-A runner writes long-form posts by itself and adds them to the queue, at most 2 a day: one at a random minute between 09:30 and 10:30, one between 13:30 and 14:30 (Italian time). Start it in Git Bash from this folder:
+A runner writes long-form posts by itself and adds them to the queue, at most 1 a day, at a random minute between 12:30 and 13:30 (Italian time). Start it in Git Bash from this folder:
 
 ```
 bash pipeline/run.sh
 ```
 
-It keeps going until you press Ctrl+C, then prints how many posts it queued and through which day the auto posts are scheduled. `bash pipeline/run.sh --once` stops after one post. A stopped run picks up where it left off next time.
+It keeps going until you press Ctrl+C, then prints how many posts it queued and through which day the auto posts are scheduled. `bash pipeline/run.sh --once` stops after one post, and `bash pipeline/run.sh --posts 10` stops once 10 posts are queued. A stopped run picks up where it left off next time.
 
 Each post goes through these stages:
 1. Harvest: new items from `pipeline/sources.txt`.
 2. Scout: ideas, scored and picked with a niche mix.
 3. Research: facts with sources, plus hands-on checks in the public sandbox repo `xposts-sandbox`, which holds no secrets.
-4. Outline.
-5. Value gate.
-6. Writing, following `.claude/skills/x-long-form-posts/SKILL.md`.
-7. Inspection and up to 3 fix rounds.
-8. Queue: commit and push.
+4. Credibility: scored on what the research found. Weakly backed ideas are dropped here.
+5. Outline.
+6. Value gate.
+7. Writing, following `.claude/skills/x-long-form-posts/SKILL.md`. No links.
+8. Inspection and up to 3 fix rounds. The editor judges content, not wording.
+9. Queue: commit and push.
+
+Sonnet handles the scouting (ideas and scores). Opus handles everything from research on.
 
 Posts that still fail after the fix rounds are not queued: they land in `pipeline/review/` with a NEEDS REVIEW note. While the runner is on, it also starts the posting workflow at the exact minute a post comes due.
 

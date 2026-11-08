@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ai  # noqa: E402
 import core  # noqa: E402
 
-CRITERIA = ("value", "specificity", "freshness", "demand", "agreement", "novelty", "credibility")
+CRITERIA = ("value", "specificity", "freshness", "demand", "agreement", "novelty")  # credibility is scored after research
 OWN = ("decision", "known-issue", "commit")
 STOP = set("with from that this what your about into have will when using after over their more than just".split())
 

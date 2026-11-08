@@ -23,7 +23,8 @@
      "kind",
      "quote",
      "fix",
-     "blocking"
+     "blocking",
+     "earlier"
     ],
     "properties": {
      "kind": {
@@ -44,6 +45,10 @@
      },
      "blocking": {
       "type": "boolean"
+     },
+     "earlier": {
+      "type": "boolean",
+      "description": "true when this issue was in the earlier blocking list and is still not solved"
      }
     }
    }

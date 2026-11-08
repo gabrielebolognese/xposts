@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["core_claims", "score", "reason"],
+  "additionalProperties": false,
+  "properties": {
+    "core_claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim", "fact_ids"],
+        "additionalProperties": false,
+        "properties": {
+          "claim": {"type": "string"},
+          "fact_ids": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "score": {"type": "integer", "minimum": 0, "maximum": 3},
+    "reason": {"type": "string"}
+  }
+}

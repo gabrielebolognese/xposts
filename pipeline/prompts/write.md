@@ -11,7 +11,7 @@ Body rules (the hook adds about 60 to 100 characters, so aim the body at 1,100 t
 - zero emojis, no em dashes, no ellipses, at most one exclamation mark, straight quotes (" and ') only
 - no generic openings ("In today's world", "Have you ever wondered", "Here's why"), no filler, no repeated points
 - every factual claim and every number must come from the facts below; no invented benchmarks or statistics
-- avoid links unless essential (each link makes the post cost more to send)
+- no links: no URLs and no web addresses such as example.com, because X turns them into links and links cut the post's reach. Name the tool, site or source in words instead.
 - code: only short lines from the outline's code list, written exactly as they ran
 - finish with a takeaway that reinforces the reader contract; no forced engagement question
 

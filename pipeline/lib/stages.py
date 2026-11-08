@@ -10,8 +10,6 @@ import json
 import re
 import subprocess
 import sys
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -23,6 +21,24 @@ CHECKER = core.ROOT / ".claude" / "skills" / "x-long-form-posts" / "check.mjs"
 DETECT = core.PIPE / "vendor" / "ig-agent-skill" / "detect.py"
 HUMANIZE = core.PIPE / "vendor" / "ig-agent-skill" / "humanize.py"
 EMOJI_DASH_STAR = re.compile("[%s-%s%s-%s%s*`]" % tuple(map(chr, (0x1F000, 0x1FAFF, 0x2600, 0x27BF, 0x2014))))
+
+# Links cut a post's reach, so posts carry none. X turns into a link: anything starting with http(s):// or www.,
+# a domain on a long ending (.com, .dev, .app ...), and a domain on a two-letter ending (.ai, .io ...) only with a
+# path, with a subdomain, or as .co or .tv. Names such as Node.js, next.config.js, README.md or claude.ai stay text.
+URL = re.compile(r"https?://\S+|\bwww\.\S+", re.I)
+DOMAIN = re.compile(r"(?<![\w@#$./-])((?:[a-z0-9-]+\.)+)([a-z]{2,})\b(/\S*)?", re.I)
+LONG_ENDINGS = set("com org net edu gov info biz dev app xyz site page tech cloud online store shop blog news link "
+                   "tools studio design video live mov zip".split())
+CODE_ENDINGS = set("js ts py rs md sh rb go cs kt db gz".split())
+
+
+def links(text: str) -> list[str]:
+    found = URL.findall(text)
+    for m in DOMAIN.finditer(URL.sub(" ", text)):
+        dots, end, path = m.group(1).count("."), m.group(2).lower(), m.group(3)
+        if end in LONG_ENDINGS or (len(end) == 2 and end not in CODE_ENDINGS and (path or dots > 1 or end in ("co", "tv"))):
+            found.append(m.group(0))
+    return [f.rstrip(".,;:!?)'\"") for f in found]
 
 
 def load(run: Path, name: str, default=None):
@@ -102,6 +118,17 @@ def research(run: Path) -> str:
     save(run, "facts", facts)
     core.write_text(run / "facts.md", facts_md(facts))
     core.say("FACTS", f"{len(facts)} facts, {sum(c['ok'] for c in checks)}/{len(checks)} sandbox checks passed")
+    return "credibility"
+
+
+def credibility(run: Path) -> str:
+    """Credibility is scored on what the research found, not guessed while scouting."""
+    out = ai.call("credibility", run / "03-research", "credibility", core.render(
+        "credibility", IDEA=load(run, "idea"), FACTS=(run / "facts.md").read_text(encoding="utf-8")), schema="credibility")
+    save(run, "credibility", out)
+    if out["score"] < core.cfg("credibility_min", 2):
+        return f"dropped: credibility {out['score']} after research: {out['reason']}"
+    core.say("CRED", f"{out['score']} of 3: {out['reason'][:100]}")
     return "expand"
 
 
@@ -160,7 +187,7 @@ def hook_ok(h: dict) -> bool:
     a, g = h["audience"].strip(), h["grabber"].strip()
     caps = bool(re.search(r"[A-Za-z]{2}", g)) and g == g.upper()
     return (a == a.lower() and 2 < len(a) < 90 and 5 < len(g) and not (caps and len(g) > 50)
-            and not EMOJI_DASH_STAR.search(a + g))
+            and not EMOJI_DASH_STAR.search(a + g) and not links(a + "\n" + g))
 
 
 def write(run: Path) -> str:
@@ -201,27 +228,6 @@ def untraced_numbers(text: str, snippets: list[dict], facts: list[dict]) -> list
     return sorted(set(out))
 
 
-def dead_links(text: str) -> list[str]:
-    bad = []
-    for url in re.findall(r"https?://[^\s)\]]+", text):
-        url = url.rstrip(".,;:!?'\"")
-        status = None
-        for method in ("HEAD", "GET"):
-            try:
-                req = urllib.request.Request(url, method=method, headers={"User-Agent": "Mozilla/5.0 (xposts link check)"})
-                with urllib.request.urlopen(req, timeout=core.cfg("inspect.link_timeout_seconds", 15)) as r:
-                    status = r.status
-            except urllib.error.HTTPError as exc:
-                status = exc.code
-            except Exception as exc:  # DNS, timeout, TLS
-                status = type(exc).__name__
-            if status in range(200, 400):
-                break
-        if status not in range(200, 400):
-            bad.append(f"{url} ({status})")
-    return bad
-
-
 def code_problems(run: Path, draft: dict, rnd: int) -> tuple[list[str], str]:
     post = post_text(draft)
     file = run / "07-inspect" / f"post-{rnd}.txt"
@@ -230,7 +236,8 @@ def code_problems(run: Path, draft: dict, rnd: int) -> tuple[list[str], str]:
     problems = json.loads(res.stdout.decode("utf-8"))[0]["problems"]
     facts = load(run, "facts", [])
     problems += [f"number not found in the facts: {n}" for n in untraced_numbers(post, draft["snippets"], facts)]
-    problems += [f"link does not answer: {u}" for u in dead_links(post)]
+    problems += [f"links are not allowed, they cut the post's reach. Remove it and name the source in words: {u}"
+                 for u in links(post)]
     passed = {c["id"] for c in load(run, "checks", []) if c["ok"]}
     for s in draft["snippets"]:
         if s["text"] not in post:
@@ -257,11 +264,22 @@ def inspect(run: Path) -> str:
     facts_text = (run / "facts.md").read_text(encoding="utf-8")
     while True:
         problems, detector = code_problems(run, draft, rnd)
+        # After the first review the editor re-checks its own earlier issues. A new issue only blocks when it is an
+        # accuracy or privacy problem, so the fix rounds settle instead of chasing fresh wording notes each time.
+        earlier = load(run, f"inspect-{rnd - 1}", {}).get("editor_blocking", []) if rnd else []
+        recheck = ("This is the first review: every issue gets earlier false." if not rnd else
+                   "This is a re-check after a fix. Your earlier blocking issues were:\n"
+                   + "\n".join(f"- ({i['kind']}) \"{i['quote'][:200]}\" -> {i['fix']}" for i in earlier)
+                   + "\nReport each earlier issue the post still has again, with earlier true; leave out the solved "
+                     "ones. Anything new gets earlier false and only blocks when it is an accuracy or privacy "
+                     "problem, so do not look for new polish.")
         ed = ai.call("editor", stage, f"editor-{rnd}", core.render(
-            "editor", DETECTOR=detector, POST=post_text(draft), FACTS=facts_text, RULEBOOK=core.rulebook()),
-            schema="editor")
-        problems += [f"editor ({i['kind']}): \"{i['quote'][:200]}\" -> {i['fix']}" for i in ed["issues"] if i["blocking"]]
-        save(run, f"inspect-{rnd}", {"problems": problems, "editor": ed, "detector": detector})
+            "editor", RECHECK=recheck, DETECTOR=detector, POST=post_text(draft), FACTS=facts_text,
+            RULEBOOK=core.rulebook()), schema="editor")
+        blocking = [i for i in ed["issues"] if i["blocking"]
+                    and (not rnd or i.get("earlier") or i["kind"] in ("accuracy", "privacy"))]
+        problems += [f"editor ({i['kind']}): \"{i['quote'][:200]}\" -> {i['fix']}" for i in blocking]
+        save(run, f"inspect-{rnd}", {"problems": problems, "editor": ed, "editor_blocking": blocking, "detector": detector})
         if not problems:
             core.say("PASS", f"inspect round {rnd}: no problems left")
             return "queue"
@@ -326,4 +344,4 @@ def queue(run: Path) -> str:
     return "queued"
 
 
-STAGES = {"research": research, "expand": expand, "gate": gate, "write": write, "inspect": inspect, "queue": queue}
+STAGES = {"research": research, "credibility": credibility, "expand": expand, "gate": gate, "write": write, "inspect": inspect, "queue": queue}

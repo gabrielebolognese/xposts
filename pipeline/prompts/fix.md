@@ -1,6 +1,6 @@
 # Stage: fix
 
-Fix this long-form X post so every problem listed below is solved, without breaking any rule of the rulebook. Change only what the problems require; keep what works. Keep the rulebook's problem-solution arc: the problem early, its cause, the steps that solve it, a takeaway at the end. Never turn the post into a list of facts or release notes. Return the hook lines and the body separately (the body starts after the hook), with the snippets and numbers lists updated to match, and a one-line summary of your changes.
+Fix this long-form X post so every problem listed below is solved, without breaking any rule of the rulebook. Change only what the problems require; keep what works. Cut rather than add: solve a problem by removing or tightening the claim before adding words, and keep the post at or under 2,800 characters (if it is longer now, shorten it). Keep the rulebook's problem-solution arc: the problem early, its cause, the steps that solve it, a takeaway at the end. Never turn the post into a list of facts or release notes. Return the hook lines and the body separately (the body starts after the hook), with the snippets and numbers lists updated to match, and a one-line summary of your changes.
 
 Hard limits checked by code: total 800 to 3,000 characters (aim 1,200 to 2,200), hook line 1 all lowercase, hook line 2 at most 50 characters when it is in capitals, paragraphs at most 250 characters, zero emojis, no em dashes, no ellipses, at most one exclamation mark, no asterisks or backticks, every number traceable to the facts.
 

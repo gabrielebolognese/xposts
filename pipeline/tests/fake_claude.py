@@ -1,6 +1,6 @@
 """A stand-in for `claude -p` in tests (POSTS_CLAUDE points here). It reads the prompt on stdin, finds its
 "# Stage: <name>" line and answers like the real CLI with --output-format json, taking structured_output from
-fixtures.json. Environment switches: FAKE_LOG (append each stage name), FAKE_GATE_FAIL, FAKE_EDITOR_FAIL,
+fixtures.json. Environment switches: FAKE_LOG (append each stage name), FAKE_GATE_FAIL, FAKE_CRED_FAIL, FAKE_EDITOR_FAIL,
 FAKE_FAIL_STAGE=<stage> (that stage fails like a broken call).
 """
 import json
@@ -32,7 +32,10 @@ if stage == "ideate":  # the source ids must be real pool ids from the prompt
                  tool=title.split()[0].lower())
 if stage == "gate" and os.environ.get("FAKE_GATE_FAIL"):
     out["matches_obvious"] = True
-if stage == "editor" and os.environ.get("FAKE_EDITOR_FAIL"):
-    out["issues"] = [{"kind": "deletion", "quote": "Treat a hook like production code.", "fix": "cut it", "blocking": True}]
+if stage == "credibility" and os.environ.get("FAKE_CRED_FAIL"):
+    out.update(score=1, reason="only a forum post backs the core claim")
+if stage == "editor" and os.environ.get("FAKE_EDITOR_FAIL"):  # the same issue every round, still open on re-checks
+    out["issues"] = [{"kind": "deletion", "quote": "Treat a hook like production code.", "fix": "cut it", "blocking": True,
+                      "earlier": "This is a re-check" in prompt}]
 print(json.dumps({"type": "result", "subtype": "success", "is_error": False, "duration_ms": 5, "num_turns": 1,
                   "result": json.dumps(out), "session_id": "fake-session", "structured_output": out}))

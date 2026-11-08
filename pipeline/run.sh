@@ -3,6 +3,7 @@
 #   bash pipeline/run.sh          makes posts and adds them to the queue until you press Ctrl+C,
 #                                 then prints how many it made and how far ahead the queue reaches
 #   bash pipeline/run.sh --once   stops after one post (queued or sent to review)
+#   bash pipeline/run.sh --posts N  stops once N posts are queued (posts sent to review do not count)
 # A stopped run resumes at the stage it was in. Settings: pipeline/config.json. Sources: pipeline/sources.txt.
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
@@ -10,7 +11,13 @@ export PYTHONUTF8=1
 PY=python
 LOCK=pipeline/.lock
 once=0
-[ "${1:-}" = "--once" ] && once=1
+max=0
+made=0
+case "${1:-}" in
+  --once) once=1 ;;
+  --posts) max="${2:-}"
+           [[ "$max" =~ ^[1-9][0-9]*$ ]] || { echo "Usage: bash pipeline/run.sh --posts N   (N = how many posts to queue)"; exit 1; } ;;
+esac
 
 if [ -f "$LOCK" ] && kill -0 "$(cat "$LOCK" 2>/dev/null)" 2>/dev/null; then
   echo "The runner is already running (pid $(cat "$LOCK")). Stop that one first."
@@ -45,11 +52,14 @@ stop() {
 trap stop INT TERM
 
 echo "Auto post runner started. Press Ctrl+C to stop."
+[ "$max" -gt 0 ] && echo "It stops by itself once $max posts are queued."
 while :; do
   $PY pipeline/lib/step.py
   rc=$?
+  [ "$rc" = 0 ] && made=$((made + 1))
   case $rc in
-    0|11) [ "$once" = 1 ] && stop ;;               # queued, or sent to review/
+    0|11) [ "$once" = 1 ] && stop                  # queued, or sent to review/
+          [ "$max" -gt 0 ] && [ "$made" -ge "$max" ] && stop ;;
     10) ;;                                          # dropped: next idea right away
     12) [ "$once" = 1 ] && stop; nap "$idle" ;;     # nothing passed: wait for new items
     *) [ "$once" = 1 ] && stop; nap "$pause" ;;     # an error: logged, try again shortly

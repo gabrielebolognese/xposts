@@ -33,7 +33,6 @@
     "demand": 2,
     "agreement": 2,
     "novelty": 3,
-    "credibility": 3,
     "substance_800": "pass",
     "evidence": "fixture"
    },
@@ -45,7 +44,6 @@
     "demand": 1,
     "agreement": 1,
     "novelty": 1,
-    "credibility": 1,
     "substance_800": "fail",
     "evidence": "fixture"
    }
@@ -199,7 +197,8 @@
     "kind": "slop",
     "quote": "Treat a hook like production code.",
     "fix": "optional polish",
-    "blocking": false
+    "blocking": false,
+    "earlier": false
    }
   ],
   "notes": ""
@@ -216,5 +215,17 @@
   "give_up": true,
   "reason": "fixture",
   "script": ""
+ },
+ "credibility": {
+  "core_claims": [
+   {
+    "claim": "a failing hook can let checks skip silently",
+    "fact_ids": [
+     "F1"
+    ]
+   }
+  ],
+  "score": 3,
+  "reason": "fixture: backed by the docs and a passing check"
  }
 }

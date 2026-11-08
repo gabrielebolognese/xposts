@@ -5,12 +5,8 @@
   "dispatch": true,
   "windows": [
     [
-      "09:30",
-      "10:30"
-    ],
-    [
-      "13:30",
-      "14:30"
+      "12:30",
+      "13:30"
     ]
   ],
   "lead_minutes": 15,
@@ -26,12 +22,16 @@
       "effort": "medium"
     },
     "score": {
-      "model": "haiku",
-      "effort": "low"
+      "model": "sonnet",
+      "effort": "medium"
     },
     "research": {
       "model": "opus",
       "effort": "high"
+    },
+    "credibility": {
+      "model": "opus",
+      "effort": "medium"
     },
     "expand": {
       "model": "opus",
@@ -46,11 +46,11 @@
       "effort": "high"
     },
     "editor": {
-      "model": "sonnet",
+      "model": "opus",
       "effort": "medium"
     },
     "fixer": {
-      "model": "sonnet",
+      "model": "opus",
       "effort": "medium"
     },
     "limit_fallback": {
@@ -80,19 +80,19 @@
     "pool_days": 14,
     "max_items": 80,
     "candidates": 8,
-    "min_total": 15,
+    "min_total": 13,
     "hard_min": {
       "value": 2,
-      "credibility": 2,
       "novelty": 2
     },
     "similar_ratio": 0.8,
     "cooldown_days": 7,
     "backlog_decay": 0.9,
     "backlog_days": 14,
-    "backlog_min": 12,
+    "backlog_min": 10,
     "similar_words": 0.3
   },
+  "credibility_min": 2,
   "quota": {
     "window": 6,
     "max": {
@@ -111,7 +111,6 @@
   },
   "inspect": {
     "min_slop_score": 70,
-    "min_fingerprint_score": 100,
-    "link_timeout_seconds": 15
+    "min_fingerprint_score": 100
   }
 }

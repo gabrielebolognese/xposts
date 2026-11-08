@@ -62,18 +62,18 @@ slot="$(ls queue 2>/dev/null | head -1)"
 [ -n "$slot" ] && [ -f "queue/$slot/post.txt" ] || fail "no queue folder" "$out"
 head -2 "queue/$slot/post.txt" | grep -q "^developers using claude code hooks$" || fail "wrong post text" "$(cat "queue/$slot/post.txt")"
 node .claude/skills/x-long-form-posts/check.mjs "queue/$slot/post.txt" >/dev/null || fail "queued post breaks the rulebook" "$out"
-hhmm="${slot:11:4}"; { [ "$hhmm" -ge 0930 ] && [ "$hhmm" -le 1030 ]; } || { [ "$hhmm" -ge 1330 ] && [ "$hhmm" -le 1430 ]; } || fail "slot $slot outside the windows"
+hhmm="${slot:11:4}"; { [ "$hhmm" -ge 1230 ] && [ "$hhmm" -le 1330 ]; } || fail "slot $slot outside the window"
 [ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "pipeline: queue 1 post" ] || fail "not pushed" "$out"
 printf '%s' "$out" | grep -q "Stopped. This session: 1 posts queued, 0 sent to review/, 0 dropped. 1 auto posts are waiting" || fail "stop summary" "$out"
 [ ! -f pipeline/.lock ] || fail "lock left behind"
-c="$(calls)"; [ "$c" = "ideate score research expand gate hooks write editor " ] || fail "unexpected call order" "calls: $c"
+c="$(calls)"; [ "$c" = "ideate score research credibility expand gate hooks write editor " ] || fail "unexpected call order" "calls: $c"
 ok "queued $slot, pushed to the remote, summary printed, lock removed"
 
 # B: the value gate fails twice: one rework, then dropped with the reason
 seed "Image CDNs serve stale thumbnails after a cache purge race"
 FAKE_GATE_FAIL=1 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 10 ] || fail "gate path exit $rc"
-c="$(calls)"; [ "$c" = "ideate score research expand gate expand gate " ] || fail "gate rework order" "calls: $c"
+c="$(calls)"; [ "$c" = "ideate score research credibility expand gate expand gate " ] || fail "gate rework order" "calls: $c"
 [ "$(history_status)" = dropped ] || fail "dropped not recorded"
 grep -q '"reason": "value gate: matches an obvious version' pipeline/data/backlog.json || fail "drop reason missing"
 ok "gate fail: reworked once, then dropped with the reason in the backlog"
@@ -83,7 +83,7 @@ before="$(ls queue | wc -l)"
 seed "Server components leak secrets into client bundles through props"
 FAKE_EDITOR_FAIL=1 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 11 ] || fail "review path exit $rc"
-c="$(calls)"; [ "$c" = "ideate score research expand gate hooks write editor fix editor fix editor fix editor " ] \
+c="$(calls)"; [ "$c" = "ideate score research credibility expand gate hooks write editor fix editor fix editor fix editor " ] \
   || fail "review path order" "calls: $c"
 ls pipeline/review/*.txt >/dev/null 2>&1 || fail "no review file"
 head -1 pipeline/review/*.txt | grep -q "NEEDS REVIEW" || fail "review header"
@@ -95,13 +95,21 @@ ok "editor fail: 3 fix rounds, then review/ with NEEDS REVIEW, not queued"
 seed "Feature flags drift between staging and production after manual edits"
 FAKE_FAIL_STAGE=write python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 1 ] || fail "failure exit $rc"
-run="$(ls -d pipeline/runs/* | tail -1)"
+run="$(ls -td pipeline/runs/* | head -1)"   # newest: run names from the same minute sort by topic, not by time
 grep -q '"stage": "write"' "$run/state.json" || fail "state not at write" "$(cat "$run/state.json")"
 : > "$FAKE_LOG"
 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 0 ] || fail "resume exit $rc"
 c="$(calls)"; [ "$c" = "hooks write editor " ] || fail "resume redid earlier stages" "calls: $c"
 ok "failure in write: error logged, the next step resumed at write and queued the post"
+
+# F: the research only finds weak sources: credibility is scored after research and the idea is dropped
+seed "Cron jobs double fire after a daylight saving change"
+FAKE_CRED_FAIL=1 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
+[ $rc = 10 ] || fail "credibility path exit $rc"
+c="$(calls)"; [ "$c" = "ideate score research credibility " ] || fail "credibility drop order" "calls: $c"
+grep -q '"reason": "credibility 1 after research: only a forum post' pipeline/data/backlog.json || fail "credibility reason missing"
+ok "low credibility after research: dropped before the outline, reason in the backlog"
 
 # E: nothing left to scout: the runner waits; Ctrl+C (SIGINT) stops it with the summary
 set -m   # job control: without it a background job starts with SIGINT ignored and cannot trap it
@@ -118,6 +126,15 @@ printf '%s' "$out" | grep -q "Stopped. This session: 0 posts queued, 0 sent to r
   || fail "summary after Ctrl+C" "$out"
 [ ! -f pipeline/.lock ] || fail "lock left after Ctrl+C"
 ok "idle runner stopped by Ctrl+C: $(printf '%s' "$out" | grep Stopped | sed 's/^Stopped. //')"
+
+# G: --posts N stops by itself once N posts are queued
+seed "Docker builds miss cache layers after a lockfile reorder"
+out="$(timeout 300 bash pipeline/run.sh --posts 1 2>&1)"; rc=$?
+[ $rc = 0 ] || fail "--posts exit $rc" "$out"
+printf '%s' "$out" | grep -q "Stopped. This session: 1 posts queued" || fail "--posts summary" "$out"
+bash pipeline/run.sh --posts x >/dev/null 2>&1 && fail "--posts accepted a non-number"
+[ ! -f pipeline/.lock ] || fail "lock left after --posts"
+ok "--posts 1 queued one post and stopped with the summary"
 
 echo "all $pass passed"
 rm -rf "$T"

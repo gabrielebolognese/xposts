@@ -1,1 +1,4 @@
-3. Multi-language mode transcribes 99 languages. There's also a local MCP server that gives assistant apps read-only access to your notes. It's off by default. Note: there's no per-app token, so any app under your account can read while it's on.
+3. One command per agent:
+magpie claude deepseek/deepseek-v4-pro
+magpie codex moonshot/kimi-k2.5
+The first puts Claude Code on DeepSeek, the second puts Codex on Kimi. Or pick the model from one list in the menu bar.

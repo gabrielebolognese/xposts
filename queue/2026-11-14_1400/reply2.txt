@@ -1,0 +1,1 @@
+2. Transcription runs locally with Whisper through whisper.cpp. Summaries and answers come from a local Gemma 4, gpt-oss or Qwen3 model through llama.cpp, picked to fit your hardware. After the one-time model download it works offline.

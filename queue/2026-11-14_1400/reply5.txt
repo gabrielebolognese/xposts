@@ -1,0 +1,1 @@
+5. You need macOS 14.4+ on Apple Silicon, Windows 10 2004+ (x64) or Ubuntu 22.04+ (x64 AppImage), plus 8 GB of memory. Setup first downloads a notes model of about 5 GB, then a better one that can be 14 GB or more.

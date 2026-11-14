@@ -1,1 +1,1 @@
-2. Transcription runs locally with Whisper through whisper.cpp. Summaries and answers come from a local Gemma 4, gpt-oss or Qwen3 model through llama.cpp, picked to fit your hardware. After the one-time model download it works offline.
+2. Measured on an RTX 3050 Laptop 4 GB: Llama-3.1-8B-Instruct, NF4, LoRA, batch 1, seq 512. Peak 3.32 GB at 119.6 tok/s (before a correctness fix). A later run peaked at 2.40 GB. The README says its higher speed is the clock, not a speedup.

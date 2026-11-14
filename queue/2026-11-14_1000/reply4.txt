@@ -1,1 +1,1 @@
-4. Good fit if you take confidential calls in legal, healthcare, finance or HR. Meeting data stays on your machine. It only goes online for model downloads and update checks. Since there's no bot, tell the others you're recording.
+4. The catches: streaming is opt-in and still BETA. The 4 GB numbers are self-reported and used LoRA at batch 1, seq 512. Bigger batches or longer sequences cost more memory, so test on your own card before you plan around it.

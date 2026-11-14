@@ -36,7 +36,7 @@ if __name__ == "__main__":
         core.save_json(core.DATA / "session.json", {"started": core.now_rome().isoformat(timespec="seconds")})
     else:
         line = stop_line()
-        print(line)
+        print(core.paint(core.BLUE, line))
         core.LOGS.mkdir(parents=True, exist_ok=True)
         with open(core.LOGS / "sessions.log", "a", encoding="utf-8", newline="\n") as f:
             f.write(f"[{core.now_rome():%Y-%m-%d %H:%M}] {line}\n")

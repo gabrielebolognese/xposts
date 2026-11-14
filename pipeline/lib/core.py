@@ -78,10 +78,24 @@ def undash(text: str) -> str:
     return re.sub(r"\s*" + chr(0x2014) + r"+\s*", ", ", text)
 
 
+# Terminal colours by tag. run.sh sets RUNNER_COLOR when it prints to a terminal; logs/runner.log stays plain.
+GREEN, ORANGE, RED, YELLOW, BLUE, GRAY = "92", "38;5;208", "91", "93", "38;5;117", "90"
+COLORS = {
+    "POSTED": GREEN, "READY": GREEN,                      # a post went out, a thread is ready
+    "DROP": ORANGE, "MISSED": ORANGE, "REVIEW": ORANGE,   # discarded, missed its time, or sent to review/
+    "ERROR": RED, "WARN": YELLOW,
+    "SLOT": BLUE, "POST": BLUE, "IDLE": BLUE, "LIMIT": BLUE,  # important status: queue changes, posting, waiting
+}  # every other tag (STEP, PICK, SEARCH, SCORE, HOOK...) is routine progress: dark gray
+
+
+def paint(code: str, text: str) -> str:
+    return f"\033[{code}m{text}\033[0m" if os.environ.get("RUNNER_COLOR") else text
+
+
 def say(tag: str, text: str) -> None:
-    """[HH:MM] TAG    text, on the terminal and in logs/runner.log."""
+    """[HH:MM] TAG    text, on the terminal (coloured by tag) and in logs/runner.log."""
     line = f"[{datetime.now():%H:%M}] {tag:<6} {undash(str(text))}"
-    print(line, flush=True)
+    print(paint(COLORS.get(tag, GRAY), line), flush=True)
     LOGS.mkdir(parents=True, exist_ok=True)
     with open(LOGS / "runner.log", "a", encoding="utf-8", newline="\n") as f:
         f.write(line + "\n")

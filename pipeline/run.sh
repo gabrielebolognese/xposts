@@ -12,6 +12,8 @@
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 export PYTHONUTF8=1
+[ -t 1 ] && export RUNNER_COLOR=1   # coloured messages on a terminal (see COLORS in pipeline/lib/core.py)
+paint() { if [ -n "${RUNNER_COLOR:-}" ]; then printf '\033[%sm%s\033[0m\n' "$1" "$2"; else echo "$2"; fi; }
 PY=python
 LOCK=pipeline/.lock
 once=0
@@ -39,7 +41,7 @@ idle=$(( $(cfg runner.idle_minutes) * 60 ))
 pause=$(( $(cfg runner.error_pause_minutes) * 60 ))
 
 $PY pipeline/lib/summary.py start
-[ -f .env ] || [ -n "${POSTS_FAKE_X:-}" ] || echo "WARNING: no .env file in this folder, so nothing can be posted. Create it with the 4 X keys (see README)."
+[ -f .env ] || [ -n "${POSTS_FAKE_X:-}" ] || paint 93 "WARNING: no .env file in this folder, so nothing can be posted. Create it with the 4 X keys (see README)."
 every=$(cfg poster.interval_seconds)
 ( while :; do $PY pipeline/lib/poster.py; sleep "$every"; done ) &   # the posting loop, independent of the steps
 poster=$!
@@ -58,8 +60,8 @@ stop() {
 }
 trap stop INT TERM
 
-echo "Auto post runner started. Press Ctrl+C to stop."
-[ "$max" -gt 0 ] && echo "It stops by itself once $max threads are ready."
+paint "38;5;117" "Auto post runner started. Press Ctrl+C to stop."
+[ "$max" -gt 0 ] && paint "38;5;117" "It stops by itself once $max threads are ready."
 while :; do
   $PY pipeline/lib/step.py
   rc=$?

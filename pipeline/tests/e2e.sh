@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# End-to-end test of the runner with a fake claude, fake discovery signals and a fake sandbox, in a throwaway copy
-# of the project that pushes to a local bare repo. No network, no model calls, nothing touches the real queue.
+# End-to-end test of the runner with a fake claude, fake discovery signals and a fake X client, in a throwaway copy
+# of the project that pushes to a local bare repo. No network, no model calls, no posts, nothing touches the real queue.
 #   bash pipeline/tests/e2e.sh
 set -u
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -11,14 +11,14 @@ ok() { pass=$((pass + 1)); echo "ok $pass $1"; }
 fail() { echo "FAIL: $1"; echo "--- output:"; printf '%s\n' "${2:-}" | tail -30; exit 1; }
 
 mkdir -p "$W/.claude/skills" "$W/pipeline"
-cp "$SRC/scheduler.js" "$SRC/package.json" "$W/"
+cp "$SRC/scheduler.js" "$SRC/post.js" "$SRC/post-now.js" "$SRC/package.json" "$W/"
 cp -r "$SRC/.claude/skills/x-threads" "$W/.claude/skills/"
-for d in lib bin prompts schemas vendor tests sandbox; do cp -r "$SRC/pipeline/$d" "$W/pipeline/"; done
+for d in lib prompts schemas vendor tests; do cp -r "$SRC/pipeline/$d" "$W/pipeline/"; done
 cp "$SRC/pipeline/run.sh" "$SRC/pipeline/categories.json" "$W/pipeline/"
 python - "$SRC/pipeline/config.json" "$W/pipeline/config.json" <<'EOF'
 import json, sys
 c = json.load(open(sys.argv[1], encoding="utf-8"))
-c.update(dispatch=False)
+c["poster"]["interval_seconds"] = 2
 c["runner"].update(idle_minutes=1, error_pause_minutes=0)
 c["retries"]["transient_backoff_seconds"] = []
 c["discovery"]["searches_per_day"] = 1
@@ -33,7 +33,7 @@ git -C "$W" config core.autocrlf false
 git -C "$W" add -A && git -C "$W" commit -qm init
 git -C "$W" remote add origin "$T/remote.git" && git -C "$W" push -q -u origin main 2>/dev/null
 
-export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_SANDBOX_FAKE=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log"
+export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log"
 cd "$W" || exit 1
 
 seed() {  # seed <tool name>: a pending discovery, as a category search would leave it
@@ -174,22 +174,77 @@ bash pipeline/run.sh --posts x >/dev/null 2>&1 && fail "--posts accepted a non-n
 : > "$FAKE_LOG"
 ok "--posts 1 made one thread and stopped with the summary"
 
-# P: a thread posted from the dashboard (posted-now.json) leaves the queue; the next best thread takes its slot
+# P: "Post thread now" leaves a request; the posting loop posts it (fake X), records it and removes its queue/ folder;
+#    the next arrangement gives the slot to the next best thread
 first="$(nth_slot 1)"; count="$(ls queue | wc -l)"
 python - <<'EOF'
-import json
+import json, os
 pool = json.load(open("pipeline/data/virality.json"))
 run = next(e["run"] for e in pool.values() if e["name"] == "Viral winner")
-json.dump([{"run": run, "at": "2026-11-14T08:00:00Z", "slot": pool[run]["slot"]}], open("pipeline/data/posted-now.json", "w"))
+os.makedirs("pipeline/data/post-now", exist_ok=True)
+json.dump({"run": run, "at": "2026-11-14T08:00:00Z"}, open(f"pipeline/data/post-now/{run}.json", "w"))
 EOF
+python pipeline/lib/poster.py
+python -c 'import json; p=json.load(open("pipeline/data/posted-now.json")); assert p[-1]["url"].startswith("https://x.com/i/status/fake") and p[-1]["complete"], p' \
+  || fail "post-now not recorded" "$(tail -5 pipeline/logs/runner.log)"
+[ -z "$(ls pipeline/data/post-now)" ] || fail "request not cleared" "$(ls pipeline/data/post-now)"
+[ ! -d "queue/$first" ] || fail "the posted thread's folder is still in queue/"
+[ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "autopost: update queue" ] || fail "post-now removal not pushed"
 python pipeline/lib/step.py >/dev/null 2>&1
 python -c 'import json; e=[x for x in json.load(open("pipeline/data/virality.json")).values() if x["name"]=="Viral winner"][0]; assert e["status"]=="posted" and e["posted_now"], e' \
   || fail "posted-now thread not marked posted"
-grep -q "Viral winner" queue/*/post.txt && fail "the posted thread is still in queue/"
+grep -q "Viral winner" queue/*/post.txt && fail "the posted thread is back in queue/"
 [ "$(slot_of "Open-source LLMs Tool")" = "$first" ] || fail "the next best thread did not take the freed slot"
 [ "$(ls queue | wc -l)" = $((count - 1)) ] || fail "queue size after post-now" "$(ls queue)"
-[ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "pipeline: arrange the thread queue" ] || fail "post-now arrangement not pushed"
-ok "post now: the thread left queue/ and $first went to the next best thread"
+ok "post now: posted by the posting loop, folder removed and pushed, $first went to the next best thread"
+
+# L1: the posting loop posts what is due (a single post and a thread), moves them to posted/, commits and pushes
+python - <<'EOF'
+import sys
+from datetime import timedelta
+sys.path.insert(0, "pipeline/lib")
+import core
+due = core.slot_name(core.now_rome() - timedelta(minutes=2))
+other = core.slot_name(core.now_rome() - timedelta(minutes=3))
+core.write_text(core.ROOT / "queue" / other / "post.txt", "a plain text post")
+for i, t in enumerate(["main post", "1. first reply", "2. second reply"]):
+    core.write_text(core.ROOT / "queue" / due / ("post.txt" if i == 0 else f"reply{i}.txt"), t)
+open("due.txt", "w").write(f"{due} {other}")
+EOF
+read due other < due.txt; rm due.txt
+python pipeline/lib/poster.py
+[ -f "posted/$other/post.txt" ] && [ ! -d "queue/$other" ] || fail "the single post was not posted" "$(tail -5 pipeline/logs/runner.log)"
+python -c 'import json,sys; assert len(json.load(open(sys.argv[1]))["ids"]) == 3' "posted/$due/thread.json" || fail "the thread was not posted in 3 parts"
+[ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "autopost: update queue" ] || fail "posting not pushed"
+git --git-dir="$T/remote.git" ls-tree -r --name-only main | grep -q "^posted/$due/thread.json$" || fail "posted/ not on the remote"
+grep -q "POSTED .*posted $due -> https://x.com/i/status/fake" pipeline/logs/runner.log || fail "no POSTED line in the log"
+ok "posting loop: a due post and a 3-part thread went out (fake X), moved to posted/ and pushed"
+
+# L2: a thread that missed its slot (PC off, post.js moved it to missed/) goes back to the virality queue
+python - <<'EOF'
+import json, shutil
+pool = json.load(open("pipeline/data/virality.json"))
+e = next(x for x in pool.values() if x["name"] == "Weak hook tool")
+shutil.move(f"queue/{e['slot']}", "missed/2026-01-01_0600")
+e["slot"] = "2026-01-01_0600"
+json.dump(pool, open("pipeline/data/virality.json", "w"))
+EOF
+python pipeline/lib/step.py >/dev/null 2>&1
+python -c 'import json; e=[x for x in json.load(open("pipeline/data/virality.json")).values() if x["name"]=="Weak hook tool"][0]; assert e["status"]=="scheduled" and e["slot"]!="2026-01-01_0600" and e["missed"]==1, e' \
+  || fail "the missed thread did not get a new slot" "$(cat pipeline/data/virality.json)"
+[ -d "queue/$(slot_of "Weak hook tool")" ] || fail "no queue folder for the rescheduled thread"
+grep -q "missed 2026-01-01_0600 (the PC was off), back in the virality queue" pipeline/logs/runner.log || fail "no log line for the missed thread"
+ok "missed slot: the thread went back to the virality queue and got $(slot_of "Weak hook tool")"
+
+# L3: the posting loop and an arrangement at the same time take turns (the queue lock), git stays clean
+python pipeline/lib/poster.py & bg=$!
+python pipeline/lib/step.py >/dev/null 2>&1
+wait $bg
+[ ! -d pipeline/.queue-lock ] || fail "queue lock left behind"
+[ ! -f .git/index.lock ] || fail "git index lock left behind"
+[ -z "$(git status --porcelain -- queue posted missed)" ] || fail "uncommitted queue changes" "$(git status --porcelain)"
+[ "$(git rev-parse HEAD)" = "$(git --git-dir="$T/remote.git" rev-parse main)" ] || fail "local and remote differ"
+ok "posting loop and arrangement at the same time: they took turns, everything committed and pushed"
 
 # E: nothing left to do: the runner waits; Ctrl+C (SIGINT) stops it with the summary
 set -m   # job control: without it a background job starts with SIGINT ignored and cannot trap it

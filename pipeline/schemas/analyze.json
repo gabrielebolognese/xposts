@@ -2,45 +2,160 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "type": "object",
  "additionalProperties": false,
- "required": ["project_name", "repo", "owner", "description", "functionality", "problem", "beneficiaries", "pricing_model",
-              "pricing_details", "pricing_verified", "open_source", "license", "commercial_use", "install_requirements",
-              "platforms", "features", "limitations", "alternatives", "why_use", "different", "latest_update", "maintained",
-              "safe_to_recommend", "safety_note", "solves_stated_problem", "find_it", "facts", "checks", "recommend", "reason"],
+ "required": [
+  "project_name",
+  "repo",
+  "owner",
+  "description",
+  "functionality",
+  "problem",
+  "beneficiaries",
+  "pricing_model",
+  "pricing_details",
+  "pricing_verified",
+  "open_source",
+  "license",
+  "commercial_use",
+  "install_requirements",
+  "platforms",
+  "features",
+  "limitations",
+  "alternatives",
+  "why_use",
+  "different",
+  "latest_update",
+  "maintained",
+  "safe_to_recommend",
+  "safety_note",
+  "solves_stated_problem",
+  "find_it",
+  "facts",
+  "recommend",
+  "reason"
+ ],
  "properties": {
-  "project_name": {"type": "string", "minLength": 1},
-  "repo": {"type": "string"},
-  "owner": {"type": "string"},
-  "description": {"type": "string"},
-  "functionality": {"type": "string"},
-  "problem": {"type": "string"},
-  "beneficiaries": {"type": "string"},
-  "pricing_model": {"enum": ["free", "freemium", "trial", "paid", "unknown"]},
-  "pricing_details": {"type": "string"},
-  "pricing_verified": {"type": "boolean"},
-  "open_source": {"type": "boolean"},
-  "license": {"type": "string"},
-  "commercial_use": {"type": "string"},
-  "install_requirements": {"type": "string"},
-  "platforms": {"type": "array", "items": {"type": "string"}},
-  "features": {"type": "array", "items": {"type": "string"}},
-  "limitations": {"type": "array", "items": {"type": "string"}},
+  "project_name": {
+   "type": "string",
+   "minLength": 1
+  },
+  "repo": {
+   "type": "string"
+  },
+  "owner": {
+   "type": "string"
+  },
+  "description": {
+   "type": "string"
+  },
+  "functionality": {
+   "type": "string"
+  },
+  "problem": {
+   "type": "string"
+  },
+  "beneficiaries": {
+   "type": "string"
+  },
+  "pricing_model": {
+   "enum": [
+    "free",
+    "freemium",
+    "trial",
+    "paid",
+    "unknown"
+   ]
+  },
+  "pricing_details": {
+   "type": "string"
+  },
+  "pricing_verified": {
+   "type": "boolean"
+  },
+  "open_source": {
+   "type": "boolean"
+  },
+  "license": {
+   "type": "string"
+  },
+  "commercial_use": {
+   "type": "string"
+  },
+  "install_requirements": {
+   "type": "string"
+  },
+  "platforms": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "features": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "limitations": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
   "alternatives": {
    "type": "array",
-   "items": {"type": "object", "additionalProperties": false, "required": ["name", "note"],
-             "properties": {"name": {"type": "string"}, "note": {"type": "string"}}}
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "name",
+     "note"
+    ],
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "note": {
+      "type": "string"
+     }
+    }
+   }
   },
-  "why_use": {"type": "string"},
-  "different": {"type": "string"},
-  "latest_update": {"type": "string"},
-  "maintained": {"type": "boolean"},
-  "safe_to_recommend": {"type": "boolean"},
-  "safety_note": {"type": "string"},
-  "solves_stated_problem": {"type": "boolean"},
+  "why_use": {
+   "type": "string"
+  },
+  "different": {
+   "type": "string"
+  },
+  "latest_update": {
+   "type": "string"
+  },
+  "maintained": {
+   "type": "boolean"
+  },
+  "safe_to_recommend": {
+   "type": "boolean"
+  },
+  "safety_note": {
+   "type": "string"
+  },
+  "solves_stated_problem": {
+   "type": "boolean"
+  },
   "find_it": {
    "type": "object",
    "additionalProperties": false,
-   "required": ["github_search", "web_search"],
-   "properties": {"github_search": {"type": "string"}, "web_search": {"type": "string"}}
+   "required": [
+    "github_search",
+    "web_search"
+   ],
+   "properties": {
+    "github_search": {
+     "type": "string"
+    },
+    "web_search": {
+     "type": "string"
+    }
+   }
   },
   "facts": {
    "type": "array",
@@ -48,34 +163,43 @@
    "items": {
     "type": "object",
     "additionalProperties": false,
-    "required": ["id", "claim", "url", "date", "quote", "primary"],
+    "required": [
+     "id",
+     "claim",
+     "url",
+     "date",
+     "quote",
+     "primary"
+    ],
     "properties": {
-     "id": {"type": "string", "pattern": "^F[0-9]+$"},
-     "claim": {"type": "string"},
-     "url": {"type": "string"},
-     "date": {"type": "string"},
-     "quote": {"type": "string", "maxLength": 600},
-     "primary": {"type": "boolean"}
+     "id": {
+      "type": "string",
+      "pattern": "^F[0-9]+$"
+     },
+     "claim": {
+      "type": "string"
+     },
+     "url": {
+      "type": "string"
+     },
+     "date": {
+      "type": "string"
+     },
+     "quote": {
+      "type": "string",
+      "maxLength": 600
+     },
+     "primary": {
+      "type": "boolean"
+     }
     }
    }
   },
-  "checks": {
-   "type": "array",
-   "maxItems": 2,
-   "items": {
-    "type": "object",
-    "additionalProperties": false,
-    "required": ["id", "kind", "purpose", "script", "expect"],
-    "properties": {
-     "id": {"type": "string", "pattern": "^C[0-9]+$"},
-     "kind": {"enum": ["install", "behavior"]},
-     "purpose": {"type": "string"},
-     "script": {"type": "string", "maxLength": 6000},
-     "expect": {"type": "string"}
-    }
-   }
+  "recommend": {
+   "type": "boolean"
   },
-  "recommend": {"type": "boolean"},
-  "reason": {"type": "string"}
+  "reason": {
+   "type": "string"
+  }
  }
 }

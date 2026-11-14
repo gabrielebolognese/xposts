@@ -76,7 +76,7 @@ try { tab = localStorage.getItem('tab') || 'ready'; } catch {}
 if (!TABS.some(([k]) => k === tab)) tab = 'ready';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const GROUP = { scheduled: 'ready', waiting: 'ready', 'posted-now': 'posted', posted: 'posted', lost: 'dropped' };
+const GROUP = { scheduled: 'ready', waiting: 'ready', posting: 'ready', 'posted-now': 'posted', posted: 'posted', lost: 'dropped' };
 const group = (t) => GROUP[t.status] || t.status;
 const byScore = (a, b) => (b.score ?? -1) - (a.score ?? -1) || String(a.slot || '~').localeCompare(String(b.slot || '~'));
 function when(slot) {
@@ -98,6 +98,7 @@ function statusText(t) {
     case 'waiting': return 'Waiting in the virality queue';
     case 'posted': return `Posted${t.postedAt ? ' ' + when(t.postedAt) : ''}`;
     case 'posted-now': return `Posted now${t.postedAt ? ', ' + when(t.postedAt) : ''}`;
+    case 'posting': return 'Posting now...';
     case 'review': return 'Needs review';
     case 'dropped': return 'Dropped';
     default: return t.status;
@@ -105,16 +106,21 @@ function statusText(t) {
 }
 
 function actions(t) {
-  if (notes[t.run]) return `<p class="note">${esc(notes[t.run])}</p>`;
-  if (!t.parts || t.status === 'posted' || t.status === 'posted-now') return '';
+  if (t.postUrl) return `<p class="note"><a href="${esc(t.postUrl)}" target="_blank" rel="noopener">View it on X</a></p>`;
+  if (notes[t.run] && t.status !== 'posting') return `<p class="note">${esc(notes[t.run])}</p>`;
+  if (t.status === 'posting') return '<p class="note">The runner is posting it now. The replies follow 10 to 40 seconds apart.</p>';
+  if (!t.parts || t.status === 'posted') return '';
+  const failed = t.postError ? `<p class="note">The last attempt did not go out: ${esc(t.postError)}</p>` : '';
+  const off = !online || !data.poster.on;
   if (confirming === t.run) {
     const risk = ['making', 'review', 'dropped'].includes(t.status) ? ' It has not passed every check yet.' : '';
     const slot = t.status === 'scheduled' ? ` Its slot goes to the next best thread.` : '';
     return `<div class="actions"><span>Post this thread on X now?${risk} Nothing else in the schedule changes.${slot}</span>
-      <button class="main" data-act="post" data-run="${esc(t.run)}"${online ? '' : ' disabled'}>Yes, post it now</button>
+      <button class="main" data-act="post" data-run="${esc(t.run)}"${off ? ' disabled' : ''}>Yes, post it now</button>
       <button class="alt" data-act="cancel">Cancel</button></div>`;
   }
-  return `<div class="actions"><button class="main" data-act="ask" data-run="${esc(t.run)}"${online ? '' : ' disabled title="The dashboard server is not running"'}>Post thread now</button></div>`;
+  const why = !online ? 'The dashboard server is not running' : 'The runner is not running, and it does the posting';
+  return `${failed}<div class="actions"><button class="main" data-act="ask" data-run="${esc(t.run)}"${off ? ` disabled title="${why}"` : ''}>Post thread now</button>${off && online ? '<span class="note">Start the runner (bash pipeline/run.sh) to post.</span>' : ''}</div>`;
 }
 
 function card(t) {
@@ -163,6 +169,7 @@ function render() {
       <div>Step ${at + 1} of ${STAGES.length}: ${esc(statusText(t).replace(/^Making: /, ''))}, updated ${ago(t.updated)}</div>
       ${t.hook ? `<div class="hook">${esc(t.hook)}</div>` : ''}</div>`;
   }).join('') : `<div class="sub">Nothing is being made right now. ${esc(runnerText)}</div>`;
+  renderPostedNow();
   const log = document.getElementById('log');
   const atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 20;
   log.textContent = data.log.lines.join('\n') || 'The runner has not written anything yet.';
@@ -180,7 +187,7 @@ async function refresh() {
     const recent = data.log.updated && Date.now() - data.log.updated < 40 * 60000;
     const runner = data.lock && recent ? `runner on, last activity ${ago(data.log.updated)}`
       : `runner ${data.lock ? 'quiet' : 'off'}${data.log.updated ? `, last activity ${ago(data.log.updated)}` : ''}`;
-    runnerText = `${runner[0].toUpperCase() + runner.slice(1)}.`;
+    runnerText = `${runner[0].toUpperCase() + runner.slice(1)}. ${data.poster.on ? 'Posting is on.' : 'Posting is off: nothing goes out until the runner runs.'}`;
     status(`Live, updated ${new Date().toLocaleTimeString('en-GB')}. Today: ${data.madeToday} threads made, ${data.searches} category searches. ${runnerText}`);
   } catch {
     online = false;
@@ -189,19 +196,13 @@ async function refresh() {
   render();
 }
 
-async function refreshRuns() {
+function renderPostedNow() {
   const box = document.getElementById('nowRuns');
-  try {
-    const r = await (await fetch('/api/post-now-runs', { cache: 'no-store' })).json();
-    if (r.error) { box.textContent = r.error; return; }
-    box.innerHTML = r.data.length ? r.data.map((x) => {
-      const state = x.status === 'completed' ? (x.conclusion === 'success' ? 'posted' : x.conclusion) : x.status.replace('_', ' ');
-      const at = new Date(x.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-      return `<div class="run"><span>${esc(at)}  ${esc(x.displayTitle.replace(/^post now /, ''))}</span><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(state)}</a></div>`;
-    }).join('') : 'Nothing posted from here yet.';
-  } catch {
-    box.textContent = 'Could not reach the dashboard server.';
-  }
+  const list = data?.postedNow || [];
+  box.innerHTML = list.length ? list.map((x) => {
+    const t = data.threads.find((y) => y.run === x.run);
+    return `<div class="run"><span>${esc(when(x.at))}  ${esc(t?.name || x.run)}</span>${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">view</a>` : ''}</div>`;
+  }).join('') : 'Nothing posted from here yet.';
 }
 
 async function postNow(run) {
@@ -214,7 +215,7 @@ async function postNow(run) {
   let body = {};
   try { body = await r.json(); } catch {}
   if (!r.ok || body.error) return `Not sent: ${body.error || `the server answered ${r.status}`}`;
-  return 'Sent. GitHub posts it within a minute or two, the replies follow 10 to 40 seconds apart.';
+  return 'Requested. The runner posts it within 30 seconds, the replies follow 10 to 40 seconds apart.';
 }
 
 document.getElementById('tabs').addEventListener('click', (e) => {
@@ -235,20 +236,17 @@ document.getElementById('list').addEventListener('click', async (e) => {
   if (b.dataset.act === 'cancel') confirming = null;
   if (b.dataset.act === 'post') {
     confirming = null;
-    notes[run] = 'Sending to GitHub...';
+    notes[run] = 'Sending the request...';
     render();
     notes[run] = await postNow(run);
     if (notes[run].startsWith('Not sent')) setTimeout(() => { delete notes[run]; render(); }, 10000);
     refresh();
-    setTimeout(refreshRuns, 4000);
   }
   render();
 });
 
 refresh();
-refreshRuns();
 setInterval(refresh, 4000);
-setInterval(refreshRuns, 15000);
 </script>
 </body>
 </html>

@@ -93,15 +93,6 @@
     "primary": true
    }
   ],
-  "checks": [
-   {
-    "id": "C1",
-    "kind": "install",
-    "purpose": "install it and print its version",
-    "script": "set -euo pipefail\npip install toolx\ntoolx --version",
-    "expect": "a version number"
-   }
-  ],
   "recommend": true,
   "reason": "Legitimate, maintained and useful."
  },
@@ -376,11 +367,6 @@
    }
   ],
   "changes": "fixture: nothing changed"
- },
- "check_fix": {
-  "give_up": true,
-  "reason": "fixture",
-  "script": ""
  },
  "virality": {
   "title": "{NAME}: local prompt compression",

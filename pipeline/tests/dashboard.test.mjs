@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { threads, threadParts } from '../../dashboard.js';
+import { requestPost, threads, threadParts } from '../../dashboard.js';
 import { decode } from '../../post-now.js';
 
 const draft = { hook: 'the hook', promise: 'the promise:', replies: ['one', 'two', 'three', 'four'] };
@@ -44,6 +44,30 @@ test('each run gets its status, slot, score and full thread', () => {
   assert.deepEqual(t['2026-11-14_0800_b'].parts, ['the hook\n\nthe promise:', '1. one', '2. two', '3. three', '4. four']);
   assert.equal(t['2026-11-14_0900_c'].status, 'posted-now');
   assert.equal(t['2026-11-14_1000_d'].status, 'dropped');
+});
+
+test('post now leaves a request for the runner, only while the runner is on', () => {
+  const { r, run } = root();
+  run('2026-11-14_0800_b', { stage: 'ready' }, { 'draft.json': draft });
+  run('2026-11-14_0700_a', { stage: 'hooks' });
+  const data = path.join(r, 'pipeline', 'data');
+  fs.writeFileSync(path.join(data, 'virality.json'), JSON.stringify({ '2026-11-14_0800_b': { status: 'waiting' } }));
+  assert.throws(() => requestPost('2026-11-14_0800_b', r), /runner is not running/);
+  fs.writeFileSync(path.join(data, 'poster.json'), JSON.stringify({ at: Date.now() / 1000 }));
+  assert.throws(() => requestPost('2026-11-14_0700_a', r), /no finished thread/);
+  fs.mkdirSync(path.join(data, 'post-now'), { recursive: true });
+  fs.writeFileSync(path.join(data, 'post-now', '2026-11-14_0800_b.failed'), JSON.stringify({ error: 'auth failed' }));
+  assert.equal(threads(r).find((t) => t.run === '2026-11-14_0800_b').postError, 'auth failed');
+  assert.deepEqual(requestPost('2026-11-14_0800_b', r), { ok: true });
+  assert.ok(fs.existsSync(path.join(data, 'post-now', '2026-11-14_0800_b.json')));
+  assert.ok(!fs.existsSync(path.join(data, 'post-now', '2026-11-14_0800_b.failed')));
+  assert.equal(threads(r).find((t) => t.run === '2026-11-14_0800_b').status, 'posting');
+  assert.throws(() => requestPost('2026-11-14_0800_b', r), /already posted or is being posted/);
+  fs.writeFileSync(path.join(data, 'posted-now.json'), JSON.stringify([{ run: '2026-11-14_0800_b', url: 'https://x.com/i/status/1' }]));
+  fs.rmSync(path.join(data, 'post-now', '2026-11-14_0800_b.json'));
+  const t = threads(r).find((x) => x.run === '2026-11-14_0800_b');
+  assert.equal(t.status, 'posted-now');
+  assert.equal(t.postUrl, 'https://x.com/i/status/1');
 });
 
 test('threadParts matches what the runner queues, and post-now decodes it back', () => {

@@ -149,6 +149,25 @@ class Virality(unittest.TestCase):
         self.assertEqual(dst, ["2026-10-25_0600", "2026-10-25_1000", "2026-10-25_1400"])
 
 
+class QueueLock(unittest.TestCase):
+    def test_one_holder_at_a_time_and_stale_takeover(self):
+        lock = core.PIPE / ".queue-lock"
+        self.assertFalse(lock.exists(), "a queue lock is held right now: stop the runner before the unit tests")
+        with core.queue_lock():
+            self.assertTrue(lock.exists())
+            with self.assertRaises(TimeoutError):
+                with core.queue_lock(wait_seconds=1):
+                    pass
+        self.assertFalse(lock.exists())
+        lock.mkdir()  # left behind by a crashed process
+        import os, time
+        old = time.time() - 3600
+        os.utime(lock, (old, old))
+        with core.queue_lock(wait_seconds=2, stale_seconds=60):
+            self.assertTrue(lock.exists())
+        self.assertFalse(lock.exists())
+
+
 class Checker(unittest.TestCase):
     MAIN = "this free tool replaces a paid one\n\nhow it works and where to get it:"
     REPLIES = ["1. It does the job.", "2. It is open source.", "3. It installs in a minute.",

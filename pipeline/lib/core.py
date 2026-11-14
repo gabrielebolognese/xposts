@@ -7,6 +7,7 @@ import re
 import shutil
 import sys
 import time
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -147,6 +148,33 @@ def add_history(entry: dict) -> None:
     items = history()
     items.append({**entry, "at": now_rome().isoformat(timespec="seconds")})
     save_json(DATA / "history.json", items)
+
+
+@contextmanager
+def queue_lock(wait_seconds: float = 900, stale_seconds: float = 1200):
+    """One process at a time changes queue/, posted/ or missed/ and runs git: the posting loop (poster.py) and the
+    arrangement (virality.arrange). A lock left by a crashed process is taken over after stale_seconds (age based:
+    on Windows os.kill(pid, 0) would end the process instead of testing it)."""
+    lock = PIPE / ".queue-lock"
+    start = time.time()
+    while True:
+        try:
+            lock.mkdir()
+            break
+        except FileExistsError:
+            try:
+                if time.time() - lock.stat().st_mtime > stale_seconds:
+                    shutil.rmtree(lock, ignore_errors=True)
+                    continue
+            except FileNotFoundError:
+                continue
+            if time.time() - start > wait_seconds:
+                raise TimeoutError(f"{lock} is held by another process")
+            time.sleep(0.5)
+    try:
+        yield
+    finally:
+        shutil.rmtree(lock, ignore_errors=True)
 
 
 def bump_session(key: str) -> None:

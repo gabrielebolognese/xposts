@@ -1,12 +1,12 @@
 // Live dashboard for the auto threads: npm run dashboard, then http://localhost:3001
 // Shows every thread the runner is making or has made (stage, hook, the full thread, virality score, slot) and the
-// runner log, refreshed every few seconds. "Post thread now" starts the post-now GitHub workflow (the X keys live
-// only in GitHub secrets, never on this PC) and records the run in pipeline/data/posted-now.json, so the runner never
-// schedules that thread again; nothing else in the schedule changes.
+// runner log, refreshed every few seconds. "Post thread now" leaves a request in pipeline/data/post-now/ for the
+// runner's posting loop, which posts the thread within about 30 seconds and records it in posted-now.json, so it is
+// never scheduled again; nothing else in the schedule changes. This server never posts and never touches git.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { exec, execFile } from 'node:child_process';
+import { exec } from 'node:child_process';
 
 const ROOT = import.meta.dirname;
 const PORT = Number(process.env.DASHBOARD_PORT) || 3001; // tests use another port and DASHBOARD_NO_OPEN=1
@@ -30,8 +30,9 @@ const writeJson = (file, data) => {
 // The same parts the runner puts in queue/: the main post (hook, empty line, promise), then the numbered replies
 export const threadParts = (d) => [`${d.hook.trim()}\n\n${d.promise.trim()}`, ...d.replies.map((r, i) => `${i + 1}. ${r.trim()}`)];
 
-function statusOf(st, entry, early) {
+function statusOf(st, entry, early, requested) {
   if (early) return 'posted-now';
+  if (requested) return 'posting';
   if (STAGES.includes(st.stage)) return 'making';
   if (st.stage === 'ready') return entry?.status ?? 'waiting';
   return st.stage ?? 'making'; // review or dropped
@@ -43,6 +44,7 @@ export function threads(root = ROOT, limit = 80) {
   const runsDir = path.join(pipe, 'runs');
   const pool = readJson(path.join(pipe, 'data', 'virality.json'), {});
   const early = new Map(readJson(path.join(pipe, 'data', 'posted-now.json'), []).map((p) => [p.run, p]));
+  const requests = path.join(pipe, 'data', 'post-now');
   const names = fs.existsSync(runsDir)
     ? fs.readdirSync(runsDir).filter((n) => fs.existsSync(path.join(runsDir, n, 'discovery.json'))) // old long-form runs have none
     : [];
@@ -54,7 +56,8 @@ export function threads(root = ROOT, limit = 80) {
     const a = readJson(path.join(dir, 'analysis.json'), null);
     const v = readJson(path.join(dir, 'virality.json'), null);
     const entry = pool[run];
-    const status = statusOf(st, entry, early.get(run));
+    const status = statusOf(st, entry, early.get(run), fs.existsSync(path.join(requests, `${run}.json`)));
+    const failed = readJson(path.join(requests, `${run}.failed`), null);
     let updated = 0;
     try {
       updated = fs.statSync(path.join(dir, 'state.json')).mtimeMs;
@@ -72,6 +75,7 @@ export function threads(root = ROOT, limit = 80) {
       hookScore: v?.hook_score ?? null, threadScore: v?.thread_score ?? null,
       strengths: v?.strengths || '', weaknesses: v?.weaknesses || '',
       hook: st.hook || null, fixRound: st.fix_round || 0, outcome: st.outcome || '',
+      postUrl: early.get(run)?.url || null, postError: failed?.error || null,
       parts: draft?.hook && draft?.promise && Array.isArray(draft.replies) ? threadParts(draft) : null,
     };
   });
@@ -94,51 +98,29 @@ function state() {
   const pool = Object.values(readJson(path.join(pipe, 'data', 'virality.json'), {}));
   const madeToday = pool.filter((e) => e.created?.startsWith(today)).length;
   const lock = fs.existsSync(path.join(pipe, '.lock'));
-  return { now: Date.now(), threads: threads(), log: logTail(), searches, madeToday, lock };
+  return { now: Date.now(), threads: threads(), log: logTail(), searches, madeToday, lock, poster: poster(), postedNow: postedNow() };
 }
 
-// DASHBOARD_FAKE_GH=<script.js> (tests) runs that node script instead of the GitHub CLI, so nothing can be posted
-function gh(args) {
-  const fake = process.env.DASHBOARD_FAKE_GH;
-  return new Promise((resolve, reject) => {
-    const tryAt = (bins) => execFile(bins[0], fake ? [fake, ...args] : args, { timeout: 60000 }, (err, stdout, stderr) => {
-      if (err?.code === 'ENOENT' && bins.length > 1) return tryAt(bins.slice(1));
-      if (err) return reject(new Error((stderr || err.message).trim().slice(0, 300)));
-      resolve(stdout);
-    });
-    tryAt(fake ? [process.execPath] : ['gh', 'C:/Program Files/GitHub CLI/gh.exe']);
-  });
+// The posting loop's heartbeat: it writes data/poster.json after every round (every 30 seconds)
+function poster(root = ROOT) {
+  const at = (readJson(path.join(root, 'pipeline', 'data', 'poster.json'), {}).at || 0) * 1000;
+  return { at, on: Date.now() - at < 3 * 60000 };
 }
 
-const repo = () => readJson(path.join(ROOT, 'pipeline', 'config.json'), {}).repo;
-
-let runsCache = { at: 0, data: [] };
-async function postNowRuns() {
-  if (Date.now() - runsCache.at > 15000) {
-    try {
-      const out = await gh(['run', 'list', '-R', repo(), '--workflow', 'post-now.yml', '-L', '8',
-        '--json', 'displayTitle,status,conclusion,url,createdAt']);
-      runsCache = { at: Date.now(), data: JSON.parse(out) };
-    } catch (err) {
-      runsCache = { at: Date.now(), data: [], error: err.message };
-    }
-  }
-  return runsCache;
+function postedNow(root = ROOT) {
+  return readJson(path.join(root, 'pipeline', 'data', 'posted-now.json'), []).slice(-8).reverse();
 }
 
-async function postNow(run) {
-  const t = threads(ROOT, 100000).find((x) => x.run === run);
+export function requestPost(run, root = ROOT) {
+  const t = threads(root, 100000).find((x) => x.run === run);
   if (!t?.parts) throw new Error('This run has no finished thread yet.');
-  if (t.status === 'posted' || t.status === 'posted-now') throw new Error('This thread was already posted.');
-  const slot = t.status === 'scheduled' ? t.slot : '';
-  const thread = Buffer.from(JSON.stringify(t.parts)).toString('base64');
-  await gh(['workflow', 'run', 'post-now.yml', '-R', repo(), '-f', `run=${run}`, '-f', `thread=${thread}`, '-f', `slot=${slot}`]);
-  const file = path.join(ROOT, 'pipeline', 'data', 'posted-now.json');
-  const list = readJson(file, []);
-  list.push({ run, at: new Date().toISOString(), slot });
-  writeJson(file, list);
-  runsCache.at = 0;
-  return { ok: true, slot };
+  if (['posted', 'posted-now', 'posting'].includes(t.status)) throw new Error('This thread was already posted or is being posted.');
+  if (!poster(root).on) throw new Error('The runner is not running, and it does the posting. Start it with: bash pipeline/run.sh');
+  const dir = path.join(root, 'pipeline', 'data', 'post-now');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.rmSync(path.join(dir, `${run}.failed`), { force: true });
+  writeJson(path.join(dir, `${run}.json`), { run, at: new Date().toISOString() });
+  return { ok: true };
 }
 
 function serve() {
@@ -154,7 +136,6 @@ function serve() {
           return res.end(fs.readFileSync(path.join(ROOT, 'dashboard.html')));
         }
         if (req.method === 'GET' && req.url === '/api/state') return json(state());
-        if (req.method === 'GET' && req.url === '/api/post-now-runs') return json(await postNowRuns());
         // JSON only: browsers won't send a cross-origin JSON POST without CORS, so other sites can't press the button
         if (req.method === 'POST' && req.url === '/api/post-now') {
           if (!String(req.headers['content-type']).startsWith('application/json')) return json({ error: 'JSON requests only' }, 415);
@@ -162,7 +143,7 @@ function serve() {
           for await (const chunk of req) chunks.push(chunk);
           const { run } = JSON.parse(Buffer.concat(chunks).toString());
           if (typeof run !== 'string' || !/^[\w.-]+$/.test(run)) return json({ error: 'bad run name' }, 400);
-          return json(await postNow(run));
+          return json(requestPost(run));
         }
         if (req.url.startsWith('/api/')) return json({ error: `unknown request ${req.method} ${req.url}` }, 404);
         res.writeHead(404);

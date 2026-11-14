@@ -18,14 +18,11 @@ Rules for every part:
 - no links and no web addresses: X turns example.com into a link and links cut the reach. Write owner/name or the product name instead.
 - zero emojis, no em dashes, no asterisks or backticks (X shows markdown literally)
 - every claim, number and price from the facts only. Describe pricing exactly: a free tier or a trial is not "free". A public repo is not automatically free for commercial use.
-- commands and code: short, written exactly as a passing check ran them or as a fact quotes them
+- commands and code: short, written exactly as a fact quotes them
 
 Also return:
-- snippets: every command or piece of code in the replies, verbatim, with source = the id of the passing check (C...) or of the fact (F...) that shows it
+- snippets: every command or piece of code in the replies, verbatim, with source = the id of the fact that quotes it
 - numbers: every number in the thread except the reply numbers, verbatim, with the id of the fact it comes from
-
-Passing checks (id: command run):
-{{CHECKS}}
 
 The analysis:
 {{ANALYSIS}}

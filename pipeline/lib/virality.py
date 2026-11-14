@@ -5,9 +5,10 @@ score. arrange() keeps queue/ filled for the next horizon_days (3 slots a day: 0
 highest scored threads, the highest in the earliest slot. A newer thread that scores higher takes the earliest slot
 and pushes the others back, out of queue/ when they no longer fit; a thread can wait indefinitely. Slots that are due
 or within lead_minutes, and folders that are not auto threads, are never touched.
-Statuses: waiting (no slot), scheduled (in queue/), posted (its slot time came, or the dashboard posted it now),
-lost (its run folder is gone). The dashboard's "Post thread now" lists runs in data/posted-now.json (only the
-dashboard writes it): those are never scheduled again and their slot goes to the next best thread.
+Statuses: waiting (no slot), scheduled (in queue/), posted (its folder reached posted/, or the dashboard posted it
+now), lost (its run folder is gone). A thread whose folder went to missed/ (the PC was off for hours) goes back to
+waiting and gets a new slot. Runs posted with the dashboard's "Post thread now" are in data/posted-now.json (the
+posting loop writes it): those are never scheduled again and their slot goes to the next best thread.
 Usage: python pipeline/lib/virality.py   prints the virality queue, best first
 """
 from __future__ import annotations
@@ -85,8 +86,14 @@ def write_folder(slot: str, run: str) -> bool:
 
 
 def arrange() -> list[str]:
-    """Bring queue/ in line with the virality queue, commit and push. Returns the slots that changed."""
-    if core.cfg("push", True):  # see the posts GitHub moved and anything scheduled from elsewhere
+    """Bring queue/ in line with the virality queue, commit and push. Returns the slots that changed. Holds the queue
+    lock, so it never runs at the same time as the posting loop."""
+    with core.queue_lock():
+        return _arrange()
+
+
+def _arrange() -> list[str]:
+    if core.cfg("push", True):  # anything scheduled from the phone or another PC
         stages.git("pull", "--rebase", "--autostash", "-q")
     pool, now = load(), core.now_rome()
     lead = core.cfg("lead_minutes", 15)
@@ -100,14 +107,19 @@ def arrange() -> list[str]:
             e.update(status="posted", slot=None, posted_now=True)
             discover.set_status(e.get("discovery"), "published", published_at=now.isoformat(timespec="seconds"))
             core.say("SLOT", f"[{e['score']}] {e['name']} was posted from the dashboard, its slot is free")
-    for e in pool.values():  # a slot that is due, or about to be, belongs to the posting workflow now
+    for e in pool.values():  # a slot that is due: posted once its folder is in posted/; missed (PC off) goes back
         if e["status"] == "scheduled" and core.slot_time(e["slot"]) <= now + timedelta(minutes=lead):
-            e["status"] = "posted"
-            discover.set_status(e.get("discovery"), "published", published_at=core.slot_time(e["slot"]).isoformat())
-    ours = {e["slot"]: e for e in pool.values() if e["status"] == "scheduled"}
+            if (core.ROOT / "posted" / e["slot"]).exists():
+                e["status"] = "posted"
+                discover.set_status(e.get("discovery"), "published", published_at=core.slot_time(e["slot"]).isoformat())
+            elif (core.ROOT / "missed" / e["slot"]).exists():
+                core.say("SLOT", f"[{e['score']}] {e['name']} missed {e['slot']} (the PC was off), back in the virality queue")
+                e.update(status="waiting", slot=None, missed=e.get("missed", 0) + 1)
+    ours = {e["slot"]: e for e in pool.values()
+            if e["status"] == "scheduled" and core.slot_time(e["slot"]) > now + timedelta(minutes=lead)}
     slots = [s for s in upcoming_slots(now, core.cfg("slots.times"), core.cfg("slots.horizon_days", 4), lead)
              if s in ours or not (QUEUE / s).exists()]
-    want = assign([e for e in pool.values() if e["status"] in ("waiting", "scheduled")], slots)
+    want = assign([e for e in pool.values() if e["status"] == "waiting" or e in ours.values()], slots)
     for slot, e in ours.items():
         if want.get(slot) != e["run"]:
             shutil.rmtree(QUEUE / slot, ignore_errors=True)

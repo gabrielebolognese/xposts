@@ -18,7 +18,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ai  # noqa: E402
 import core  # noqa: E402
 import discover  # noqa: E402
-import sandbox  # noqa: E402
 
 CHECKER = core.ROOT / ".claude" / "skills" / "x-threads" / "check.mjs"
 DETECT = core.PIPE / "vendor" / "ig-agent-skill" / "detect.py"
@@ -71,10 +70,7 @@ def today() -> str:
 def facts_md(facts: list[dict]) -> str:
     out = []
     for f in facts:
-        if f.get("kind") == "measured":
-            out.append(f"{f['id']} [measured in the sandbox by check {f['check_id']}] {f['claim']}\n"
-                       f"   run: {f['url']}\n   output: {f['quote']}")
-        elif f.get("kind") == "repo":
+        if f.get("kind") == "repo":
             out.append(f"{f['id']} [GitHub API] {f['claim']}\n   {f['url']} ({f['date']})\n   \"{f['quote']}\"")
         else:
             out.append(f"{f['id']} [{'primary' if f.get('primary') else 'secondary'}] {f['claim']}\n"
@@ -125,12 +121,6 @@ def repo_facts(r: dict) -> list[dict]:
             for n, (claim, keep, quote) in enumerate((x for x in rows if x[1]), 1)]
 
 
-def results_of(log: str) -> str:
-    """What a check measured: every RESULT line (up to 3000 characters), else the end of its log."""
-    lines = [l for l in log.splitlines() if l.startswith("RESULT ")]
-    return "\n".join(lines)[:3000] if lines else log[-1500:]
-
-
 def analyze(run: Path) -> str:
     stage = run / "02-analyze"
     disc = load(run, "discovery")
@@ -164,36 +154,11 @@ def analyze(run: Path) -> str:
         reasons.append("does not solve the stated problem")
     if out["pricing_model"] != "free" and not out["pricing_verified"]:
         reasons.append(f"pricing could not be verified ({out['pricing_model']})")
-    checks = []
-    if not reasons:
-        for c in out["checks"]:
-            script, res = c["script"], None
-            for rnd in range(core.cfg("caps.sandbox_fix_rounds", 2) + 1):
-                core.say("CHECK", f"{c['id']} in the sandbox: {c['purpose'][:80]}")
-                res = sandbox.run(script, stage / "checks" / f"{c['id']}-{rnd}")
-                if res["ok"] or rnd == core.cfg("caps.sandbox_fix_rounds", 2):
-                    break
-                fix = ai.call("analyze", stage, f"fix-{c['id']}", core.render(
-                    "check_fix", PURPOSE=c["purpose"], EXPECT=c["expect"], SCRIPT=script, LOG=res["log"][-3000:]),
-                    schema="check_fix")
-                if fix["give_up"]:
-                    core.say("CHECK", f"{c['id']} given up: {fix['reason'][:100]}")
-                    break
-                script = fix["script"]
-            checks.append({**c, "script": script, "ok": res["ok"], "url": res["url"], "log": res["log"][-3000:]})
-            if res["ok"]:
-                facts.append({"id": f"M{c['id'][1:]}", "claim": f"{c['purpose']} (expected: {c['expect']})",
-                              "url": res["url"], "date": today(), "quote": results_of(res["log"]), "primary": True,
-                              "kind": "measured", "check_id": c["id"], "command": script})
-            elif c["kind"] == "install":
-                reasons.append(f"it did not install and run in a clean machine: {c['purpose']}")
-    save(run, "checks", checks)
     save(run, "facts", facts)
     core.write_text(run / "facts.md", facts_md(facts))
     if reasons:
         return "dropped: analysis: " + "; ".join(reasons)
-    core.say("FACTS", f"{out['project_name']}: {len(facts)} facts, {sum(c['ok'] for c in checks)}/{len(checks)} "
-             f"sandbox checks passed, {out['pricing_model']}, license {out['license']}")
+    core.say("FACTS", f"{out['project_name']}: {len(facts)} facts, {out['pricing_model']}, license {out['license']}")
     return "score"
 
 
@@ -307,10 +272,9 @@ def hooks(run: Path) -> str:
 
 def thread(run: Path) -> str:
     a = load(run, "analysis")
-    passed = "\n".join(f"{c['id']}: {c['script'][:1500]}" for c in load(run, "checks", []) if c["ok"]) or "(none)"
     out = ai.call("thread", run / "05-thread", "thread", core.render(
         "thread", HOOK=state(run)["hook"], GITHUB=a["find_it"]["github_search"] or "(no GitHub repository)",
-        WEB=a["find_it"]["web_search"] or a["project_name"], CHECKS=passed, ANALYSIS=brief(run), FACTS=facts_text(run),
+        WEB=a["find_it"]["web_search"] or a["project_name"], ANALYSIS=brief(run), FACTS=facts_text(run),
         RULEBOOK=core.rulebook()), schema="thread")
     save(run, "draft", {"hook": state(run)["hook"], "promise": out["promise"].strip(),
                         "replies": [unnumber(r) for r in out["replies"]], "snippets": out["snippets"],
@@ -355,16 +319,13 @@ def code_problems(run: Path, draft: dict, rnd: int) -> tuple[list[str], str]:
     for i, p in enumerate(parts):
         problems += [f"{'main post' if i == 0 else f'reply {i}'}: links are not allowed, they cut the reach. Remove it "
                      f"and name the tool or repository in words: {u}" for u in links(p)]
-    passed = {c["id"] for c in load(run, "checks", []) if c["ok"]}
     quotes = {f["id"]: squash(f"{f['quote']} {f.get('command', '')}") for f in facts}
     for s in draft["snippets"]:
         src = s["source"].strip()
         if s["text"] not in plain:
             problems.append(f"snippet listed but not in the thread verbatim: {s['text'][:60]}")
-        elif src in passed:
-            continue
         elif src not in quotes or squash(s["text"]) not in quotes[src]:
-            problems.append(f"command or code that no passing check ran and no fact quotes ({src}): {s['text'][:60]}")
+            problems.append(f"command or code that no fact quotes ({src}): {s['text'][:60]}")
     det = json.loads(subprocess.run([sys.executable, "-I", "-X", "utf8", str(DETECT), str(plain_file), "--json"],
                                     capture_output=True, timeout=60).stdout.decode("utf-8"))["checks"]
     hum = json.loads(subprocess.run([sys.executable, "-I", "-X", "utf8", str(HUMANIZE), str(plain_file), "--json"],

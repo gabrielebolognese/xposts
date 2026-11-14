@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# The auto post runner. Start it in Git Bash from the x-autopost folder:
-#   bash pipeline/run.sh          searches categories for tools, turns the best ones into threads scored for virality,
-#                                 and keeps queue/ filled with the highest scored ones (3 a day, 4 days ahead) until
-#                                 you press Ctrl+C, then prints what it did
+# The auto post runner: this PC posts everything in queue/ (GitHub only stores the repo) and makes the threads.
+# Start it in Git Bash from the x-autopost folder:
+#   bash pipeline/run.sh          posts what is due every 30 seconds (the X keys come from .env), searches categories
+#                                 for tools, turns the best ones into threads scored for virality, and keeps queue/
+#                                 filled with the highest scored ones (3 a day, 4 days ahead) until you press Ctrl+C,
+#                                 then prints what it did. Nothing posts while it is stopped.
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
 #   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches
 #                                 more categories than the daily 5 when it needs them to reach N (the first fill)
@@ -37,16 +39,18 @@ idle=$(( $(cfg runner.idle_minutes) * 60 ))
 pause=$(( $(cfg runner.error_pause_minutes) * 60 ))
 
 $PY pipeline/lib/summary.py start
-( while :; do $PY pipeline/lib/dispatch.py; sleep 60; done ) &
-dispatcher=$!
+[ -f .env ] || [ -n "${POSTS_FAKE_X:-}" ] || echo "WARNING: no .env file in this folder, so nothing can be posted. Create it with the 4 X keys (see README)."
+every=$(cfg poster.interval_seconds)
+( while :; do $PY pipeline/lib/poster.py; sleep "$every"; done ) &   # the posting loop, independent of the steps
+poster=$!
 
 napper=""
 nap() { sleep "$1" & napper=$!; wait "$napper"; }   # wait returns at once when Ctrl+C arrives
 
 stop() {
   trap - INT TERM
-  kill "$dispatcher" $napper 2>/dev/null
-  wait "$dispatcher" 2>/dev/null
+  kill "$poster" $napper 2>/dev/null
+  wait "$poster" 2>/dev/null
   echo
   $PY pipeline/lib/summary.py stop
   rm -f "$LOCK"

@@ -1,8 +1,6 @@
 {
  "repo": "gabrielebolognese/xposts",
- "sandbox_repo": "gabrielebolognese/xposts-sandbox",
  "push": true,
- "dispatch": true,
  "slots": {
   "times": [
    "06:00",
@@ -12,10 +10,13 @@
   "horizon_days": 4
  },
  "lead_minutes": 15,
+ "poster": {
+  "interval_seconds": 30,
+  "pull_minutes": 5
+ },
  "runner": {
   "idle_minutes": 30,
-  "error_pause_minutes": 5,
-  "dispatch_grace_minutes": 10
+  "error_pause_minutes": 5
  },
  "models": {
   "discover": {
@@ -70,8 +71,7 @@
  "timeouts": {
   "call_seconds": 1800,
   "discover_seconds": 1800,
-  "analyze_seconds": 2700,
-  "sandbox_seconds": 1200
+  "analyze_seconds": 2700
  },
  "retries": {
   "transient_backoff_seconds": [
@@ -115,7 +115,6 @@
   "max_per_day": 20
  },
  "caps": {
-  "sandbox_fix_rounds": 2,
   "inspect_fix_rounds": 3,
   "run_errors": 2
  },

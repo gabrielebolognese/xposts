@@ -144,13 +144,40 @@ export async function main(client, now = new Date(), wait = sleep) {
   return failed;
 }
 
-if (path.basename(process.argv[1] ?? '') === 'post.js') {
+// The X client for this PC. The 4 keys come from the .env file next to this script, which only the user writes.
+// POSTS_FAKE_X=1 (tests) returns a fake client that prints what it would post and never calls X.
+const KEYS = ['X_APP_KEY', 'X_APP_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_SECRET'];
+export async function xClient() {
+  if (process.env.POSTS_FAKE_X) {
+    let n = 0;
+    const tweet = async (payload) => {
+      n += 1;
+      console.log(`FAKE_X ${JSON.stringify(payload)}`);
+      return { data: { id: `fake${Date.now()}${n}` } };
+    };
+    return { v2: { tweet, uploadMedia: async () => 'fakemedia' }, v1: { uploadMedia: async () => 'fakemedia' } };
+  }
+  try {
+    process.loadEnvFile(path.join(import.meta.dirname, '.env'));
+  } catch {}
+  const missing = KEYS.filter((k) => !process.env[k]);
+  if (missing.length) throw new Error(`X keys missing (${missing.join(', ')}): put them in the .env file in the x-autopost folder`);
   const { TwitterApi } = await import('twitter-api-v2'); // loaded here so the tests can import this file without it
-  const client = new TwitterApi({
+  return new TwitterApi({
     appKey: process.env.X_APP_KEY,
     appSecret: process.env.X_APP_SECRET,
     accessToken: process.env.X_ACCESS_TOKEN,
     accessSecret: process.env.X_ACCESS_SECRET,
   }).readWrite;
-  if (await main(client)) process.exitCode = 1;
+}
+export const quick = async () => {}; // no pauses with the fake client, so tests stay fast
+
+if (path.basename(process.argv[1] ?? '') === 'post.js') {
+  try {
+    const client = await xClient();
+    if (await main(client, new Date(), process.env.POSTS_FAKE_X ? quick : sleep)) process.exitCode = 1;
+  } catch (err) {
+    console.error(`error: ${err.message}`);
+    process.exitCode = 1;
+  }
 }

@@ -1,3 +1,3 @@
-LoRA fine-tune Llama 3.1 8B on the 4 GB laptop GPU you already own, no cloud GPU rental. Soup is free and Apache-2.0, and its own run peaked at 3.32 GB.
+Granola Business costs $14 per user per month. Yogurt does AI meeting notes for free, with no bot in the call, and your audio and transcripts stay on your computer.
 
-How it works, the real numbers, and the catches:
+What it does, what your computer needs, and the catches before you install it.

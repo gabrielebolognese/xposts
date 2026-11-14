@@ -1,1 +1,1 @@
-6. Go to GitHub and search for: MakazhanAlpamys/Soup (10,534 stars). The free Colab T4 notebook for checking the 4 GB claim yourself is linked in the README.
+6. The catches: the repo was only created on 2026-11-10, so expect rough edges. Speaker names from Zoom, Teams and Meet work on Mac only. The Windows build isn't signed yet, so at the SmartScreen warning click More info, then Run anyway.

@@ -1,1 +1,1 @@
-1. Without streaming, Soup's README lists 8 GB+ VRAM for 7B models with QLoRA. Layer streaming keeps the frozen base out of VRAM and feeds it to the GPU one decoder layer at a time. The base weights wait in system RAM instead.
+1. Granola's free Basic plan only keeps 30 days of meeting history. Yogurt is an open-source desktop app from Frigade for Mac, Windows and Linux. It records your calls without a bot joining the meeting.

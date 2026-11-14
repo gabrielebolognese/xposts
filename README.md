@@ -86,7 +86,11 @@ It keeps going until you press Ctrl+C, then prints what it did, through which da
 
 Threads that still fail quality control after the fix rounds land in `pipeline/review/` with a NEEDS REVIEW note. While the runner is on, it also starts the posting workflow at the exact minute a post comes due. A DM or comment CTA means you answer those people yourself.
 
+**Dashboard.** `npm run dashboard` opens http://localhost:3001: every thread the runner is making or has made, live (its stage, the hook, the full thread with character counts, the virality score, its slot or why it was dropped), the next slots and the runner log. It refreshes every few seconds and only reads the runner's files.
+
+**Post thread now** (on any finished thread in the dashboard) posts that thread on X right away, outside the schedule. Your X keys stay in GitHub secrets, so the button starts the `post-now` workflow, which posts the main post and the replies 10 to 40 seconds apart, usually within a minute or two. Nothing else in the schedule changes: the thread is recorded in `pipeline/data/posted-now.json` so it never goes out again, and if it had a slot, the workflow removes that folder and the runner gives the slot to the next best thread. The "Posted now" panel shows those workflow runs.
+
 - **Settings:** models, slots, the daily searches, scores and limits live in `pipeline/config.json`.
 - **Local state (never committed):** `pipeline/data/` (rotation, searches, discoveries, virality queue, history), `pipeline/runs/` (every file of every thread), `pipeline/logs/`.
 - **Requirements:** the `claude` CLI logged in (it shares your Claude usage limits; each thread takes about 10 Opus calls), `gh` logged in, Python 3.11+ with `jsonschema`, Node 22.
-- **Tests:** `node --test pipeline/tests/post.test.mjs`, `python -m unittest discover -s pipeline/tests -p "test_*.py"`, `bash pipeline/tests/e2e.sh` (fake model, discovery and sandbox, no network).
+- **Tests:** `node --test pipeline/tests/post.test.mjs pipeline/tests/dashboard.test.mjs`, `python -m unittest discover -s pipeline/tests -p "test_*.py"`, `bash pipeline/tests/e2e.sh` (fake model, discovery and sandbox, no network).

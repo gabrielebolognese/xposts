@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto Threads</title>
+<style>
+  :root {
+    --bg: #f5f7f9; --panel: #ffffff; --ink: #0f1419; --muted: #5b6b78; --line: #e2e7eb; --soft: #eef3f7;
+    --accent: #1d9bf0; --accent-ink: #ffffff; --ok: #0a8f5c; --good: #1d74c9; --warn: #b86e00; --bad: #d4245a;
+    --shadow: 0 1px 2px rgba(15, 20, 25, .06), 0 4px 16px rgba(15, 20, 25, .04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0b0e11; --panel: #15191e; --ink: #e7e9ea; --muted: #8b98a5; --line: #283038; --soft: #1b2127;
+            --ok: #2bc48a; --good: #4aa8ff; --warn: #f0a640; --bad: #ff5d8a; --shadow: none; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line);
+           padding: 12px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+  h1 { font-size: 18px; margin: 0; letter-spacing: -.01em; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); display: inline-block; }
+  .dot.on { background: var(--ok); box-shadow: 0 0 0 0 rgba(10, 143, 92, .5); animation: ping 2s infinite; }
+  .dot.off { background: var(--bad); }
+  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(10, 143, 92, .45); } 70% { box-shadow: 0 0 0 7px rgba(10, 143, 92, 0); } 100% { box-shadow: 0 0 0 0 rgba(10, 143, 92, 0); } }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; max-width: 1260px; margin: 0 auto; padding: 20px; }
+  main, aside { min-width: 0; }
+  @media (max-width: 920px) { .layout { grid-template-columns: minmax(0, 1fr); padding: 16px; } header { padding: 12px 16px; } }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tabs button { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px;
+                 padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+  .tabs button.on { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+  .tabs button span { color: var(--muted); margin-left: 4px; }
+  .tabs button.on span { color: inherit; opacity: .7; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .name { font-weight: 650; font-size: 16px; margin: 4px 0 2px; overflow-wrap: anywhere; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 10px; overflow-wrap: anywhere; }
+  .badge { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; background: var(--soft); color: var(--muted); white-space: nowrap; }
+  .badge.making { color: var(--accent); }
+  .badge.scheduled { color: var(--ok); }
+  .badge.posted { color: var(--good); }
+  .badge.review { color: var(--warn); }
+  .badge.dropped { color: var(--bad); }
+  .score { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 3px 8px; color: #fff; }
+  .score.s-ex { background: var(--ok); } .score.s-good { background: var(--good); }
+  .score.s-avg { background: var(--warn); } .score.s-low { background: var(--bad); }
+  .steps { display: flex; gap: 4px; margin: 6px 0 12px; }
+  .step { flex: 1; height: 4px; border-radius: 2px; background: var(--line); }
+  .step.done { background: var(--accent); }
+  .step.now { background: var(--accent); animation: blink 1.2s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .thread { margin-top: 4px; }
+  .post { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; position: relative; padding-bottom: 12px; }
+  .post:not(:last-child)::before { content: ""; position: absolute; left: 17px; top: 40px; bottom: 2px; width: 2px; background: var(--line); }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1d9bf0, #7856ff);
+            color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .who { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+  .who b { color: var(--ink); font-weight: 650; }
+  .count.over { color: var(--bad); font-weight: 700; }
+  .text { white-space: pre-wrap; overflow-wrap: anywhere; margin-top: 2px; }
+  .muted { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+  .reason { font-size: 14px; background: var(--soft); border-radius: 10px; padding: 10px 12px; margin: 8px 0; overflow-wrap: anywhere; }
+  details { margin-top: 6px; font-size: 14px; }
+  summary { cursor: pointer; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin-top: 8px; }
+  .grid dt { color: var(--muted); } .grid dd { margin: 0; overflow-wrap: anywhere; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .actions.confirm span { flex: 1 1 260px; font-size: 14px; }
+  .warn { color: var(--warn); font-size: 14px; font-weight: 600; margin: 0; flex-basis: 100%; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 8px 16px; font: inherit; font-weight: 650; cursor: pointer; }
+  button.plain { background: none; border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 8px 14px; font: inherit; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .row:first-of-type { border-top: 0; padding-top: 0; }
+  .row small { color: var(--muted); grid-column: 1 / -1; overflow-wrap: anywhere; }
+  .row a { color: var(--accent); text-decoration: none; }
+  .log { font: 12px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace; max-height: 360px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 40px 16px; background: var(--panel); border: 1px dashed var(--line); border-radius: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Auto threads</h1>
+  <span class="pill"><span id="liveDot" class="dot"></span><span id="live">Connecting</span></span>
+  <span class="pill"><span id="runDot" class="dot"></span><span id="runner"></span></span>
+  <span class="pill" id="today"></span>
+</header>
+<div class="layout">
+  <main>
+    <nav class="tabs" id="tabs"></nav>
+    <div id="list"></div>
+  </main>
+  <aside>
+    <section class="panel"><h2>Next slots</h2><div id="slots"></div></section>
+    <section class="panel"><h2>Posted now</h2><div id="nowRuns"></div></section>
+    <section class="panel"><h2>Runner log</h2><div id="log" class="log"></div></section>
+  </aside>
+</div>
+<script>
+const TABS = [['all', 'All'], ['making', 'Making'], ['scheduled', 'Scheduled'], ['waiting', 'Waiting'],
+              ['review', 'Review'], ['dropped', 'Dropped'], ['posted', 'Posted']];
+const STAGES = ['analyze', 'score', 'hooks', 'thread', 'inspect', 'virality'];
+const STAGE_LABEL = { analyze: 'verifying the project', score: 'scoring the discovery', hooks: 'writing hooks',
+                      thread: 'writing the thread', inspect: 'quality control', virality: 'virality scoring' };
+let data = null, tab = 'all', confirming = null;
+const open = new Set(), notes = {};
+try { tab = localStorage.getItem('tab') || 'all'; } catch {}
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const group = (t) => (t.status === 'posted-now' ? 'posted' : t.status === 'lost' ? 'dropped' : t.status);
+function slotLabel(slot) {
+  const m = /^(\d{4}-\d{2}-\d{2})_(\d{2})(\d{2})/.exec(slot || '');
+  if (!m) return slot ? new Date(slot).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  const day = new Date(`${m[1]}T12:00:00Z`).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  return `${day}, ${m[2]}:${m[3]}`;
+}
+function ago(ms) {
+  const m = Math.round((Date.now() - ms) / 60000);
+  return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`;
+}
+function scoreClass(s) { return s >= 80 ? 's-ex' : s >= 70 ? 's-good' : s >= 60 ? 's-avg' : 's-low'; }
+
+function badge(t) {
+  switch (t.status) {
+    case 'making': return `<span class="badge making">Making: ${esc(STAGE_LABEL[t.stage] || t.stage)}${t.stage === 'inspect' && t.fixRound ? `, fix round ${t.fixRound}` : ''}</span>`;
+    case 'scheduled': return `<span class="badge scheduled">Scheduled ${esc(slotLabel(t.slot))}</span>`;
+    case 'waiting': return '<span class="badge">Waiting in the virality queue</span>';
+    case 'posted': return `<span class="badge posted">Posted${t.postedAt ? ' ' + esc(slotLabel(t.postedAt)) : ''}</span>`;
+    case 'posted-now': return `<span class="badge posted">Posted now${t.postedAt ? ', ' + esc(slotLabel(t.postedAt)) : ''}</span>`;
+    case 'review': return '<span class="badge review">Needs review</span>';
+    case 'dropped': return '<span class="badge dropped">Dropped</span>';
+    default: return `<span class="badge">${esc(t.status)}</span>`;
+  }
+}
+
+function post(text, i) {
+  const n = [...text].length;
+  return `<div class="post"><div class="avatar">${i === 0 ? 'X' : i}</div><div>
+    <div class="who"><b>${i === 0 ? 'Main post' : `Reply ${i}`}</b><span class="count${n > 280 ? ' over' : ''}">${n}/280</span></div>
+    <div class="text">${esc(text)}</div></div></div>`;
+}
+
+function actions(t) {
+  if (!t.parts || t.status === 'posted' || t.status === 'posted-now') return '';
+  if (notes[t.run]) return `<div class="actions"><span class="muted">${esc(notes[t.run])}</span></div>`;
+  if (confirming === t.run) {
+    const unchecked = ['making', 'review', 'dropped'].includes(t.status)
+      ? `<p class="warn">This thread has not passed every check${t.status === 'dropped' ? ' (the runner dropped it)' : t.status === 'making' ? ' (it is still being made)' : ''}.</p>` : '';
+    const slot = t.status === 'scheduled' ? ` Its slot (${esc(slotLabel(t.slot))}) goes to the next best thread.` : '';
+    return `<div class="actions confirm">${unchecked}<span>Post this thread on X now? Nothing else in the schedule changes.${slot}</span>
+      <button class="primary" data-act="post" data-run="${esc(t.run)}">Yes, post it now</button>
+      <button class="plain" data-act="cancel">Cancel</button></div>`;
+  }
+  return `<div class="actions"><button class="primary" data-act="ask" data-run="${esc(t.run)}">Post thread now</button></div>`;
+}
+
+function card(t) {
+  const at = STAGES.indexOf(t.stage);
+  const steps = t.status === 'making'
+    ? `<div class="steps">${STAGES.map((s, i) => `<span class="step${i < at ? ' done' : i === at ? ' now' : ''}" title="${s}"></span>`).join('')}</div>` : '';
+  const score = t.score != null ? `<span class="score ${scoreClass(t.score)}" title="hook ${t.hookScore}, thread ${t.threadScore}">${t.score} ${esc(t.classification)}</span>` : '';
+  let body;
+  if (t.parts) body = `<div class="thread">${t.parts.map(post).join('')}</div>`;
+  else if (t.hook) body = `<div class="thread">${post(t.hook, 0)}</div><p class="muted">The hook is chosen. The replies are being written.</p>`;
+  else body = `<p class="muted">${t.status === 'making' ? 'Verifying and scoring the project. The thread appears here as soon as it is written.' : 'No thread was written.'}</p>`;
+  const reason = (t.status === 'dropped' || t.status === 'review') && t.outcome
+    ? `<div class="reason">${esc(t.outcome.replace(/^dropped:\s*/, ''))}</div>` : '';
+  const rows = [['Problem', t.problem], ['Repository', t.repo], ['Pricing', t.pricing], ['License', t.license],
+    ['Virality', t.score != null ? `${t.score} (hook ${t.hookScore}, thread ${t.threadScore})` : ''],
+    ['Strengths', t.strengths], ['Weaknesses', t.weaknesses], ['Run', t.run]].filter((r) => r[1]);
+  const details = `<details data-run="${esc(t.run)}"${open.has(t.run) ? ' open' : ''}><summary>Details</summary>
+    <dl class="grid">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl></details>`;
+  return `<article class="card"><div class="top">${badge(t)}${score}<span class="muted">updated ${ago(t.updated)}</span></div>
+    <div class="name">${esc(t.name)}</div><div class="meta">${esc(t.category)}</div>
+    ${steps}${body}${reason}${details}${actions(t)}</article>`;
+}
+
+function render() {
+  if (!data) return;
+  const counts = Object.fromEntries(TABS.map(([k]) => [k, k === 'all' ? data.threads.length : data.threads.filter((t) => group(t) === k).length]));
+  document.getElementById('tabs').innerHTML = TABS.map(([k, label]) =>
+    `<button class="${k === tab ? 'on' : ''}" data-tab="${k}">${label}<span>${counts[k]}</span></button>`).join('');
+  let list = data.threads.filter((t) => tab === 'all' || group(t) === tab);
+  if (tab === 'scheduled') list = [...list].sort((a, b) => a.slot.localeCompare(b.slot));
+  if (tab === 'waiting') list = [...list].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+  document.getElementById('list').innerHTML = list.length ? list.map(card).join('')
+    : `<div class="empty">${data.threads.length ? 'Nothing here right now.' : 'No threads yet. Start the runner with: bash pipeline/run.sh --posts 20'}</div>`;
+
+  const slots = data.threads.filter((t) => t.status === 'scheduled').sort((a, b) => a.slot.localeCompare(b.slot));
+  document.getElementById('slots').innerHTML = slots.length ? slots.map((t) =>
+    `<div class="row"><span>${esc(slotLabel(t.slot))}</span><span class="score ${scoreClass(t.score)}">${t.score}</span><small>${esc(t.name)}</small></div>`).join('')
+    : '<p class="muted">No threads scheduled.</p>';
+
+  const recent = data.log.updated && Date.now() - data.log.updated < 40 * 60000;
+  document.getElementById('runDot').className = `dot ${data.lock && recent ? 'on' : 'off'}`;
+  document.getElementById('runner').textContent = data.lock && recent ? `Runner on, last activity ${ago(data.log.updated)}`
+    : data.lock ? `Runner quiet since ${ago(data.log.updated)}` : `Runner off${data.log.updated ? `, last activity ${ago(data.log.updated)}` : ''}`;
+  document.getElementById('today').textContent = `Today: ${data.madeToday} threads made, ${data.searches} category searches`;
+  const log = document.getElementById('log');
+  const atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 20;
+  log.textContent = data.log.lines.join('\n') || 'The runner has not written anything yet.';
+  if (atBottom) log.scrollTop = log.scrollHeight;
+}
+
+async function refresh() {
+  try {
+    const r = await fetch('/api/state', { cache: 'no-store' });
+    data = await r.json();
+    document.getElementById('liveDot').className = 'dot on';
+    document.getElementById('live').textContent = `Live, updated ${new Date().toLocaleTimeString('en-GB')}`;
+    render();
+  } catch {
+    document.getElementById('liveDot').className = 'dot off';
+    document.getElementById('live').textContent = 'Offline: is npm run dashboard still running?';
+  }
+}
+
+async function refreshRuns() {
+  const box = document.getElementById('nowRuns');
+  try {
+    const r = await (await fetch('/api/post-now-runs', { cache: 'no-store' })).json();
+    if (r.error) { box.innerHTML = `<p class="muted">${esc(r.error)}</p>`; return; }
+    box.innerHTML = r.data.length ? r.data.map((x) => {
+      const state = x.status === 'completed' ? (x.conclusion === 'success' ? 'posted' : x.conclusion) : x.status.replace('_', ' ');
+      return `<div class="row"><span>${esc(x.displayTitle.replace(/^post now /, ''))}</span><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(state)}</a>
+        <small>${esc(new Date(x.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))}</small></div>`;
+    }).join('') : '<p class="muted">Nothing posted from here yet.</p>';
+  } catch {
+    box.innerHTML = '<p class="muted">Could not read GitHub.</p>';
+  }
+}
+
+document.getElementById('tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-tab]');
+  if (!b) return;
+  tab = b.dataset.tab;
+  try { localStorage.setItem('tab', tab); } catch {}
+  render();
+});
+document.getElementById('list').addEventListener('toggle', (e) => {
+  const d = e.target;
+  if (d.tagName === 'DETAILS') d.open ? open.add(d.dataset.run) : open.delete(d.dataset.run);
+}, true);
+document.getElementById('list').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-act]');
+  if (!b) return;
+  if (b.dataset.act === 'ask') confirming = b.dataset.run;
+  if (b.dataset.act === 'cancel') confirming = null;
+  if (b.dataset.act === 'post') {
+    const run = b.dataset.run;
+    confirming = null;
+    notes[run] = 'Sending to GitHub...';
+    render();
+    try {
+      const r = await (await fetch('/api/post-now', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ run }) })).json();
+      notes[run] = r.error ? `Not sent: ${r.error}` : 'Sent. GitHub posts it within a minute or two, the replies follow 10 to 40 seconds apart.';
+      if (r.error) setTimeout(() => { delete notes[run]; render(); }, 8000);
+      refresh();
+      setTimeout(refreshRuns, 4000);
+    } catch {
+      notes[run] = 'Not sent: the dashboard server did not answer.';
+      setTimeout(() => { delete notes[run]; render(); }, 8000);
+    }
+  }
+  render();
+});
+
+refresh();
+refreshRuns();
+setInterval(refresh, 4000);
+setInterval(refreshRuns, 15000);
+</script>
+</body>
+</html>

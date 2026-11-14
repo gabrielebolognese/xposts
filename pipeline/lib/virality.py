@@ -5,7 +5,9 @@ score. arrange() keeps queue/ filled for the next horizon_days (3 slots a day: 0
 highest scored threads, the highest in the earliest slot. A newer thread that scores higher takes the earliest slot
 and pushes the others back, out of queue/ when they no longer fit; a thread can wait indefinitely. Slots that are due
 or within lead_minutes, and folders that are not auto threads, are never touched.
-Statuses: waiting (no slot), scheduled (in queue/), posted (its slot time came), lost (its run folder is gone).
+Statuses: waiting (no slot), scheduled (in queue/), posted (its slot time came, or the dashboard posted it now),
+lost (its run folder is gone). The dashboard's "Post thread now" lists runs in data/posted-now.json (only the
+dashboard writes it): those are never scheduled again and their slot goes to the next best thread.
 Usage: python pipeline/lib/virality.py   prints the virality queue, best first
 """
 from __future__ import annotations
@@ -21,6 +23,7 @@ import discover  # noqa: E402
 import stages  # noqa: E402
 
 POOL = core.DATA / "virality.json"
+POSTED_NOW = core.DATA / "posted-now.json"
 QUEUE = core.ROOT / "queue"
 
 
@@ -28,12 +31,18 @@ def load() -> dict:
     return core.load_json(POOL, {})
 
 
+def posted_now() -> set[str]:
+    return {p["run"] for p in core.load_json(POSTED_NOW, [])}
+
+
 def add(run: Path, ev: dict, draft: dict, disc: dict, name: str) -> None:
     pool = load()
+    early = run.name in posted_now()  # posted from the dashboard while it was still being made
     pool[run.name] = {"run": run.name, "name": name, "discovery": disc.get("id"), "score": ev["final"],
                       "hook_score": ev["hook_score"], "thread_score": ev["thread_score"],
                       "classification": ev["classification"], "hook": draft["hook"],
-                      "created": core.now_rome().isoformat(timespec="seconds"), "status": "waiting", "slot": None}
+                      "created": core.now_rome().isoformat(timespec="seconds"),
+                      "status": "posted" if early else "waiting", "slot": None, "posted_now": early}
     core.save_json(POOL, pool)
 
 
@@ -81,6 +90,16 @@ def arrange() -> list[str]:
         stages.git("pull", "--rebase", "--autostash", "-q")
     pool, now = load(), core.now_rome()
     lead = core.cfg("lead_minutes", 15)
+    touched, out = [], []
+    early = posted_now()
+    for e in pool.values():  # posted from the dashboard: never again, and its slot is free for the next best thread
+        if e["run"] in early and e["status"] in ("waiting", "scheduled"):
+            if e["status"] == "scheduled":
+                shutil.rmtree(QUEUE / e["slot"], ignore_errors=True)
+                touched.append(e["slot"])
+            e.update(status="posted", slot=None, posted_now=True)
+            discover.set_status(e.get("discovery"), "published", published_at=now.isoformat(timespec="seconds"))
+            core.say("SLOT", f"[{e['score']}] {e['name']} was posted from the dashboard, its slot is free")
     for e in pool.values():  # a slot that is due, or about to be, belongs to the posting workflow now
         if e["status"] == "scheduled" and core.slot_time(e["slot"]) <= now + timedelta(minutes=lead):
             e["status"] = "posted"
@@ -89,7 +108,6 @@ def arrange() -> list[str]:
     slots = [s for s in upcoming_slots(now, core.cfg("slots.times"), core.cfg("slots.horizon_days", 4), lead)
              if s in ours or not (QUEUE / s).exists()]
     want = assign([e for e in pool.values() if e["status"] in ("waiting", "scheduled")], slots)
-    touched, out = [], []
     for slot, e in ours.items():
         if want.get(slot) != e["run"]:
             shutil.rmtree(QUEUE / slot, ignore_errors=True)

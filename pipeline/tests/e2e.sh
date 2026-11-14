@@ -174,6 +174,23 @@ bash pipeline/run.sh --posts x >/dev/null 2>&1 && fail "--posts accepted a non-n
 : > "$FAKE_LOG"
 ok "--posts 1 made one thread and stopped with the summary"
 
+# P: a thread posted from the dashboard (posted-now.json) leaves the queue; the next best thread takes its slot
+first="$(nth_slot 1)"; count="$(ls queue | wc -l)"
+python - <<'EOF'
+import json
+pool = json.load(open("pipeline/data/virality.json"))
+run = next(e["run"] for e in pool.values() if e["name"] == "Viral winner")
+json.dump([{"run": run, "at": "2026-11-14T08:00:00Z", "slot": pool[run]["slot"]}], open("pipeline/data/posted-now.json", "w"))
+EOF
+python pipeline/lib/step.py >/dev/null 2>&1
+python -c 'import json; e=[x for x in json.load(open("pipeline/data/virality.json")).values() if x["name"]=="Viral winner"][0]; assert e["status"]=="posted" and e["posted_now"], e' \
+  || fail "posted-now thread not marked posted"
+grep -q "Viral winner" queue/*/post.txt && fail "the posted thread is still in queue/"
+[ "$(slot_of "Open-source LLMs Tool")" = "$first" ] || fail "the next best thread did not take the freed slot"
+[ "$(ls queue | wc -l)" = $((count - 1)) ] || fail "queue size after post-now" "$(ls queue)"
+[ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "pipeline: arrange the thread queue" ] || fail "post-now arrangement not pushed"
+ok "post now: the thread left queue/ and $first went to the next best thread"
+
 # E: nothing left to do: the runner waits; Ctrl+C (SIGINT) stops it with the summary
 set -m   # job control: without it a background job starts with SIGINT ignored and cannot trap it
 bash pipeline/run.sh > "$T/runner.out" 2>&1 &

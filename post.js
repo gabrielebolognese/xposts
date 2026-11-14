@@ -68,6 +68,31 @@ async function postMain(client, full, text) {
   return data.id;
 }
 
+// Posts parts[ids.length...] as a chain: part 0 on its own (postFirst, or plain text), each next part as a reply to
+// the previous id, a random 10 to 40 seconds apart. A failed part is retried once after 30 s. ids grows as parts go
+// out and save() runs after each one, so a caller can resume a chain that stopped halfway.
+export async function chain(client, parts, ids = [], { save = () => {}, wait = sleep, postFirst = null, label = 'thread' } = {}) {
+  const once = async (part) => {
+    if (part === 0) return postFirst ? postFirst() : (await client.v2.tweet({ text: parts[0] })).data.id;
+    const { data } = await client.v2.tweet({ text: parts[part], reply: { in_reply_to_tweet_id: ids.at(-1) } });
+    return data.id;
+  };
+  for (let part = ids.length; part < parts.length; part++) {
+    if (part > 0) await wait(pause());
+    let id;
+    try {
+      id = await once(part);
+    } catch (err) {
+      console.log(`part ${part} of ${label} failed, retrying in ${RETRY_MS / 1000} s:`, JSON.stringify(err?.data ?? err?.message));
+      await wait(RETRY_MS);
+      id = await once(part);
+    }
+    ids.push(id);
+    save();
+  }
+  return ids;
+}
+
 // Posts the folder: a single post, or a thread (the main post, then each reply answering the one before it).
 // A thread saves its progress after every part, so a failed run resumes at the next part and never posts twice.
 export async function publish(dir, client, wait = sleep) {
@@ -79,24 +104,7 @@ export async function publish(dir, client, wait = sleep) {
 
   const ids = started(dir) ? JSON.parse(fs.readFileSync(progressFile(dir), 'utf8')).ids : [];
   const save = () => fs.writeFileSync(progressFile(dir), JSON.stringify({ ids }, null, 1) + '\n');
-  const once = async (part) => {
-    if (part === 0) return postMain(client, full, text);
-    const { data } = await client.v2.tweet({ text: replies[part - 1], reply: { in_reply_to_tweet_id: ids.at(-1) } });
-    return data.id;
-  };
-  for (let part = ids.length; part <= replies.length; part++) {
-    if (part > 0) await wait(pause());
-    let id;
-    try {
-      id = await once(part);
-    } catch (err) {
-      console.log(`part ${part} of ${dir} failed, retrying in ${RETRY_MS / 1000} s:`, JSON.stringify(err?.data ?? err?.message));
-      await wait(RETRY_MS);
-      id = await once(part);
-    }
-    ids.push(id);
-    save();
-  }
+  await chain(client, [text, ...replies], ids, { save, wait, postFirst: () => postMain(client, full, text), label: dir });
   return { id: ids[0], replies: replies.length };
 }
 

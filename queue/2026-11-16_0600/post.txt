@@ -1,3 +1,3 @@
-Keep Claude Code, pay DeepSeek instead: one free, MIT-licensed command swaps the model behind your coding agent. You only pay the provider you pick.
+DeepSeek V4 Flash 284B (91 GB) on a 12 GB Android phone at 1 tok/s. A 125B Qwen at 7-9 tok/s on a 16 GB MacBook. One free llama.cpp-based tool, author's benchmarks.
 
-Here's how it works, the exact commands, and the catches to know first.
+How it works, what it runs on, real speeds, and the catches:

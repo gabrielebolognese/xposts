@@ -1,1 +1,1 @@
-2. License is Apache 2.0 for all artifacts, and the model card says it is intended for commercial and research use. The weights are free to download. You pay only for your own hardware or any hosting you choose.
+2. Transcription runs locally with Whisper through whisper.cpp. Summaries and answers come from a local Gemma 4, gpt-oss or Qwen3 model through llama.cpp, picked to fit your hardware. After the one-time model download it works offline.

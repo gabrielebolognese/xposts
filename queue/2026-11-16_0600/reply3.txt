@@ -1,4 +1,1 @@
-3. One command per agent:
-magpie claude deepseek/deepseek-v4-pro
-magpie codex moonshot/kimi-k2.5
-The first puts Claude Code on DeepSeek, the second puts Codex on Kimi. Or pick the model from one list in the menu bar.
+3. Setup is mostly automatic: --auto measures your machine and the model, then picks cache size, threads and which device does what. Works with any MoE GGUF llama.cpp loads, in any quantization. Backends: CPU, Metal, CUDA, HIP, Vulkan, OpenCL and the Hexagon NPU.

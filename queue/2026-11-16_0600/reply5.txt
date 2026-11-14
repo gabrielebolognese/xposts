@@ -1,1 +1,2 @@
-5. Before you install: it reads your agents' sign-ins to find subscriptions (magpie accounts discovery off stops it) and sends a daily anonymous ping (you can turn it off in Settings). Claude Free/Pro/Max plans in other tools break Anthropic's terms, so use API keys.
+5. Runs on Android, macOS, Windows and Linux; iOS is experimental with no App Store or TestFlight build. The Windows installer needs no admin rights. The macOS app is not notarised yet. Quick CLI test:
+bmoe-cli -m model.gguf --auto -p "Explain MoE routing."

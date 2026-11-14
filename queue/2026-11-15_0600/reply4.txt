@@ -1,1 +1,1 @@
-4. Hardware: Apple Silicon M1 to M5 with 16 GB or more. No Intel Macs, no Windows. On 16 GB, LTX-2.5 runs at smaller sizes, and a video now peaks around 5.7 GB of memory (it was 9 GB). Full size needs 48 GB. Set aside about 40 GB of disk for the first install.
+4. The paper ran 277 SWE-Bench tasks from six repos across five agent and model combinations. Mean cost fell 18.4% to 30.9%, cheaper in all 30 repo x combination cells, and Pass@1 went up in 4 of 5. Costs include the plugin's own model calls.

@@ -1,1 +1,1 @@
-6. Catches: MiniMax H3 is an optional download of about 75 GB and its licence does not cover the EU, UK, South Korea or US. Ideogram 4 and YuE2's weights are non-commercial. Prompts and media stay local, but anonymous usage counts are on by default.
+6. Caveats: it is v0.1.0 research code, and the numbers come from the authors' own benchmarks. Savings need repeat sessions in one repo. With a new repo per task it was 6 to 20%. It cuts spend but sets no hard cap. Claude Code support is 2.1.300 to 2.1.310.

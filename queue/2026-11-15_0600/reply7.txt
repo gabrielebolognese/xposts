@@ -1,1 +1,3 @@
-7. To get it, go to GitHub and search for: mrbizarro/Phosphene. Or search for Phosphene local AI video Mac and open the official website. It also installs with one click through Pinokio.
+7. Free and open source under Apache-2.0. Its own model calls run through your agent on your plan, and what it learns stays on your machine.
+Go to GitHub and search for: microsoft/TokenEconomizer
+Or search the web for: TokenEconomizer Microsoft coding agents

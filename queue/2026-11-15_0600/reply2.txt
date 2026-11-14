@@ -1,1 +1,1 @@
-2. It goes past short clips. One Shot makes a continuous shot of 30 seconds to 2 minutes. The Editor timeline exports to DaVinci Resolve, Premiere Pro or After Effects. With 24 GB you can train a character LoRA from 15 to 50 of your own photos.
+2. TokenEconomizer is a Microsoft plugin for Claude Code, Codex, Copilot CLI and Pi. It learns from your past sessions in each repo. It stops loading tools that go unused, since every loaded tool definition is sent with every request. One command brings them back.

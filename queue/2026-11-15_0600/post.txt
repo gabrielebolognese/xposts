@@ -1,3 +1,3 @@
-Claude Code can make AI video on your Mac. This free app ships an MCP server, so any MCP agent can render video, images and speech locally on Apple Silicon.
+Claude Code with Opus 4.8 ran 30.9% cheaper on SWE-Bench tasks with a free Microsoft plugin that learns from past sessions. Pass@1 dipped 1 point. Same agent, no new API key.
 
-What it can do, what it really costs, and the catches to know first:
+What it does, the full results, the caveats, and how to install it:

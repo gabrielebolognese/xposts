@@ -1,1 +1,1 @@
-6. magpie itself is free and MIT-licensed. You still pay the model providers you connect. It's young (created September 2026, about 36.3k stars) and the repo doesn't take pull requests. Go to GitHub and search for: yetone/magpie. Not affiliated with Apache Magpie.
+6. Catches: MiniMax H3 is an optional download of about 75 GB and its licence does not cover the EU, UK, South Korea or US. Ideogram 4 and YuE2's weights are non-commercial. Prompts and media stay local, but anonymous usage counts are on by default.

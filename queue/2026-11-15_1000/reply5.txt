@@ -1,1 +1,1 @@
-5. Before you install: it reads your agents' sign-ins to find subscriptions (magpie accounts discovery off stops it) and sends a daily anonymous ping (you can turn it off in Settings). Claude Free/Pro/Max plans in other tools break Anthropic's terms, so use API keys.
+5. For developers: it has a local HTTP API and an MCP server, so Claude Code, Codex or any MCP agent can make media for you. The README has a CLI command that prints the exact claude mcp add phosphene line for your install.

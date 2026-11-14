@@ -1,0 +1,2 @@
+4. It runs in Ollama, LM Studio, llama.cpp, MLX, vLLM and SGLang. To serve it with vLLM, the model card gives:
+vllm serve "meta-models/Muse-Glimmer-30B"

@@ -1,1 +1,1 @@
-1. It's a Mac app that runs models locally with MLX. It does text-to-video and image-to-video with sound on LTX-2.5 and MiniMax H3, plus images with FLUX.2 [klein] and Qwen-Image-Edit, full songs with vocals on YuE2 and speech on Qwen3-TTS.
+1. Coding agents pay again on every turn for instructions, loaded tool definitions and chat history. They also rediscover the same repo facts and fall into the same failure loops, session after session. That waste repeats every time you work in the same repo.

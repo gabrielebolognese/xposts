@@ -1,1 +1,1 @@
-2. Providers can be an API key (DeepSeek, Kimi, GLM and more), a local model, or any OpenAI- or Anthropic-compatible URL. You can use one provider across all your agents instead of setting keys and base URLs in each tool.
+2. It goes past short clips. One Shot makes a continuous shot of 30 seconds to 2 minutes. The Editor timeline exports to DaVinci Resolve, Premiere Pro or After Effects. With 24 GB you can train a character LoRA from 15 to 50 of your own photos.

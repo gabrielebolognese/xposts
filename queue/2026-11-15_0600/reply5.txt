@@ -1,1 +1,4 @@
-5. For developers: it has a local HTTP API and an MCP server, so Claude Code, Codex or any MCP agent can make media for you. The README has a CLI command that prints the exact claude mcp add phosphene line for your install.
+5. Claude Code install: clone microsoft/TokenEconomizer, then run
+claude plugin marketplace add /path/to/TokenEconomizer
+claude plugin install tokeneconomizer@tokeneconomizer
+Needs Python 3.10+. Keep the clone, run its one-time catalog refresh, then start a new session.

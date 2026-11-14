@@ -1,1 +1,1 @@
-1. magpie runs one local gateway that all your agents talk to. You pick a model per agent from one list, and it edits the one key that matters in that agent's own config. Menu bar app, TUI, web UI and CLI on macOS, Windows and Linux, plus Docker and Termux.
+1. It's a Mac app that runs models locally with MLX. It does text-to-video and image-to-video with sound on LTX-2.5 and MiniMax H3, plus images with FLUX.2 [klein] and Qwen-Image-Edit, full songs with vocals on YuE2 and speech on Qwen3-TTS.

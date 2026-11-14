@@ -1,1 +1,1 @@
-3. The free tier has every model, no account, no credits, no watermark and no per-render charge. Optional Pro funds the project: $15 a month, $120 a year, or $199 once for three years. If you can't afford Pro, the README says you can email for a free licence.
+3. A judge model also watches for failure loops and sends the agent a redirect note when a turn looks stuck. It never stops a turn itself. Optional micro-skills learn repo facts and state them at session start. They are off by default.

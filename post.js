@@ -5,8 +5,9 @@ const QUEUE = 'queue';
 const POSTED = 'posted';
 const MISSED = 'missed';
 const MAX_LATE_MIN = 180; // a post more than 3h late goes to missed/ instead of being posted
-const PAUSE_MS = 3000; // between the parts of a thread
 const RETRY_MS = 30000; // before the one retry of a failed thread part
+// Between the parts of a thread: a random 10 to 40 seconds, so the replies do not go out in a burst
+export const pause = (rand = Math.random) => 10000 + Math.floor(rand() * 30001);
 const MIME = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -84,7 +85,7 @@ export async function publish(dir, client, wait = sleep) {
     return data.id;
   };
   for (let part = ids.length; part <= replies.length; part++) {
-    if (part > 0) await wait(PAUSE_MS);
+    if (part > 0) await wait(pause());
     let id;
     try {
       id = await once(part);

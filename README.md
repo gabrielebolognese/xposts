@@ -65,7 +65,10 @@ A runner discovers useful tools, repositories, free alternatives and AI models, 
 bash pipeline/run.sh
 ```
 
-It keeps going until you press Ctrl+C, then prints what it did, through which day threads are scheduled and how many wait in the virality queue. `bash pipeline/run.sh --once` stops after one thread, and `bash pipeline/run.sh --posts 10` stops once 10 threads are made. A stopped run picks up where it left off next time.
+It keeps going until you press Ctrl+C, then prints what it did, through which day threads are scheduled and how many wait in the virality queue. This is the always-on runner: once the day's threads are made it waits, and at midnight the next day's generation starts. A stopped run picks up where it left off next time.
+
+- `bash pipeline/run.sh --posts 20` makes 20 threads and stops: use it once to fill the queue. To reach the number it searches more categories than the usual 5 a day (up to 15).
+- `bash pipeline/run.sh --once` stops after one thread.
 
 **Discovery.** The runner works through the 120 categories in `pipeline/categories.json` in order, about 5 category searches a day, and starts a new cycle after the last one. Each search collects signals from GitHub, Hacker News, Reddit and Hugging Face, then Sonnet searches the web around them. Every tool found is stored once in `pipeline/data/discoveries.json`; a tool comes back only for a meaningful change (a new release, a pricing change), at least 60 days after its thread. To add a category, add a line to `categories.json` with the next id.
 
@@ -79,7 +82,7 @@ It keeps going until you press Ctrl+C, then prints what it did, through which da
 
 **The virality queue.** Finished threads wait in `pipeline/data/virality.json`. The highest scores always go out first: before every step the runner puts the best threads into the next free slots, so a new thread that beats the ones already scheduled takes the earliest slot and pushes the others back, out of `queue/` when they no longer fit (they can wait indefinitely). Slots that are due within 15 minutes are never changed. `python pipeline/lib/virality.py` lists the queue with scores. The runner makes 4 to 20 threads a day (it searches more categories when it has fewer than 4) and starts a new day's generation at midnight.
 
-**Threads in `queue/`:** a folder holds `post.txt` (the main post) and `reply1.txt`, `reply2.txt` and so on. `post.js` posts the main post, then each reply under the previous one. It writes the posted ids to `thread.json`, so a thread that stops halfway resumes at the next reply on the next run, and a started thread is always finished, never moved to `missed/`.
+**Threads in `queue/`:** a folder holds `post.txt` (the main post) and `reply1.txt`, `reply2.txt` and so on. `post.js` posts the main post, then each reply under the previous one, a random 10 to 40 seconds apart. It writes the posted ids to `thread.json`, so a thread that stops halfway resumes at the next reply on the next run, and a started thread is always finished, never moved to `missed/`.
 
 Threads that still fail quality control after the fix rounds land in `pipeline/review/` with a NEEDS REVIEW note. While the runner is on, it also starts the posting workflow at the exact minute a post comes due. A DM or comment CTA means you answer those people yourself.
 

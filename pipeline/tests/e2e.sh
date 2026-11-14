@@ -190,5 +190,14 @@ printf '%s' "$out" | grep -q "Stopped. This session: 0 threads ready, 0 sent to 
 [ ! -f pipeline/.lock ] || fail "lock left after Ctrl+C"
 ok "idle runner stopped by Ctrl+C: $(printf '%s' "$out" | grep Stopped | sed 's/^Stopped. //')"
 
+# T: --posts N (POSTS_DAY_TARGET) keeps searching past the daily searches while fewer than N threads are ready today
+: > "$FAKE_LOG"
+python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
+[ $rc = 12 ] || fail "without a target the runner should wait, exit $rc"
+POSTS_DAY_TARGET=20 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
+[ $rc = 13 ] || fail "with a target of 20 the runner should search, exit $rc"
+c="$(calls)"; [ "$c" = "discover " ] || fail "target search order" "calls: $c"
+ok "first fill: with --posts 20 it searches beyond the daily searches; without it waits"
+
 echo "all $pass passed"
 rm -rf "$T"

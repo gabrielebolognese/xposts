@@ -4,7 +4,8 @@
 #                                 and keeps queue/ filled with the highest scored ones (3 a day, 4 days ahead) until
 #                                 you press Ctrl+C, then prints what it did
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
-#   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count)
+#   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches
+#                                 more categories than the daily 5 when it needs them to reach N (the first fill)
 # A stopped run resumes at the stage it was in. Settings: pipeline/config.json. Categories: pipeline/categories.json.
 set -u
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
@@ -17,7 +18,8 @@ made=0
 case "${1:-}" in
   --once) once=1 ;;
   --posts) max="${2:-}"
-           [[ "$max" =~ ^[1-9][0-9]*$ ]] || { echo "Usage: bash pipeline/run.sh --posts N   (N = how many threads to make)"; exit 1; } ;;
+           [[ "$max" =~ ^[1-9][0-9]*$ ]] || { echo "Usage: bash pipeline/run.sh --posts N   (N = how many threads to make)"; exit 1; }
+           export POSTS_DAY_TARGET="$max" ;;   # step.py searches more categories while fewer threads are ready today
 esac
 
 if [ -f "$LOCK" ] && kill -0 "$(cat "$LOCK" 2>/dev/null)" 2>/dev/null; then

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { main } from '../../post.js';
+import { main, pause } from '../../post.js';
 
 const noWait = async () => {};
 const DUE = '2026-11-14_1300';
@@ -34,10 +34,14 @@ function setup(replies) {
 }
 const progress = (base) => JSON.parse(fs.readFileSync(path.join(base, DUE, 'thread.json'), 'utf8')).ids;
 
-test('a thread: the main post, then each reply answering the one before it', async () => {
+test('a thread: the main post, then each reply answering the one before it, 10 to 40 seconds apart', async () => {
   setup(['1. one', '2. two', '3. three']);
   const { client, calls } = fakeClient('a');
-  assert.equal(await main(client, onTime, noWait), false);
+  const waits = [];
+  assert.equal(await main(client, onTime, async (ms) => waits.push(ms)), false);
+  assert.equal(waits.length, 3);
+  assert.ok(waits.every((ms) => ms >= 10000 && ms <= 40000), String(waits));
+  assert.deepEqual([pause(() => 0), pause(() => 0.999999)], [10000, 40000]);
   assert.deepEqual(calls, [
     { text: 'the hook\n\nthe promise:' },
     { text: '1. one', reply: { in_reply_to_tweet_id: 'a1' } },

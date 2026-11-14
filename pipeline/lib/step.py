@@ -7,6 +7,7 @@ the run resumes).
 """
 from __future__ import annotations
 
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -94,7 +95,8 @@ def main() -> int:
             if made >= most:
                 core.say("IDLE", f"{made} threads made today, the most for one day; tomorrow's generation starts at midnight")
                 return 12
-            if discover.search_due(made, core.cfg("virality.min_per_day", 4)):
+            least = max(core.cfg("virality.min_per_day", 4), int(os.environ.get("POSTS_DAY_TARGET") or 0))
+            if discover.search_due(made, least):
                 discover.search_one()
                 core.bump_session("searches")
                 return 13

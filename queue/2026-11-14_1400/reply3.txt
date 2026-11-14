@@ -1,1 +1,1 @@
-3. The free tier has every model, no account, no credits, no watermark and no per-render charge. Optional Pro funds the project: $15 a month, $120 a year, or $199 once for three years. If you can't afford Pro, the README says you can email for a free licence.
+3. Example: a YouTuber can turn an English video into a Spanish version with speech timed to the original. An author can narrate their own book as an audiobook. Both run locally, so nothing gets uploaded. Only clone voices you have permission to use.

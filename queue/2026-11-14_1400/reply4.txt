@@ -1,1 +1,1 @@
-4. Hardware: Apple Silicon M1 to M5 with 16 GB or more. No Intel Macs, no Windows. On 16 GB, LTX-2.5 runs at smaller sizes, and a video now peaks around 5.7 GB of memory (it was 9 GB). Full size needs 48 GB. Set aside about 40 GB of disk for the first install.
+4. Runs on Apple Silicon Macs (macOS 13.3+), Windows 10/11 x64 and Linux x64. It uses NVIDIA CUDA, Apple Metal or AMD ROCm (opt-in). No GPU? It works on CPU too, just slower. There's also an Android 10+ preview that runs offline after a model download.

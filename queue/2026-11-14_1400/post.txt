@@ -1,3 +1,3 @@
-Claude Code can make AI video on your Mac. This free app ships an MCP server, so any MCP agent can render video, images and speech locally on Apple Silicon.
+ElevenLabs Creator costs $22 a month. VoiceStudio clones voices, dubs video and narrates audiobooks on your own computer, free and with no account.
 
-What it can do, what it really costs, and the catches to know first:
+What it does, what you need to run it, and where the free version stops:

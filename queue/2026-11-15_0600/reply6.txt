@@ -1,1 +1,1 @@
-6. The catches: the repo was only created on 2026-11-10, so expect rough edges. Speaker names from Zoom, Teams and Meet work on Mac only. The Windows build isn't signed yet, so at the SmartScreen warning click More info, then Run anyway.
+6. Catches: MiniMax H3 is an optional download of about 75 GB and its licence does not cover the EU, UK, South Korea or US. Ideogram 4 and YuE2's weights are non-commercial. Prompts and media stay local, but anonymous usage counts are on by default.

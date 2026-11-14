@@ -1,1 +1,1 @@
-5. For developers: it has a local HTTP API and an MCP server, so Claude Code, Codex or any MCP agent can make media for you. The README has a CLI command that prints the exact claude mcp add phosphene line for your install.
+5. For developers: it has a local API, MCP support, reusable recipes and watch folders. The Model Manager lets you swap the default engine for dozens of others. Latest stable is v0.5.8, so expect fast changes.

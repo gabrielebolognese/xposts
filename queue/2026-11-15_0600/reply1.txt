@@ -1,1 +1,1 @@
-1. Granola's free Basic plan only keeps 30 days of meeting history. Yogurt is an open-source desktop app from Frigade for Mac, Windows and Linux. It records your calls without a bot joining the meeting.
+1. It's a Mac app that runs models locally with MLX. It does text-to-video and image-to-video with sound on LTX-2.5 and MiniMax H3, plus images with FLUX.2 [klein] and Qwen-Image-Edit, full songs with vocals on YuE2 and speech on Qwen3-TTS.

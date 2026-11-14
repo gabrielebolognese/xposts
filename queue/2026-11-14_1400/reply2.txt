@@ -1,1 +1,1 @@
-2. It goes past short clips. One Shot makes a continuous shot of 30 seconds to 2 minutes. The Editor timeline exports to DaVinci Resolve, Premiere Pro or After Effects. With 24 GB you can train a character LoRA from 15 to 50 of your own photos.
+2. Cloning works from a clean reference recording. Voice design lets you describe a voice in words and generate it. Dubbing translates a video with speech timed to the original. The default engine is built on k2-fsa/OmniVoice, which supports over 600 languages.

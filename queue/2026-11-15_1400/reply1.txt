@@ -1,1 +1,1 @@
-1. magpie runs one local gateway that all your agents talk to. You pick a model per agent from one list, and it edits the one key that matters in that agent's own config. Menu bar app, TUI, web UI and CLI on macOS, Windows and Linux, plus Docker and Termux.
+1. Caveman is an open-source (Apache-2.0) skill, CLI and local proxy for Claude Code, Codex, Gemini CLI, OpenCode and 30+ more agents. It runs on your machine with your own keys or your Claude Pro/Max login.

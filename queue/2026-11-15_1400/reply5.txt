@@ -1,1 +1,1 @@
-5. Before you install: it reads your agents' sign-ins to find subscriptions (magpie accounts discovery off stops it) and sends a daily anonymous ping (you can turn it off in Settings). Claude Free/Pro/Max plans in other tools break Anthropic's terms, so use API keys.
+5. Auto picks the model and effort for each request. Interim result: 54% cheaper with the same score on 85 coding tasks vs Opus 5.5 at xhigh. It is the only part that needs an account: the Caveman Cloud Free plan, $0 with capped usage (25,000 routing decisions).

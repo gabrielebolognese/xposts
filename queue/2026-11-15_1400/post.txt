@@ -1,3 +1,3 @@
-Keep Claude Code, pay DeepSeek instead: one free, MIT-licensed command swaps the model behind your coding agent. You only pay the provider you pick.
+Paying per token or hitting Claude Pro/Max limits? Caveman, free and open source, cut input tokens 33.2% across 54 Claude Code runs, with 18 of 18 answers still right.
 
-Here's how it works, the exact commands, and the catches to know first.
+What it does, how to install it, and the catches to know first.

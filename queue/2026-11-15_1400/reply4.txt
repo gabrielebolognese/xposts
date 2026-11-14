@@ -1,1 +1,5 @@
-4. When a quota runs out, magpie moves to your next account. Routing groups can switch to another model or provider instead. With one account and no group, there is nothing to move to and the error reaches the agent.
+4. Install with one command on Mac, Linux or Windows. It needs Node.js 22.13+.
+
+npx @caveman-ai/cli@latest
+
+It finds your agents and logins, shows what it will change, and you press Enter.

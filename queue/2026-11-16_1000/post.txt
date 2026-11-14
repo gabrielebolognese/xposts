@@ -1,3 +1,3 @@
-Your local agent halts every time a tool call fails? Meta's open 30B Muse Glimmer is trained to diagnose the error and retry. Free, Apache 2.0.
+Granola Business costs $14 per user per month. Yogurt does AI meeting notes for free, with no bot in the call, and your audio and transcripts stay on your computer.
 
-What it is, the hardware it needs, how to run it, and where it falls short.
+What it does, what your computer needs, and the catches before you install it.

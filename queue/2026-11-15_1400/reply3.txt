@@ -1,4 +1,1 @@
-3. One command per agent:
-magpie claude deepseek/deepseek-v4-pro
-magpie codex moonshot/kimi-k2.5
-The first puts Claude Code on DeepSeek, the second puts Codex on Kimi. Or pick the model from one list in the menu bar.
+3. The voice puts the answer first. Code, commands, paths and error messages stay character for character, and it never rewrites your prompt. README example: the same React fix in 20 tokens instead of 63.

@@ -1,1 +1,1 @@
-2. Providers can be an API key (DeepSeek, Kimi, GLM and more), a local model, or any OpenAI- or Anthropic-compatible URL. You can use one provider across all your agents instead of setting keys and base URLs in each tool.
+2. Version 4.0 has six parts, all on after install, each with its own switch. The two core ones: Say less makes replies short, and Read less compresses logs, JSON, CSV and test output before the model reads them.

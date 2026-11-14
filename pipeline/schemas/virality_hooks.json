@@ -1,0 +1,22 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["alternatives"],
+ "properties": {
+  "alternatives": {
+   "type": "array",
+   "maxItems": 12,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["text", "angle", "fact_ids"],
+    "properties": {
+     "text": {"type": "string", "minLength": 5},
+     "angle": {"type": "string"},
+     "fact_ids": {"type": "array", "items": {"type": "string"}}
+    }
+   }
+  }
+ }
+}

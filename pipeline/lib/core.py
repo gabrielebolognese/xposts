@@ -134,8 +134,8 @@ def gh() -> str:
 
 
 def rulebook() -> str:
-    """The long-form rulebook, the single source of truth for every writing prompt."""
-    text = (ROOT / ".claude" / "skills" / "x-long-form-posts" / "SKILL.md").read_text(encoding="utf-8")
+    """The thread rulebook, the single source of truth for every writing prompt."""
+    text = (ROOT / ".claude" / "skills" / "x-threads" / "SKILL.md").read_text(encoding="utf-8")
     return re.sub(r"^---\n.*?\n---\n", "", text, flags=re.S).strip()
 
 
@@ -150,7 +150,7 @@ def add_history(entry: dict) -> None:
 
 
 def bump_session(key: str) -> None:
-    """Count an outcome for the stop summary (queued, review, dropped)."""
+    """Count an outcome for the stop summary (queued, review, dropped, searches)."""
     s = load_json(DATA / "session.json", {})
     s[key] = s.get(key, 0) + 1
     save_json(DATA / "session.json", s)

@@ -1,19 +1,22 @@
 # Stage: fix
 
-Fix this long-form X post so every problem listed below is solved, without breaking any rule of the rulebook. Change only what the problems require; keep what works. Cut rather than add: solve a problem by removing or tightening the claim before adding words, and keep the post at or under 2,800 characters (if it is longer now, shorten it). Keep the rulebook's problem-solution arc: the problem early, its cause, the steps that solve it, a takeaway at the end. Never turn the post into a list of facts or release notes. Return the hook lines and the body separately (the body starts after the hook), with the snippets and numbers lists updated to match, and a one-line summary of your changes.
+Fix this X thread so every problem listed below is solved, following the rulebook. Change only what the problems require and keep what works. Cut rather than add. Keep the hook unless a problem is about the hook. Return the hook, the promise line, the replies (4 to 7, without numbers: code puts "1. ", "2. " in front), the snippets and numbers lists updated to match, and a one-line summary of your changes.
 
-Hard limits checked by code: total 800 to 3,000 characters (aim 1,200 to 2,200), hook line 1 all lowercase, hook line 2 at most 50 characters when it is in capitals, paragraphs at most 250 characters, zero emojis, no em dashes, no ellipses, at most one exclamation mark, no asterisks or backticks, every number traceable to the facts.
+Hard limits checked by code: main post (hook, empty line, promise) at most 280 characters; 4 to 7 replies of at most 270 characters each before the number; the last reply explains how to find the tool (search instructions, or a DM or comment CTA) without a link; no links or web addresses anywhere; zero emojis; no em dashes; no asterisks or backticks; every number traceable to the facts; every command or code snippet shown by a passing check or quoted in a fact.
 
 Problems to fix:
 {{PROBLEMS}}
 
-The post now:
+The thread now (parts separated by #--#; the first part is the main post):
 {{POST}}
 
 Snippets and numbers now (JSON):
 {{LISTS}}
 
-Facts (the only allowed source of claims and numbers):
+The analysis:
+{{ANALYSIS}}
+
+Facts (the only allowed source of claims, numbers and prices):
 {{FACTS}}
 
 The rulebook:

@@ -2,42 +2,18 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "type": "object",
  "additionalProperties": false,
- "required": [
-  "audience",
-  "grabber",
-  "body",
-  "snippets",
-  "numbers",
-  "changes"
- ],
+ "required": ["hook", "promise", "replies", "snippets", "numbers", "changes"],
  "properties": {
-  "audience": {
-   "type": "string"
-  },
-  "grabber": {
-   "type": "string"
-  },
-  "body": {
-   "type": "string",
-   "minLength": 400
-  },
+  "hook": {"type": "string", "minLength": 5},
+  "promise": {"type": "string", "minLength": 3},
+  "replies": {"type": "array", "minItems": 4, "maxItems": 7, "items": {"type": "string", "minLength": 10}},
   "snippets": {
    "type": "array",
    "items": {
     "type": "object",
     "additionalProperties": false,
-    "required": [
-     "text",
-     "check_id"
-    ],
-    "properties": {
-     "text": {
-      "type": "string"
-     },
-     "check_id": {
-      "type": "string"
-     }
-    }
+    "required": ["text", "source"],
+    "properties": {"text": {"type": "string"}, "source": {"type": "string"}}
    }
   },
   "numbers": {
@@ -45,22 +21,10 @@
    "items": {
     "type": "object",
     "additionalProperties": false,
-    "required": [
-     "text",
-     "fact_id"
-    ],
-    "properties": {
-     "text": {
-      "type": "string"
-     },
-     "fact_id": {
-      "type": "string"
-     }
-    }
+    "required": ["text", "fact_id"],
+    "properties": {"text": {"type": "string"}, "fact_id": {"type": "string"}}
    }
   },
-  "changes": {
-   "type": "string"
-  }
+  "changes": {"type": "string"}
  }
 }

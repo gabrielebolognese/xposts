@@ -1,27 +1,39 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["scores"],
-  "additionalProperties": false,
-  "properties": {
-    "scores": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "value", "specificity", "freshness", "demand", "agreement", "novelty", "substance_800", "evidence"],
-        "additionalProperties": false,
-        "properties": {
-          "id": {"type": "string"},
-          "value": {"type": "integer", "minimum": 0, "maximum": 3},
-          "specificity": {"type": "integer", "minimum": 0, "maximum": 3},
-          "freshness": {"type": "integer", "minimum": 0, "maximum": 3},
-          "demand": {"type": "integer", "minimum": 0, "maximum": 3},
-          "agreement": {"type": "integer", "minimum": 0, "maximum": 3},
-          "novelty": {"type": "integer", "minimum": 0, "maximum": 3},
-          "substance_800": {"enum": ["pass", "fail"]},
-          "evidence": {"type": "string", "description": "one short reason per criterion, quoting the sources"}
-        }
-      }
-    }
-  }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["scores", "evidence", "reason_to_exist"],
+ "properties": {
+  "scores": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["problem_solving", "savings", "usefulness", "novelty", "ease", "relevance", "reliability", "hook_strength"],
+   "properties": {
+    "problem_solving": {"type": "integer", "minimum": 0, "maximum": 3},
+    "savings": {"type": "integer", "minimum": 0, "maximum": 3},
+    "usefulness": {"type": "integer", "minimum": 0, "maximum": 3},
+    "novelty": {"type": "integer", "minimum": 0, "maximum": 3},
+    "ease": {"type": "integer", "minimum": 0, "maximum": 3},
+    "relevance": {"type": "integer", "minimum": 0, "maximum": 3},
+    "reliability": {"type": "integer", "minimum": 0, "maximum": 3},
+    "hook_strength": {"type": "integer", "minimum": 0, "maximum": 3}
+   }
+  },
+  "evidence": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["problem_solving", "savings", "usefulness", "novelty", "ease", "relevance", "reliability", "hook_strength"],
+   "properties": {
+    "problem_solving": {"type": "string"},
+    "savings": {"type": "string"},
+    "usefulness": {"type": "string"},
+    "novelty": {"type": "string"},
+    "ease": {"type": "string"},
+    "relevance": {"type": "string"},
+    "reliability": {"type": "string"},
+    "hook_strength": {"type": "string"}
+   }
+  },
+  "reason_to_exist": {"type": "string"}
+ }
 }

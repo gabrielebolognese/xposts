@@ -1,231 +1,454 @@
 {
- "ideate": {
+ "discover": {
   "candidates": [
    {
-    "audience": "developers using claude code hooks",
-    "problem": "Hook commands can fail silently, so the checks a team relies on never run.",
-    "takeaway": "How to make hook failures visible and safe before relying on them.",
-    "post_type": "mistake and fix",
-    "niche": "ai",
-    "tool": "claude code",
-    "why_now": "hooks are widely used now",
-    "source_ids": []
-   },
-   {
-    "audience": "developers using claude code hooks",
-    "problem": "Some generic thing about productivity that teaches little.",
-    "takeaway": "How to make hook failures visible and safe before relying on them.",
-    "post_type": "mistake and fix",
-    "niche": "saas",
-    "tool": "claude code",
-    "why_now": "hooks are widely used now",
-    "source_ids": []
+    "name": "{NAME}",
+    "repo": "{REPO}",
+    "official_url": "https://github.com/{REPO}",
+    "what_it_does": "Compresses prompts before they are sent to an LLM.",
+    "problem": "{NAME} problem: LLM API bills grow with every repeated token.",
+    "why_now": "A new release this month.",
+    "pricing_guess": "free",
+    "update_of_known": false,
+    "update_note": "",
+    "sources": [
+     "https://github.com/{REPO}"
+    ],
+    "triage": {
+     "problem_solving": 3,
+     "savings": 3,
+     "novelty": 3,
+     "relevance": 3,
+     "hook": 3
+    }
    }
   ]
  },
- "score": {
-  "scores": [
+ "analyze": {
+  "project_name": "{NAME}",
+  "repo": "{REPO}",
+  "owner": "fakeorg",
+  "description": "A prompt compression library.",
+  "functionality": "Compresses prompts before they reach the model.",
+  "problem": "{NAME}",
+  "beneficiaries": "Developers paying for LLM APIs.",
+  "pricing_model": "free",
+  "pricing_details": "Free and open source.",
+  "pricing_verified": true,
+  "open_source": true,
+  "license": "MIT",
+  "commercial_use": "Allowed by the MIT license.",
+  "install_requirements": "Python 3.10+",
+  "platforms": [
+   "Linux",
+   "macOS",
+   "Windows"
+  ],
+  "features": [
+   "prompt compression"
+  ],
+  "limitations": [
+   "Very short prompts gain little."
+  ],
+  "alternatives": [
    {
-    "id": "c1",
-    "value": 3,
-    "specificity": 3,
-    "freshness": 2,
-    "demand": 2,
-    "agreement": 2,
-    "novelty": 3,
-    "substance_800": "pass",
-    "evidence": "fixture"
-   },
-   {
-    "id": "c2",
-    "value": 1,
-    "specificity": 1,
-    "freshness": 1,
-    "demand": 1,
-    "agreement": 1,
-    "novelty": 1,
-    "substance_800": "fail",
-    "evidence": "fixture"
+    "name": "Other tool",
+    "note": "paid"
    }
-  ]
- },
- "research": {
-  "verifiable": true,
-  "reason": "",
-  "angle": "a tested failure path",
+  ],
+  "why_use": "It lowers API bills.",
+  "different": "It runs locally.",
+  "latest_update": "v1.2.0 on 2026-11-01",
+  "maintained": true,
+  "safe_to_recommend": true,
+  "safety_note": "Well known maintainers.",
+  "solves_stated_problem": true,
+  "find_it": {
+   "github_search": "{REPO}",
+   "web_search": "{NAME}"
+  },
   "facts": [
    {
     "id": "F1",
-    "claim": "Hooks run shell commands before or after tool use.",
-    "url": "https://docs.example/hooks",
+    "claim": "{NAME} is open source under the MIT license",
+    "url": "https://github.com/{REPO}",
     "date": "2026-11-01",
-    "quote": "Hooks are shell commands that run at points in the agent loop.",
-    "primary": true,
-    "core": true
+    "quote": "Released under the MIT license.",
+    "primary": true
+   },
+   {
+    "id": "F2",
+    "claim": "It reduces token usage by 30% in the project's benchmark",
+    "url": "https://github.com/{REPO}",
+    "date": "2026-11-01",
+    "quote": "reduces token usage by 30% on our benchmark",
+    "primary": true
+   },
+   {
+    "id": "F3",
+    "claim": "It installs with pip install toolx",
+    "url": "https://github.com/{REPO}",
+    "date": "2026-11-01",
+    "quote": "pip install toolx",
+    "primary": true
    }
   ],
   "checks": [
    {
     "id": "C1",
-    "purpose": "a failing hook exits non-zero",
-    "script": "set -euo pipefail\necho ok",
-    "expect": "ok"
+    "kind": "install",
+    "purpose": "install it and print its version",
+    "script": "set -euo pipefail\npip install toolx\ntoolx --version",
+    "expect": "a version number"
    }
-  ]
+  ],
+  "recommend": true,
+  "reason": "Legitimate, maintained and useful."
  },
- "expand": {
-  "hook_ideas": [
-   "silent failures",
-   "test the failure path"
-  ],
-  "intro": "i",
-  "problem_scenario": "p",
-  "cause": "c",
-  "solution_steps": [
-   "exit codes",
-   "logs",
-   "test failure"
-  ],
-  "example": "e",
-  "limitations": [
-   "strict hooks block work"
-  ],
-  "takeaway": "t",
-  "reader_contract": "The reader can make hook failures visible and test them.",
-  "target_persona": "practitioner",
-  "claims": [
+ "score": {
+  "scores": {
+   "problem_solving": 3,
+   "savings": 3,
+   "usefulness": 3,
+   "novelty": 3,
+   "ease": 3,
+   "relevance": 3,
+   "reliability": 3,
+   "hook_strength": 3
+  },
+  "evidence": {
+   "problem_solving": "fixture",
+   "savings": "fixture",
+   "usefulness": "fixture",
+   "novelty": "fixture",
+   "ease": "fixture",
+   "relevance": "fixture",
+   "reliability": "fixture",
+   "hook_strength": "fixture"
+  },
+  "reason_to_exist": "It cuts a real cost for many developers."
+ },
+ "hooks": {
+  "candidates": [
    {
-    "text": "Hooks run commands around tool use.",
+    "text": "{NAME} cuts LLM token use by 30% before the prompt ever reaches the API",
+    "angle": "savings",
+    "fact_ids": [
+     "F2"
+    ]
+   },
+   {
+    "text": "Stop paying for prompt compression APIs: {NAME} does it locally for free",
+    "angle": "free",
+    "fact_ids": [
+     "F1"
+    ]
+   },
+   {
+    "text": "Your AI bill is mostly wasted context. This open-source tool trims it",
+    "angle": "savings",
+    "fact_ids": []
+   },
+   {
+    "text": "Why send every token to the API when a free library can shrink the prompt first?",
+    "angle": "free",
+    "fact_ids": []
+   },
+   {
+    "text": "A free alternative to paid prompt compressors that deserves more attention",
+    "angle": "alternative",
+    "fact_ids": []
+   },
+   {
+    "text": "Most developers overlook this repo that makes long prompts cheaper",
+    "angle": "hidden",
+    "fact_ids": []
+   },
+   {
+    "text": "How to make your AI workflow use fewer tokens with one install",
+    "angle": "time",
+    "fact_ids": []
+   },
+   {
+    "text": "This MIT-licensed library shrinks prompts before they reach the model",
+    "angle": "access",
     "fact_ids": [
      "F1"
     ]
    }
-  ],
-  "original_angle": "tested failure path",
-  "visual": {
-   "would_help": false,
-   "kind": "",
-   "note": ""
-  },
-  "code": []
+  ]
  },
- "gate": {
-  "obvious_versions": [
-   "use hooks",
-   "hooks are useful",
-   "automate checks"
-  ],
-  "matches_obvious": false,
-  "obvious_note": "deeper",
-  "personas": {
-   "beginner": {
-    "learns": "what hooks are",
-    "score": 2
-   },
-   "practitioner": {
-    "learns": "test the failure path",
-    "score": 2
-   },
-   "expert": {
-    "learns": "little",
-    "score": 1
-   }
-  },
-  "claims": [
+ "hook_critic": {
+  "scores": [
    {
-    "text": "Hooks run commands around tool use.",
+    "index": 0,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   },
+   {
+    "index": 1,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   },
+   {
+    "index": 2,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   },
+   {
+    "index": 3,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   },
+   {
+    "index": 4,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   },
+   {
+    "index": 5,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   },
+   {
+    "index": 6,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   },
+   {
+    "index": 7,
+    "accuracy": 3,
+    "concreteness": 2,
+    "curiosity": 2,
+    "clarity": 3,
+    "originality": 2,
+    "note": "fixture"
+   }
+  ],
+  "refined": [
+   {
+    "text": "{NAME} cuts LLM token use by 30% before the prompt ever reaches the API",
+    "angle": "savings",
     "fact_ids": [
-     "F1"
+     "F2"
     ],
-    "supported": true
+    "based_on": 0
+   },
+   {
+    "text": "{NAME} trims your prompts locally, so the API bills you for less",
+    "angle": "savings",
+    "fact_ids": [],
+    "based_on": 1
+   },
+   {
+    "text": "Cheaper LLM calls without touching your prompts: meet {NAME}",
+    "angle": "savings",
+    "fact_ids": [],
+    "based_on": 2
    }
   ],
-  "unmapped": [],
-  "search": {
-   "queries": [
-    "claude code hooks"
-   ],
-   "top_results": [
-    "docs"
-   ],
-   "already_said": false,
-   "original_angle_present": true
-  },
-  "notes": ""
+  "best": 0
  },
- "hooks": {
-  "pairs": [
+ "thread": {
+  "promise": "What it does, how to set it up, and where to find it:",
+  "replies": [
+   "Long prompts get expensive fast. Every repeated instruction and pasted document is billed again on each call, and much of it adds nothing the model needs.",
+   "{NAME} is an open-source library that compresses a prompt before you send it. It drops low-value tokens and keeps the parts the answer depends on.",
+   "In its own benchmark it reduces token usage by 30% with no change to your prompts or your model. It is MIT licensed, so you can use it at work too.",
+   "Setup takes one line: pip install toolx. Then pass your prompt through its compress call right before the request goes out.",
+   "Go to GitHub and search for: {REPO}"
+  ],
+  "snippets": [
    {
-    "audience": "developers using claude code hooks",
-    "grabber": "A SILENT HOOK FAILURE CAN SKIP YOUR CHECKS."
-   },
+    "text": "pip install toolx",
+    "source": "F3"
+   }
+  ],
+  "numbers": [
    {
-    "audience": "Teams",
-    "grabber": "x"
-   },
-   {
-    "audience": "claude coders",
-    "grabber": "your hooks may never run."
-   },
-   {
-    "audience": "devs",
-    "grabber": "THIS GRABBER IS FAR TOO LONG TO BE AN UPPERCASE HOOK LINE"
-   },
-   {
-    "audience": "agent builders",
-    "grabber": "test the failure path."
+    "text": "30%",
+    "fact_id": "F2"
    }
   ]
  },
- "write": {
-  "hook_index": 0,
-  "body": "Hooks let you run your own commands before or after Claude Code uses a tool. Teams use them to block risky edits, run formatters and enforce rules on every change.\n\nThe trouble starts when a hook command fails in a way nobody sees. The agent keeps working, the check never ran, and the team assumes the rule still holds.\n\nThis happens because a hook is just a process. If it crashes, times out or exits with the wrong code, the result depends on how the hook reports the failure.\n\nA safer setup takes three steps:\n1. Make every hook exit with a clear code for pass and fail.\n2. Log each run to a file you can read later.\n3. Test the failure path on purpose before you rely on it.\n\nTrade-offs to keep in mind:\n- Strict hooks stop more mistakes but can block real work when they break.\n- Logging adds a little noise, so keep the lines short and dated.\n\nTreat a hook like production code. If you never watched it fail, you do not know what it does when it fails.",
-  "snippets": [],
-  "numbers": []
- },
  "editor": {
-  "paragraphs": [
-   "hooks",
-   "silent failure",
-   "cause",
-   "steps",
-   "trade-offs",
-   "takeaway"
-  ],
-  "issues": [
-   {
-    "kind": "slop",
-    "quote": "Treat a hook like production code.",
-    "fix": "optional polish",
-    "blocking": false,
-    "earlier": false
+  "checks": {
+   "benefit_real": {
+    "pass": true,
+    "note": "ok"
+   },
+   "promise_accurate": {
+    "pass": true,
+    "note": "ok"
+   },
+   "solves_problem": {
+    "pass": true,
+    "note": "ok"
+   },
+   "legitimate": {
+    "pass": true,
+    "note": "ok"
+   },
+   "pricing_correct": {
+    "pass": true,
+    "note": "ok"
+   },
+   "claims_supported": {
+    "pass": true,
+    "note": "ok"
+   },
+   "every_reply_valuable": {
+    "pass": true,
+    "note": "ok"
+   },
+   "no_repetition": {
+    "pass": true,
+    "note": "ok"
+   },
+   "mobile_readable": {
+    "pass": true,
+    "note": "ok"
+   },
+   "final_no_link": {
+    "pass": true,
+    "note": "ok"
+   },
+   "final_explains_access": {
+    "pass": true,
+    "note": "ok"
+   },
+   "sounds_natural": {
+    "pass": true,
+    "note": "ok"
    }
-  ],
-  "notes": ""
+  },
+  "issues": [],
+  "notes": "fixture"
  },
  "fix": {
-  "audience": "developers using claude code hooks",
-  "grabber": "A SILENT HOOK FAILURE CAN SKIP YOUR CHECKS.",
-  "body": "Hooks let you run your own commands before or after Claude Code uses a tool. Teams use them to block risky edits, run formatters and enforce rules on every change.\n\nThe trouble starts when a hook command fails in a way nobody sees. The agent keeps working, the check never ran, and the team assumes the rule still holds.\n\nThis happens because a hook is just a process. If it crashes, times out or exits with the wrong code, the result depends on how the hook reports the failure.\n\nA safer setup takes three steps:\n1. Make every hook exit with a clear code for pass and fail.\n2. Log each run to a file you can read later.\n3. Test the failure path on purpose before you rely on it.\n\nTrade-offs to keep in mind:\n- Strict hooks stop more mistakes but can block real work when they break.\n- Logging adds a little noise, so keep the lines short and dated.\n\nTreat a hook like production code. If you never watched it fail, you do not know what it does when it fails.",
-  "snippets": [],
-  "numbers": [],
-  "changes": "none"
+  "hook": "{NAME} cuts LLM token use by 30% before the prompt ever reaches the API",
+  "promise": "What it does, how to set it up, and where to find it:",
+  "replies": [
+   "Long prompts get expensive fast. Every repeated instruction and pasted document is billed again on each call, and much of it adds nothing the model needs.",
+   "{NAME} is an open-source library that compresses a prompt before you send it. It drops low-value tokens and keeps the parts the answer depends on.",
+   "In its own benchmark it reduces token usage by 30% with no change to your prompts or your model. It is MIT licensed, so you can use it at work too.",
+   "Setup takes one line: pip install toolx. Then pass your prompt through its compress call right before the request goes out.",
+   "Go to GitHub and search for: {REPO}"
+  ],
+  "snippets": [
+   {
+    "text": "pip install toolx",
+    "source": "F3"
+   }
+  ],
+  "numbers": [
+   {
+    "text": "30%",
+    "fact_id": "F2"
+   }
+  ],
+  "changes": "fixture: nothing changed"
  },
  "check_fix": {
   "give_up": true,
   "reason": "fixture",
   "script": ""
  },
- "credibility": {
-  "core_claims": [
+ "virality": {
+  "title": "{NAME}: local prompt compression",
+  "criteria": {
+   "financial": 17,
+   "brand": 12,
+   "hook": 17,
+   "curiosity": 8,
+   "problem": 9,
+   "shareability": 9,
+   "audience": 4,
+   "delivery": 4
+  },
+  "bonuses": {
+   "combination": 4,
+   "recognition": 1,
+   "novelty": 0
+  },
+  "penalties": [],
+  "hook_score": 85,
+  "labels": {
+   "financial_value": "high",
+   "brand_recognition": "medium",
+   "curiosity": "medium",
+   "problem_solving": "high",
+   "shareability": "high",
+   "evidence_confidence": "high"
+  },
+  "strengths": "A verified saving on a cost every API user has.",
+  "weaknesses": "No recognizable brand in the hook.",
+  "improvement": "Name the API people pay for."
+ },
+ "virality_hooks": {
+  "alternatives": [
    {
-    "claim": "a failing hook can let checks skip silently",
+    "text": "Stop overpaying for LLM tokens: {NAME} trims every prompt before it is billed",
+    "angle": "financial savings",
+    "fact_ids": []
+   },
+   {
+    "text": "{NAME} is the free prompt compressor most developers have never heard of",
+    "angle": "underrated discovery",
     "fact_ids": [
      "F1"
     ]
    }
-  ],
-  "score": 3,
-  "reason": "fixture: backed by the docs and a passing check"
+  ]
+ },
+ "hook_score": {
+  "scores": [
+   {
+    "index": 0,
+    "score": 60,
+    "accurate": true,
+    "note": "the current hook"
+   },
+   {
+    "index": 1,
+    "score": 88,
+    "accurate": true,
+    "note": "clear saving"
+   },
+   {
+    "index": 2,
+    "score": 70,
+    "accurate": true,
+    "note": "curiosity"
+   }
+  ]
  }
 }

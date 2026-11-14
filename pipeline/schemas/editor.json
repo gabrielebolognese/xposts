@@ -3,15 +3,221 @@
  "type": "object",
  "additionalProperties": false,
  "required": [
-  "paragraphs",
+  "checks",
   "issues",
   "notes"
  ],
  "properties": {
-  "paragraphs": {
-   "type": "array",
-   "items": {
-    "type": "string"
+  "checks": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "benefit_real",
+    "promise_accurate",
+    "solves_problem",
+    "legitimate",
+    "pricing_correct",
+    "claims_supported",
+    "every_reply_valuable",
+    "no_repetition",
+    "mobile_readable",
+    "final_no_link",
+    "final_explains_access",
+    "sounds_natural"
+   ],
+   "properties": {
+    "benefit_real": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "promise_accurate": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "solves_problem": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "legitimate": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "pricing_correct": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "claims_supported": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "every_reply_valuable": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "no_repetition": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "mobile_readable": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "final_no_link": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "final_explains_access": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    },
+    "sounds_natural": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "pass",
+      "note"
+     ],
+     "properties": {
+      "pass": {
+       "type": "boolean"
+      },
+      "note": {
+       "type": "string"
+      }
+     }
+    }
    }
   },
   "issues": {
@@ -29,12 +235,18 @@
     "properties": {
      "kind": {
       "enum": [
-       "repeat",
-       "deletion",
-       "slop",
-       "accuracy",
-       "privacy",
-       "structure"
+       "benefit_real",
+       "promise_accurate",
+       "solves_problem",
+       "legitimate",
+       "pricing_correct",
+       "claims_supported",
+       "every_reply_valuable",
+       "no_repetition",
+       "mobile_readable",
+       "final_no_link",
+       "final_explains_access",
+       "sounds_natural"
       ]
      },
      "quote": {

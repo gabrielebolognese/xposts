@@ -1,0 +1,42 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["scores", "refined", "best"],
+ "properties": {
+  "scores": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["index", "accuracy", "concreteness", "curiosity", "clarity", "originality", "note"],
+    "properties": {
+     "index": {"type": "integer", "minimum": 0},
+     "accuracy": {"type": "integer", "minimum": 0, "maximum": 3},
+     "concreteness": {"type": "integer", "minimum": 0, "maximum": 3},
+     "curiosity": {"type": "integer", "minimum": 0, "maximum": 3},
+     "clarity": {"type": "integer", "minimum": 0, "maximum": 3},
+     "originality": {"type": "integer", "minimum": 0, "maximum": 3},
+     "note": {"type": "string"}
+    }
+   }
+  },
+  "refined": {
+   "type": "array",
+   "minItems": 3,
+   "maxItems": 3,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["text", "angle", "fact_ids", "based_on"],
+    "properties": {
+     "text": {"type": "string", "minLength": 5},
+     "angle": {"type": "string"},
+     "fact_ids": {"type": "array", "items": {"type": "string"}},
+     "based_on": {"type": "integer", "minimum": 0}
+    }
+   }
+  },
+  "best": {"type": "integer", "minimum": 0, "maximum": 2}
+ }
+}

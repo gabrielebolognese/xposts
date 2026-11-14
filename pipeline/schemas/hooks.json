@@ -2,30 +2,22 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "type": "object",
  "additionalProperties": false,
- "required": [
-  "pairs"
- ],
+ "required": ["candidates"],
  "properties": {
-  "pairs": {
+  "candidates": {
    "type": "array",
+   "minItems": 6,
+   "maxItems": 16,
    "items": {
     "type": "object",
     "additionalProperties": false,
-    "required": [
-     "audience",
-     "grabber"
-    ],
+    "required": ["text", "angle", "fact_ids"],
     "properties": {
-     "audience": {
-      "type": "string"
-     },
-     "grabber": {
-      "type": "string"
-     }
+     "text": {"type": "string", "minLength": 5},
+     "angle": {"type": "string"},
+     "fact_ids": {"type": "array", "items": {"type": "string"}}
     }
-   },
-   "minItems": 5,
-   "maxItems": 5
+   }
   }
  }
 }

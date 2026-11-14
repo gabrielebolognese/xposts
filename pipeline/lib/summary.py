@@ -1,6 +1,7 @@
 """The runner's session counters and stop line.
   python pipeline/lib/summary.py start   reset the counters for a new session
-  python pipeline/lib/summary.py stop    print what this session did and how far ahead the auto posts reach
+  python pipeline/lib/summary.py stop    print what this session did, how far ahead the threads are scheduled and
+                                         how many wait in the virality queue
 """
 from __future__ import annotations
 
@@ -9,22 +10,25 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import core  # noqa: E402
+import virality  # noqa: E402
 
 
 def stop_line() -> str:
     s = core.load_json(core.DATA / "session.json", {})
     now = core.now_rome()
-    waiting = sorted(h["slot"] for h in core.history()
-                     if h.get("status") == "queued" and (t := core.slot_time(h.get("slot", ""))) and t >= now
-                     and (core.ROOT / "queue" / h["slot"]).exists())
-    line = (f"Stopped. This session: {s.get('queued', 0)} posts queued, {s.get('review', 0)} sent to review/, "
-            f"{s.get('dropped', 0)} dropped. ")
-    if not waiting:
-        return line + "No auto posts are waiting in the queue."
-    last = core.slot_time(waiting[-1])
-    days = (last.date() - now.date()).days
-    return line + (f"{len(waiting)} auto posts are waiting, scheduled through {last:%a %d %b} "
-                   f"({days} {'day' if days == 1 else 'days'} from today).")
+    pool = virality.load().values()
+    scheduled = sorted(e["slot"] for e in pool if e["status"] == "scheduled" and core.slot_time(e["slot"]) >= now)
+    waiting = sum(1 for e in pool if e["status"] == "waiting")
+    line = (f"Stopped. This session: {s.get('ready', 0)} threads ready, {s.get('review', 0)} sent to review/, "
+            f"{s.get('dropped', 0)} dropped, {s.get('searches', 0)} category searches. ")
+    if scheduled:
+        last = core.slot_time(scheduled[-1])
+        days = (last.date() - now.date()).days
+        line += (f"{len(scheduled)} threads are scheduled, through {last:%a %d %b} "
+                 f"({days} {'day' if days == 1 else 'days'} from today). ")
+    else:
+        line += "No threads are scheduled. "
+    return line + f"{waiting} more wait in the virality queue."
 
 
 if __name__ == "__main__":

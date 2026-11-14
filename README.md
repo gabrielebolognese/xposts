@@ -55,35 +55,35 @@ The **Scheduled posts** tab lists every upcoming post in your local `queue/`, by
 
 ## Timing
 
-GitHub's timer is not exact: runs often start 5 to 20 minutes late. Posts go out between your time and about 30 minutes after it. Runs only happen 06:00 to 23:30 Italian time (edit the cron line in `.github/workflows/post.yml` to change that; cron times are UTC).
+GitHub's timer is not exact: runs often start 5 to 20 minutes late. Posts go out between your time and about 30 minutes after it. Runs only happen from about 05:00 (06:00 in summer) to 23:30 Italian time (edit the cron line in `.github/workflows/post.yml` to change that; cron times are UTC).
 
-## Auto posts
+## Auto threads
 
-A runner writes long-form posts by itself and adds them to the queue, at most 1 a day, at a random minute between 12:30 and 13:30 (Italian time). Start it in Git Bash from this folder:
+A runner discovers useful tools, repositories, free alternatives and AI models, writes an X thread about the best ones, scores each thread for virality, and keeps `queue/` filled with the highest scored threads: 3 a day at 06:00, 10:00 and 14:00 (Italian time), at most 4 days ahead. Start it in Git Bash from this folder:
 
 ```
 bash pipeline/run.sh
 ```
 
-It keeps going until you press Ctrl+C, then prints how many posts it queued and through which day the auto posts are scheduled. `bash pipeline/run.sh --once` stops after one post, and `bash pipeline/run.sh --posts 10` stops once 10 posts are queued. A stopped run picks up where it left off next time.
+It keeps going until you press Ctrl+C, then prints what it did, through which day threads are scheduled and how many wait in the virality queue. `bash pipeline/run.sh --once` stops after one thread, and `bash pipeline/run.sh --posts 10` stops once 10 threads are made. A stopped run picks up where it left off next time.
 
-Each post goes through these stages:
-1. Harvest: new items from `pipeline/sources.txt`.
-2. Scout: ideas, scored and picked with a niche mix.
-3. Research: facts with sources, plus hands-on checks in the public sandbox repo `xposts-sandbox`, which holds no secrets.
-4. Credibility: scored on what the research found. Weakly backed ideas are dropped here.
-5. Outline.
-6. Value gate.
-7. Writing, following `.claude/skills/x-long-form-posts/SKILL.md`. No links.
-8. Inspection and up to 3 fix rounds. The editor judges content, not wording.
-9. Queue: commit and push.
+**Discovery.** The runner works through the 120 categories in `pipeline/categories.json` in order, about 5 category searches a day, and starts a new cycle after the last one. Each search collects signals from GitHub, Hacker News, Reddit and Hugging Face, then Sonnet searches the web around them. Every tool found is stored once in `pipeline/data/discoveries.json`; a tool comes back only for a meaningful change (a new release, a pricing change), at least 60 days after its thread. To add a category, add a line to `categories.json` with the next id.
 
-Sonnet handles the scouting (ideas and scores). Opus handles everything from research on.
+**Each thread goes through these stages** (Opus from here on):
+1. Analyze: the official repo, docs, releases, license and pricing are verified, with facts and sources. CLI tools are installed and run once in the public sandbox repo `xposts-sandbox`, which holds no secrets. Archived, abandoned, unsafe or unverifiable projects are dropped.
+2. Score: 8 criteria (problem solving, savings, usefulness, novelty, ease, relevance, reliability, hook strength).
+3. Hooks: 12 candidates from different angles, filtered by code (no numbers the facts do not back), then critiqued and refined.
+4. Thread: the main post (the hook and a promise line), then 4 to 7 replies, numbered 1. 2. 3., at most 280 characters each. The last reply says how to find the tool (a GitHub search or a DM or comment CTA), never a link. Rules: `.claude/skills/x-threads/SKILL.md`.
+5. Quality control and up to 3 fix rounds.
+6. Virality: hook score and full-thread score out of 100 (final = hook x 0.65 + thread x 0.35), from the rules in `pipeline/prompts/virality.md`. Under 80, alternative hooks are tried first. Under 70, the thread is dropped.
 
-Posts that still fail after the fix rounds are not queued: they land in `pipeline/review/` with a NEEDS REVIEW note. While the runner is on, it also starts the posting workflow at the exact minute a post comes due.
+**The virality queue.** Finished threads wait in `pipeline/data/virality.json`. The highest scores always go out first: before every step the runner puts the best threads into the next free slots, so a new thread that beats the ones already scheduled takes the earliest slot and pushes the others back, out of `queue/` when they no longer fit (they can wait indefinitely). Slots that are due within 15 minutes are never changed. `python pipeline/lib/virality.py` lists the queue with scores. The runner makes 4 to 20 threads a day (it searches more categories when it has fewer than 4) and starts a new day's generation at midnight.
 
-- **Sources:** one per line in `pipeline/sources.txt` (types are listed at the top of `pipeline/lib/harvest.py`). Product Hunt, the subreddits and Hacker News are read through public feeds. Reddit sometimes answers "too many requests", and that source is then skipped until the next harvest.
-- **Settings:** models, windows, scores and limits live in `pipeline/config.json`.
-- **Local state (never committed):** `pipeline/data/` (pool, backlog, history), `pipeline/runs/` (every file of every post), `pipeline/logs/`.
-- **Requirements:** the `claude` CLI logged in (it shares your Claude usage limits), `gh` logged in, Python 3.11+ with `jsonschema`, Node 22.
-- **Tests:** `node --test pipeline/tests/next-slot.test.mjs`, `python -m unittest discover -s pipeline/tests -p "test_*.py"`, `bash pipeline/tests/e2e.sh` (fake model and sandbox, no network).
+**Threads in `queue/`:** a folder holds `post.txt` (the main post) and `reply1.txt`, `reply2.txt` and so on. `post.js` posts the main post, then each reply under the previous one. It writes the posted ids to `thread.json`, so a thread that stops halfway resumes at the next reply on the next run, and a started thread is always finished, never moved to `missed/`.
+
+Threads that still fail quality control after the fix rounds land in `pipeline/review/` with a NEEDS REVIEW note. While the runner is on, it also starts the posting workflow at the exact minute a post comes due. A DM or comment CTA means you answer those people yourself.
+
+- **Settings:** models, slots, the daily searches, scores and limits live in `pipeline/config.json`.
+- **Local state (never committed):** `pipeline/data/` (rotation, searches, discoveries, virality queue, history), `pipeline/runs/` (every file of every thread), `pipeline/logs/`.
+- **Requirements:** the `claude` CLI logged in (it shares your Claude usage limits; each thread takes about 10 Opus calls), `gh` logged in, Python 3.11+ with `jsonschema`, Node 22.
+- **Tests:** `node --test pipeline/tests/post.test.mjs`, `python -m unittest discover -s pipeline/tests -p "test_*.py"`, `bash pipeline/tests/e2e.sh` (fake model, discovery and sandbox, no network).

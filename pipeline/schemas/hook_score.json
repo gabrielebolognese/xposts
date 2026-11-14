@@ -1,0 +1,22 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["scores"],
+ "properties": {
+  "scores": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["index", "score", "accurate", "note"],
+    "properties": {
+     "index": {"type": "integer", "minimum": 0},
+     "score": {"type": "integer", "minimum": 0, "maximum": 100},
+     "accurate": {"type": "boolean"},
+     "note": {"type": "string"}
+    }
+   }
+  }
+ }
+}

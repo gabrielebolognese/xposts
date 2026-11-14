@@ -1,0 +1,64 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["title", "criteria", "bonuses", "penalties", "hook_score", "labels", "strengths", "weaknesses", "improvement"],
+ "properties": {
+  "title": {"type": "string"},
+  "criteria": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["financial", "brand", "hook", "curiosity", "problem", "shareability", "audience", "delivery"],
+   "properties": {
+    "financial": {"type": "integer", "minimum": 0, "maximum": 20},
+    "brand": {"type": "integer", "minimum": 0, "maximum": 15},
+    "hook": {"type": "integer", "minimum": 0, "maximum": 20},
+    "curiosity": {"type": "integer", "minimum": 0, "maximum": 10},
+    "problem": {"type": "integer", "minimum": 0, "maximum": 10},
+    "shareability": {"type": "integer", "minimum": 0, "maximum": 10},
+    "audience": {"type": "integer", "minimum": 0, "maximum": 5},
+    "delivery": {"type": "integer", "minimum": 0, "maximum": 5}
+   }
+  },
+  "bonuses": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["combination", "recognition", "novelty"],
+   "properties": {
+    "combination": {"type": "integer", "minimum": 0, "maximum": 8},
+    "recognition": {"type": "integer", "minimum": 0, "maximum": 3},
+    "novelty": {"type": "integer", "minimum": 0, "maximum": 3}
+   }
+  },
+  "penalties": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["kind", "points", "reason"],
+    "properties": {
+     "kind": {"enum": ["misleading_financial", "weak_hook", "overused", "weak_delivery", "unverified", "engagement_bait"]},
+     "points": {"type": "integer", "minimum": 0, "maximum": 30},
+     "reason": {"type": "string"}
+    }
+   }
+  },
+  "hook_score": {"type": "integer", "minimum": 0, "maximum": 100},
+  "labels": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": ["financial_value", "brand_recognition", "curiosity", "problem_solving", "shareability", "evidence_confidence"],
+   "properties": {
+    "financial_value": {"enum": ["low", "medium", "high", "exceptional"]},
+    "brand_recognition": {"enum": ["low", "medium", "high"]},
+    "curiosity": {"enum": ["low", "medium", "high"]},
+    "problem_solving": {"enum": ["low", "medium", "high"]},
+    "shareability": {"enum": ["low", "medium", "high"]},
+    "evidence_confidence": {"enum": ["high", "medium", "low"]}
+   }
+  },
+  "strengths": {"type": "string"},
+  "weaknesses": {"type": "string"},
+  "improvement": {"type": "string"}
+ }
+}

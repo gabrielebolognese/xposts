@@ -1,116 +1,126 @@
 {
-  "repo": "gabrielebolognese/xposts",
-  "sandbox_repo": "gabrielebolognese/xposts-sandbox",
-  "push": true,
-  "dispatch": true,
-  "windows": [
-    [
-      "12:30",
-      "13:30"
-    ]
+ "repo": "gabrielebolognese/xposts",
+ "sandbox_repo": "gabrielebolognese/xposts-sandbox",
+ "push": true,
+ "dispatch": true,
+ "slots": {
+  "times": [
+   "06:00",
+   "10:00",
+   "14:00"
   ],
-  "lead_minutes": 15,
-  "runner": {
-    "harvest_every_minutes": 120,
-    "idle_minutes": 30,
-    "error_pause_minutes": 5,
-    "dispatch_grace_minutes": 10
+  "horizon_days": 4
+ },
+ "lead_minutes": 15,
+ "runner": {
+  "idle_minutes": 30,
+  "error_pause_minutes": 5,
+  "dispatch_grace_minutes": 10
+ },
+ "models": {
+  "discover": {
+   "model": "sonnet",
+   "effort": "medium"
   },
-  "models": {
-    "ideate": {
-      "model": "sonnet",
-      "effort": "medium"
-    },
-    "score": {
-      "model": "sonnet",
-      "effort": "medium"
-    },
-    "research": {
-      "model": "opus",
-      "effort": "high"
-    },
-    "credibility": {
-      "model": "opus",
-      "effort": "medium"
-    },
-    "expand": {
-      "model": "opus",
-      "effort": "medium"
-    },
-    "gate": {
-      "model": "opus",
-      "effort": "medium"
-    },
-    "write": {
-      "model": "opus",
-      "effort": "high"
-    },
-    "editor": {
-      "model": "opus",
-      "effort": "medium"
-    },
-    "fixer": {
-      "model": "opus",
-      "effort": "medium"
-    },
-    "limit_fallback": {
-      "model": "opus",
-      "effort": "medium"
-    }
+  "analyze": {
+   "model": "opus",
+   "effort": "high"
   },
-  "timeouts": {
-    "call_seconds": 1800,
-    "research_seconds": 2700,
-    "sandbox_seconds": 1200
+  "score": {
+   "model": "opus",
+   "effort": "medium"
   },
-  "retries": {
-    "transient_backoff_seconds": [
-      60,
-      240,
-      960
-    ],
-    "limit_margin_seconds": 120
+  "hooks": {
+   "model": "opus",
+   "effort": "high"
   },
-  "harvest": {
-    "pool_keep_days": 30,
-    "first_run_items": 20,
-    "item_text_chars": 1500
+  "hook_critic": {
+   "model": "opus",
+   "effort": "medium"
   },
-  "scout": {
-    "pool_days": 14,
-    "max_items": 80,
-    "candidates": 8,
-    "min_total": 13,
-    "hard_min": {
-      "value": 2,
-      "novelty": 2
-    },
-    "similar_ratio": 0.8,
-    "cooldown_days": 7,
-    "backlog_decay": 0.9,
-    "backlog_days": 14,
-    "backlog_min": 10,
-    "similar_words": 0.3
+  "thread": {
+   "model": "opus",
+   "effort": "high"
   },
-  "credibility_min": 2,
-  "quota": {
-    "window": 6,
-    "max": {
-      "ai": 2,
-      "saas": 1,
-      "webdev": 1,
-      "video": 1,
-      "design": 1
-    }
+  "editor": {
+   "model": "opus",
+   "effort": "medium"
   },
-  "caps": {
-    "sandbox_fix_rounds": 2,
-    "gate_reworks": 1,
-    "inspect_fix_rounds": 3,
-    "run_errors": 2
+  "fixer": {
+   "model": "opus",
+   "effort": "medium"
   },
-  "inspect": {
-    "min_slop_score": 70,
-    "min_fingerprint_score": 100
+  "virality": {
+   "model": "opus",
+   "effort": "medium"
+  },
+  "virality_hooks": {
+   "model": "opus",
+   "effort": "high"
+  },
+  "hook_score": {
+   "model": "opus",
+   "effort": "medium"
+  },
+  "limit_fallback": {
+   "model": "opus",
+   "effort": "medium"
   }
+ },
+ "timeouts": {
+  "call_seconds": 1800,
+  "discover_seconds": 1800,
+  "analyze_seconds": 2700,
+  "sandbox_seconds": 1200
+ },
+ "retries": {
+  "transient_backoff_seconds": [
+   60,
+   240,
+   960
+  ],
+  "limit_margin_seconds": 120
+ },
+ "discovery": {
+  "searches_per_day": 5,
+  "candidates_per_search": 10,
+  "first_since_days": 120,
+  "gh_min_stars": 30,
+  "gh_new_min_stars": 10,
+  "signals_max": 40,
+  "triage_min": 9,
+  "revisit_min_days": 60,
+  "max_searches_per_day": 15
+ },
+ "select": {
+  "min_total": 16,
+  "hard_min": {
+   "problem_solving": 2,
+   "usefulness": 2,
+   "reliability": 2
+  },
+  "max_inactive_days": 365,
+  "similar_ratio": 0.8
+ },
+ "hooks": {
+  "candidates": 12,
+  "recent_openings": 10
+ },
+ "virality": {
+  "min_score": 70,
+  "optimize_below": 80,
+  "hook_weight": 0.65,
+  "alternative_hooks": 10,
+  "min_per_day": 4,
+  "max_per_day": 20
+ },
+ "caps": {
+  "sandbox_fix_rounds": 2,
+  "inspect_fix_rounds": 3,
+  "run_errors": 2
+ },
+ "inspect": {
+  "min_slop_score": 70,
+  "min_fingerprint_score": 100
+ }
 }

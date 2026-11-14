@@ -1,14 +1,20 @@
 # Stage: hooks
 
-Write 5 different hook pairs for this long-form X post, following the rulebook's two-sentence hook rules exactly:
-- audience: sentence 1, all lowercase, naming the audience or situation, natural and short ("next.js developers", "saas founders", "developers using claude code"). No CAPS, no period needed.
-- grabber: sentence 2, a concrete reason to keep reading: a specific benefit, insight, problem, warning or opportunity the post really delivers. Either lowercase, or ALL CAPS with at most 50 characters including spaces and punctuation. No clickbait, no promise the post does not keep, no emojis, no em dashes, no asterisks.
+Write {{COUNT}} hook candidates for an X thread about this discovery. The hook is the first line of the main post and the most important text in the whole thread. Read the rulebook's hook section below and follow it.
 
-Make the 5 pairs genuinely different (different audiences, different angles, a mix of lowercase and caps grabbers).
+- Problem-solving centered: a concrete benefit, a recognizable frustration solved, an unexpected alternative, or an unnecessary expense challenged. The reader should understand at once what problem this solves and why they should care.
+- Use at least 5 different angles across the candidates (financial savings, free access, time savings, replacing a paid product, eliminating a frustrating task, hidden functionality, better performance, a simpler workflow, access to powerful technology, avoiding subscriptions), and different sentence structures: no two candidates may start with the same three words. The rulebook's examples are inspiration, not templates.
+- One line each, at most 180 characters. No links or web addresses, no emojis, no em dashes, no asterisks or backticks.
+- Accurate: it must represent what the tool really does. Every number (price, percentage, count, time) must come from the facts, and fact_ids lists the facts behind each candidate. Never inflate: if a tool cuts token use by 30%, do not claim 90%.
+- Do not reuse the openings of these recent hooks: {{RECENT}}
+{{RETRY}}
+The analysis:
+{{ANALYSIS}}
 
-Reader contract (what the post delivers): {{CONTRACT}}
+Facts:
+{{FACTS}}
 
-Outline:
-{{OUTLINE}}
+The rulebook:
+{{RULEBOOK}}
 
 Answer with the JSON object only.

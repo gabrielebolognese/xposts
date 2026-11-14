@@ -44,6 +44,15 @@
   .run { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 4px 0; }
   .run a { color: var(--ink); }
   .empty { color: var(--muted); padding: 30px 0; }
+  body { padding-bottom: 220px; }
+  #progress { position: fixed; right: 16px; bottom: 16px; width: 320px; max-height: 45vh; overflow: auto; background: var(--bg);
+              border: 1px solid var(--ink); border-radius: 6px; padding: 12px 14px; font-size: 13px; z-index: 10; }
+  #progress h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 6px; color: var(--muted); }
+  #progress .item + .item { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
+  #progress .item b { display: block; font-size: 14px; overflow-wrap: anywhere; }
+  #progress .bar { margin: 6px 0 4px; }
+  #progress .hook { color: var(--muted); overflow-wrap: anywhere; margin-top: 4px; }
+  @media (max-width: 700px) { #progress { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 35vh; } }
 </style>
 </head>
 <body>
@@ -53,18 +62,23 @@
 <div id="list"></div>
 <details class="box"><summary>Posted now</summary><div id="nowRuns" class="note"></div></details>
 <details class="box" id="logBox"><summary>Runner log</summary><pre id="log"></pre></details>
+<aside id="progress"><h3>Being made now</h3><div id="making"></div></aside>
 <script>
-const TABS = [['all', 'All'], ['making', 'Making'], ['scheduled', 'Scheduled'], ['waiting', 'Waiting'],
-              ['review', 'Review'], ['dropped', 'Dropped'], ['posted', 'Posted']];
+// Ready (scheduled or waiting in the virality queue) is the main view, best score first; threads being made are in
+// the box at the bottom right
+const TABS = [['ready', 'Ready'], ['posted', 'Posted'], ['review', 'Review'], ['dropped', 'Dropped']];
 const STAGES = ['analyze', 'score', 'hooks', 'thread', 'inspect', 'virality'];
 const STAGE_LABEL = { analyze: 'verifying the project', score: 'scoring the discovery', hooks: 'writing hooks',
                       thread: 'writing the thread', inspect: 'quality control', virality: 'virality scoring' };
-let data = null, online = false, tab = 'all', confirming = null;
+let data = null, online = false, tab = 'ready', confirming = null, runnerText = '';
 const open = new Set(), notes = {};
-try { tab = localStorage.getItem('tab') || 'all'; } catch {}
+try { tab = localStorage.getItem('tab') || 'ready'; } catch {}
+if (!TABS.some(([k]) => k === tab)) tab = 'ready';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const group = (t) => (t.status === 'posted-now' ? 'posted' : t.status === 'lost' ? 'dropped' : t.status);
+const GROUP = { scheduled: 'ready', waiting: 'ready', 'posted-now': 'posted', posted: 'posted', lost: 'dropped' };
+const group = (t) => GROUP[t.status] || t.status;
+const byScore = (a, b) => (b.score ?? -1) - (a.score ?? -1) || String(a.slot || '~').localeCompare(String(b.slot || '~'));
 function when(slot) {
   const m = /^(\d{4}-\d{2}-\d{2})_(\d{2})(\d{2})/.exec(slot || '');
   if (!m) return slot ? new Date(slot).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
@@ -132,14 +146,23 @@ function card(t) {
 
 function render() {
   if (!data) return;
-  const count = (k) => (k === 'all' ? data.threads.length : data.threads.filter((t) => group(t) === k).length);
+  const count = (k) => data.threads.filter((t) => group(t) === k).length;
   document.getElementById('tabs').innerHTML = TABS.map(([k, label]) =>
     `<button class="${k === tab ? 'on' : ''}" data-tab="${k}">${label} ${count(k)}</button>`).join('');
-  let list = data.threads.filter((t) => tab === 'all' || group(t) === tab);
-  if (tab === 'scheduled') list = [...list].sort((a, b) => a.slot.localeCompare(b.slot));
-  if (tab === 'waiting') list = [...list].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-  document.getElementById('list').innerHTML = list.length ? list.map(card).join('')
-    : `<p class="empty">${data.threads.length ? 'Nothing here right now.' : 'No threads yet. They appear here as soon as the runner starts making them (bash pipeline/run.sh).'}</p>`;
+  let list = data.threads.filter((t) => group(t) === tab);
+  if (tab === 'ready') list = [...list].sort(byScore);
+  const empty = tab === 'ready' ? 'No finished threads yet. Each one appears here when it passes every check, best score first.'
+    : 'Nothing here.';
+  document.getElementById('list').innerHTML = list.length ? list.map(card).join('') : `<p class="empty">${empty}</p>`;
+
+  const making = data.threads.filter((t) => t.status === 'making');
+  document.getElementById('making').innerHTML = making.length ? making.map((t) => {
+    const at = STAGES.indexOf(t.stage);
+    return `<div class="item"><b>${esc(t.name)}</b><span class="sub">${esc(t.category)}</span>
+      <div class="bar">${STAGES.map((s, i) => `<i class="${i <= at ? 'done' : ''}" title="${s}"></i>`).join('')}</div>
+      <div>Step ${at + 1} of ${STAGES.length}: ${esc(statusText(t).replace(/^Making: /, ''))}, updated ${ago(t.updated)}</div>
+      ${t.hook ? `<div class="hook">${esc(t.hook)}</div>` : ''}</div>`;
+  }).join('') : `<div class="sub">Nothing is being made right now. ${esc(runnerText)}</div>`;
   const log = document.getElementById('log');
   const atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 20;
   log.textContent = data.log.lines.join('\n') || 'The runner has not written anything yet.';
@@ -157,7 +180,8 @@ async function refresh() {
     const recent = data.log.updated && Date.now() - data.log.updated < 40 * 60000;
     const runner = data.lock && recent ? `runner on, last activity ${ago(data.log.updated)}`
       : `runner ${data.lock ? 'quiet' : 'off'}${data.log.updated ? `, last activity ${ago(data.log.updated)}` : ''}`;
-    status(`Live, updated ${new Date().toLocaleTimeString('en-GB')}. Today: ${data.madeToday} threads made, ${data.searches} category searches. ${runner[0].toUpperCase() + runner.slice(1)}.`);
+    runnerText = `${runner[0].toUpperCase() + runner.slice(1)}.`;
+    status(`Live, updated ${new Date().toLocaleTimeString('en-GB')}. Today: ${data.madeToday} threads made, ${data.searches} category searches. ${runnerText}`);
   } catch {
     online = false;
     status('Offline: the dashboard server is not running. Start it with npm run dashboard, then reload this page.');

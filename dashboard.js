@@ -9,7 +9,7 @@ import path from 'node:path';
 import { exec, execFile } from 'node:child_process';
 
 const ROOT = import.meta.dirname;
-const PORT = 3001;
+const PORT = Number(process.env.DASHBOARD_PORT) || 3001; // tests use another port and DASHBOARD_NO_OPEN=1
 const ADDRESS = `http://localhost:${PORT}`;
 const STAGES = ['analyze', 'score', 'hooks', 'thread', 'inspect', 'virality'];
 const BOM = String.fromCharCode(0xfeff);
@@ -97,14 +97,16 @@ function state() {
   return { now: Date.now(), threads: threads(), log: logTail(), searches, madeToday, lock };
 }
 
+// DASHBOARD_FAKE_GH=<script.js> (tests) runs that node script instead of the GitHub CLI, so nothing can be posted
 function gh(args) {
+  const fake = process.env.DASHBOARD_FAKE_GH;
   return new Promise((resolve, reject) => {
-    const tryAt = (bins) => execFile(bins[0], args, { timeout: 60000 }, (err, stdout, stderr) => {
+    const tryAt = (bins) => execFile(bins[0], fake ? [fake, ...args] : args, { timeout: 60000 }, (err, stdout, stderr) => {
       if (err?.code === 'ENOENT' && bins.length > 1) return tryAt(bins.slice(1));
       if (err) return reject(new Error((stderr || err.message).trim().slice(0, 300)));
       resolve(stdout);
     });
-    tryAt(['gh', 'C:/Program Files/GitHub CLI/gh.exe']);
+    tryAt(fake ? [process.execPath] : ['gh', 'C:/Program Files/GitHub CLI/gh.exe']);
   });
 }
 
@@ -154,13 +156,15 @@ function serve() {
         if (req.method === 'GET' && req.url === '/api/state') return json(state());
         if (req.method === 'GET' && req.url === '/api/post-now-runs') return json(await postNowRuns());
         // JSON only: browsers won't send a cross-origin JSON POST without CORS, so other sites can't press the button
-        if (req.method === 'POST' && req.url === '/api/post-now' && req.headers['content-type'] === 'application/json') {
+        if (req.method === 'POST' && req.url === '/api/post-now') {
+          if (!String(req.headers['content-type']).startsWith('application/json')) return json({ error: 'JSON requests only' }, 415);
           const chunks = [];
           for await (const chunk of req) chunks.push(chunk);
           const { run } = JSON.parse(Buffer.concat(chunks).toString());
           if (typeof run !== 'string' || !/^[\w.-]+$/.test(run)) return json({ error: 'bad run name' }, 400);
           return json(await postNow(run));
         }
+        if (req.url.startsWith('/api/')) return json({ error: `unknown request ${req.method} ${req.url}` }, 404);
         res.writeHead(404);
         res.end();
       } catch (err) {
@@ -169,6 +173,7 @@ function serve() {
     })
     .listen(PORT, 'localhost', () => {
       console.log(`Dashboard running on ${ADDRESS} (Ctrl+C to stop)`);
+      if (process.env.DASHBOARD_NO_OPEN) return;
       const open = { win32: 'start ""', darwin: 'open' }[process.platform] ?? 'xdg-open';
       exec(`${open} ${ADDRESS}`);
     });

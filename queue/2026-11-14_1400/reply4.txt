@@ -1,1 +1,1 @@
-4. Good fit if you take confidential calls in legal, healthcare, finance or HR. Meeting data stays on your machine. It only goes online for model downloads and update checks. Since there's no bot, tell the others you're recording.
+4. Hardware: Apple Silicon M1 to M5 with 16 GB or more. No Intel Macs, no Windows. On 16 GB, LTX-2.5 runs at smaller sizes, and a video now peaks around 5.7 GB of memory (it was 9 GB). Full size needs 48 GB. Set aside about 40 GB of disk for the first install.

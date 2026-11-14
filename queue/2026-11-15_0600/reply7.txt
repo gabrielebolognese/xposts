@@ -1,1 +1,1 @@
-7. There is no GitHub repo. Search for Meta Muse Glimmer 30B and open the official Hugging Face page under the meta-models org. Download only from that org, because look-alike repos exist for popular models.
+7. Go to GitHub and search for: FrigadeHQ/yogurt. It's free under the MIT license and needs no account. The Show HN post got 298 points.

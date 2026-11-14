@@ -1,1 +1,1 @@
-2. Transcription runs locally with Whisper through whisper.cpp. Summaries and answers come from a local Gemma 4, gpt-oss or Qwen3 model through llama.cpp, picked to fit your hardware. After the one-time model download it works offline.
+2. It goes past short clips. One Shot makes a continuous shot of 30 seconds to 2 minutes. The Editor timeline exports to DaVinci Resolve, Premiere Pro or After Effects. With 24 GB you can train a character LoRA from 15 to 50 of your own photos.

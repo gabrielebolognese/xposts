@@ -1,0 +1,1 @@
+2. License is Apache 2.0 for all artifacts, and the model card says it is intended for commercial and research use. The weights are free to download. You pay only for your own hardware or any hosting you choose.

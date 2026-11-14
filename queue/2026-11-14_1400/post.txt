@@ -1,0 +1,3 @@
+Your local agent halts every time a tool call fails? Meta's open 30B Muse Glimmer is trained to diagnose the error and retry. Free, Apache 2.0.
+
+What it is, the hardware it needs, how to run it, and where it falls short.

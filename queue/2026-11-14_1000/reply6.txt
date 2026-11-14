@@ -1,1 +1,1 @@
-6. The catches: the repo was only created on 2026-11-10, so expect rough edges. Speaker names from Zoom, Teams and Meet work on Mac only. The Windows build isn't signed yet, so at the SmartScreen warning click More info, then Run anyway.
+6. Limits: it's still early, the latest release is v0.0.122. Speed figures are from flagship chips. The NPU path is experimental and only speeds up Q4_0 and Q8_0 quants. Tool calling includes web search, which uses the network. Mac runs the iOS app and needs an M1 or newer.

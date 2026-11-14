@@ -1,1 +1,1 @@
-5. You need macOS 14.4+ on Apple Silicon, Windows 10 2004+ (x64) or Ubuntu 22.04+ (x64 AppImage), plus 8 GB of memory. Setup first downloads a notes model of about 5 GB, then a better one that can be 14 GB or more.
+5. Pricing: the core app is free. Pro is optional and adds Kokoro voice replies, personas and actions. The README lists $119 lifetime or $7.99/month. The Pro page currently shows $34.99 lifetime for a limited time, and says $7.99/month will rise to $9.99.

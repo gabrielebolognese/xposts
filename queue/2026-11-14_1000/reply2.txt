@@ -1,1 +1,1 @@
-2. Transcription runs locally with Whisper through whisper.cpp. Summaries and answers come from a local Gemma 4, gpt-oss or Qwen3 model through llama.cpp, picked to fit your hardware. After the one-time model download it works offline.
+2. Chat runs GGUF models like Qwen 3, Llama 3.2, Gemma 3 and Phi-4, or your own .gguf files. On a Snapdragon 8 Gen 2+ that's 15-30 tok/s on CPU and 20-40 tok/s on the Adreno GPU. Image generation takes 5-10s per image on a Snapdragon NPU.

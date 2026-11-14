@@ -1,1 +1,1 @@
-1. Granola's free Basic plan only keeps 30 days of meeting history. Yogurt is an open-source desktop app from Frigade for Mac, Windows and Linux. It records your calls without a bot joining the meeting.
+1. Off Grid is an open-source app for phones and Macs that runs AI models on your own hardware: chat, vision, Whisper speech-to-text and Stable Diffusion image generation. No account, no API key.

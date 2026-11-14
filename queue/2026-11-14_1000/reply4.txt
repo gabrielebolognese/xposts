@@ -1,1 +1,1 @@
-4. Good fit if you take confidential calls in legal, healthcare, finance or HR. Meeting data stays on your machine. It only goes online for model downloads and update checks. Since there's no bot, tell the others you're recording.
+4. Bonus: if you already run Ollama, LM Studio or LocalAI at home, Off Grid can connect to it over your local network. Your phone becomes a client for the bigger models on your desktop.

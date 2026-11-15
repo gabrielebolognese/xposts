@@ -1,3 +1,3 @@
-Claude Code can make AI video on your Mac. This free app ships an MCP server, so any MCP agent can render video, images and speech locally on Apple Silicon.
+Stop paying Claude Opus prices for every agent step. NVIDIA's open-source router sends easy ones to a cheaper model: $109.81 vs $148.83 per Terminal-Bench 2.1 run.
 
-What it can do, what it really costs, and the catches to know first:
+Here's the open-source router behind those numbers and how to try it.

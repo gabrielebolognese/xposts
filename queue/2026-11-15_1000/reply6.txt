@@ -1,1 +1,1 @@
-6. Caveats: it's pre-1.0, so APIs, config and routing behavior can change between releases. Pin your version. The standalone server from cargo install --locked switchyard-server is for demos and local evaluation only, not production.
+6. Catches: releases are still beta (v0.1.917-beta). Server-side tools are on by default, so be careful exposing it on a network. Core is Apache 2.0, but the Studio UI is AGPL-3.0, which matters if you ship a modified version as a service.

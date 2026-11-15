@@ -1,5 +1,2 @@
-5. Run it without installing: uvx whichllm@latest
-
-Shopping for a GPU? Simulate one: uvx whichllm@latest --gpu "RTX 4090"
-
-whichllm run downloads the top pick and opens a chat. Needs Python 3.11+. Or install with pip install whichllm
+5. Runs on Android, macOS, Windows and Linux; iOS is experimental with no App Store or TestFlight build. The Windows installer needs no admin rights. The macOS app is not notarised yet. Quick CLI test:
+bmoe-cli -m model.gguf --auto -p "Explain MoE routing."

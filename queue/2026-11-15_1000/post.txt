@@ -1,3 +1,3 @@
-Stop paying Claude Opus prices for every agent step. NVIDIA's open-source router sends easy ones to a cheaper model: $109.81 vs $148.83 per Terminal-Bench 2.1 run.
+Claude Code without the API bill: one free, open-source command, unsloth start claude, runs it on a 27B Qwen model on your own GPU. You can fine-tune the model too.
 
-Here's the open-source router behind those numbers and how to try it.
+Here's how it works, what hardware you need, and the catches.

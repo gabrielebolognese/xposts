@@ -1,1 +1,1 @@
-4. Practical use: there's a guide for routing between Sonnet and Opus in Claude Code with your Claude login (Linux x86_64 only). Another lets Auto routing pick a capable or efficient model for each request in VS Code Copilot Chat.
+4. Hardware: per the docs, QLoRA on a 7B model needs at least 5 GB of VRAM, and a 70B model needs 41 GB. On Windows and Linux, Studio needs an NVIDIA GPU. A paid Pro tier also exists.

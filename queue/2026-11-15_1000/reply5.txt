@@ -1,1 +1,5 @@
-5. Fastest way to test it: on OpenRouter, set model to nvidia/switchyard. You pay the rate of whichever model answers, with no extra routing fee. To embed it in your own stack: pip install nemo-switchyard
+5. Install on Mac:
+brew install --cask unsloth
+On Windows:
+winget install --id UnslothAI.Unsloth -e
+There's also a one-line script, but it pipes a remote script into your shell. The package managers or desktop installers are the safer route.

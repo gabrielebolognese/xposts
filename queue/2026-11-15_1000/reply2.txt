@@ -1,1 +1,3 @@
-2. The default mode, Stage routing, doesn't only read the prompt. It uses recent tool activity and outcome signals, so the model can change while the agent works. It runs efficient-first with a 0.5 confidence threshold and no classifier call.
+2. The Claude Code part:
+unsloth start claude --model unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_XL
+That runs Claude Code on a local Qwen model instead of a cloud one. It also works with Codex and other agents, and it can serve models through an OpenAI-compatible API.

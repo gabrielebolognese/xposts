@@ -1,1 +1,1 @@
-2. Providers can be an API key (DeepSeek, Kimi, GLM and more), a local model, or any OpenAI- or Anthropic-compatible URL. You can use one provider across all your agents instead of setting keys and base URLs in each tool.
+2. The token cut did not cost accuracy in their test. Across 244 retrieval questions on 4 models, TOON scored 72.2% vs 71.4% for JSON. Headers also declare the row count [N] and the field list {fields}, so truncated or malformed output can't slip through.

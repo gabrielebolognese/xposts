@@ -1,1 +1,1 @@
-3. It's not a pure win every time. On DeepSWE, Stage solved 61.36% for $466.28, vs 62.8% for $720.95 with Sol alone. A bit less success, a lot less cost. The README itself warns a cheaper call doesn't guarantee a cheaper finished task.
+3. Training side: LoRA, QLoRA, full fine-tuning, pretraining, GRPO, DPO and FP8. They claim 2x faster training with 70% less VRAM and no accuracy loss. That's their number, not an independent test. You can export the result to GGUF, NVFP4 or FP8.

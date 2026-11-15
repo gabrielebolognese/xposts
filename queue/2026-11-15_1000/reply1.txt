@@ -1,1 +1,1 @@
-1. The tool is Switchyard, an open-source library from NVIDIA. It pairs a cheaper efficient model with a stronger capable model and picks which one handles each request or agent step. Apache-2.0 licensed.
+1. Unsloth runs and trains LLMs and diffusion models locally. Use it as a desktop app, a browser UI called Studio, or a Python library called Core. Works on Windows, Linux, WSL and macOS, with NVIDIA, AMD, Intel GPUs, CPUs and Vulkan.

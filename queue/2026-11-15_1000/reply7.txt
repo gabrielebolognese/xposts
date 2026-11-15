@@ -1,1 +1,2 @@
-7. Go to GitHub and search for: NVIDIA-NeMo/Switchyard. Or search the web for NVIDIA NeMo Switchyard and open the official repo.
+7. Go to GitHub and search for: unslothai/unsloth
+Or search for Unsloth Desktop and open the official website to get the installers.

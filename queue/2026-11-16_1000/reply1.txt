@@ -1,1 +1,1 @@
-1. Picking a local model often means downloading several multi-GB files to see what fits. whichllm reads your GPU, RAM and memory bandwidth, finds which open models fit, estimates their speed, ranks them by benchmarks and prints the command for the top pick.
+1. BigMoeOnEdge is built on llama.cpp. MoE models use only a few experts per token, so it keeps the weights every token needs plus the most-used experts in memory and reads the rest from flash. Per the README, output matches the full model in memory; tests check it.

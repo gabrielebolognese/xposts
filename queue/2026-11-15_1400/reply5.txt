@@ -1,1 +1,1 @@
-5. Auto picks the model and effort for each request. Interim result: 54% cheaper with the same score on 85 coding tasks vs Opus 5.5 at xhigh. It is the only part that needs an account: the Caveman Cloud Free plan, $0 with capped usage (25,000 routing decisions).
+5. For developers: it has a local HTTP API and an MCP server, so Claude Code, Codex or any MCP agent can make media for you. The README has a CLI command that prints the exact claude mcp add phosphene line for your install.

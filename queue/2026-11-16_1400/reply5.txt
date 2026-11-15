@@ -1,1 +1,5 @@
-5. When not to use it: deeply nested or non-uniform data, where compact JSON often wins. Purely flat tables, where CSV is smaller (TOON adds about 5–10% for its guardrails). If latency matters, measure: some local or quantized models process compact JSON faster.
+5. Run it without installing: uvx whichllm@latest
+
+Shopping for a GPU? Simulate one: uvx whichllm@latest --gpu "RTX 4090"
+
+whichllm run downloads the top pick and opens a chat. Needs Python 3.11+. Or install with pip install whichllm

@@ -1,3 +1,1 @@
-4. Try it on your own data with no install: cat data.json | npx @toon-format/cli --stats
-It prints token estimates for JSON vs TOON. In code: npm install @toon-format/toon
-Official ports exist for Python, Go, Rust, .NET, Java, Swift, Dart and Julia.
+4. Speeds are estimates from memory bandwidth, not measurements of your machine. One README check: it estimated 70 tok/s for a 35B MoE model, and llama.cpp measured 79 tok/s from a 22 GB file on a 16 GB card.

@@ -1,1 +1,1 @@
-2. Version 4.0 has six parts, all on after install, each with its own switch. The two core ones: Say less makes replies short, and Read less compresses logs, JSON, CSV and test output before the model reads them.
+2. It goes past short clips. One Shot makes a continuous shot of 30 seconds to 2 minutes. The Editor timeline exports to DaVinci Resolve, Premiere Pro or After Effects. With 24 GB you can train a character LoRA from 15 to 50 of your own photos.

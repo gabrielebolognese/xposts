@@ -1,1 +1,1 @@
-2. It goes past short clips. One Shot makes a continuous shot of 30 seconds to 2 minutes. The Editor timeline exports to DaVinci Resolve, Premiere Pro or After Effects. With 24 GB you can train a character LoRA from 15 to 50 of your own photos.
+2. The default mode, Stage routing, doesn't only read the prompt. It uses recent tool activity and outcome signals, so the model can change while the agent works. It runs efficient-first with a 0.5 confidence threshold and no classifier call.

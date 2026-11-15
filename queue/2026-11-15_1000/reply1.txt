@@ -1,1 +1,1 @@
-1. It's a Mac app that runs models locally with MLX. It does text-to-video and image-to-video with sound on LTX-2.5 and MiniMax H3, plus images with FLUX.2 [klein] and Qwen-Image-Edit, full songs with vocals on YuE2 and speech on Qwen3-TTS.
+1. The tool is Switchyard, an open-source library from NVIDIA. It pairs a cheaper efficient model with a stronger capable model and picks which one handles each request or agent step. Apache-2.0 licensed.

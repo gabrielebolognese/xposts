@@ -1,1 +1,1 @@
-2. The token cut did not cost accuracy in their test. Across 244 retrieval questions on 4 models, TOON scored 72.2% vs 71.4% for JSON. Headers also declare the row count [N] and the field list {fields}, so truncated or malformed output can't slip through.
+2. Why a 35B model works on 8 GB: it's a mixture-of-experts model, so each token only uses about 3B of its parameters. When a model doesn't fit in VRAM, whichllm moves the experts to system RAM first. A plain fits-in-VRAM check would skip it.

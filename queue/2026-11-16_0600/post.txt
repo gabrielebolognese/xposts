@@ -1,3 +1,3 @@
-DeepSeek V4 Flash 284B (91 GB) on a 12 GB Android phone at 1 tok/s. A 125B Qwen at 7-9 tok/s on a 16 GB MacBook. One free llama.cpp-based tool, author's benchmarks.
+Paying per token or hitting Claude Pro/Max limits? Caveman, free and open source, cut input tokens 33.2% across 54 Claude Code runs, with 18 of 18 answers still right.
 
-How it works, what it runs on, real speeds, and the catches:
+What it does, how to install it, and the catches to know first.

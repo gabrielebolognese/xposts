@@ -1,1 +1,3 @@
-4. When a quota runs out, magpie moves to your next account. Routing groups can switch to another model or provider instead. With one account and no group, there is nothing to move to and the error reaches the agent.
+4. Try it on your own data with no install: cat data.json | npx @toon-format/cli --stats
+It prints token estimates for JSON vs TOON. In code: npm install @toon-format/toon
+Official ports exist for Python, Go, Rust, .NET, Java, Swift, Dart and Julia.

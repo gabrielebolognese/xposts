@@ -1,0 +1,1 @@
+5. Bonus: there is an optional DFlash speculative decoding drafter. Meta reports 3.1x faster decoding on an RTX 5090, 1.8x on an M5 Max and 1.5x on an M4 Max.

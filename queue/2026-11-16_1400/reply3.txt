@@ -1,4 +1,1 @@
-3. One command per agent:
-magpie claude deepseek/deepseek-v4-pro
-magpie codex moonshot/kimi-k2.5
-The first puts Claude Code on DeepSeek, the second puts Codex on Kimi. Or pick the model from one list in the menu bar.
+3. Use it as a translation layer. Keep JSON in your code and encode to TOON only right before the data goes into a prompt. It works best on uniform, table-like data. The README's weather example drops from ~117 to ~66 tokens.

@@ -1,3 +1,3 @@
-Keep Claude Code, pay DeepSeek instead: one free, MIT-licensed command swaps the model behind your coding agent. You only pay the provider you pick.
+Sending JSON to Claude or GPT? You pay for every repeated key on every row. TOON lists the fields once: 42.6% fewer tokens than JSON at similar accuracy in its 4-model test.
 
-Here's how it works, the exact commands, and the catches to know first.
+How it works, when not to use it, and how to test it on your own data:

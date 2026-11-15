@@ -1,1 +1,1 @@
-4. Hardware: Apple Silicon M1 to M5 with 16 GB or more. No Intel Macs, no Windows. On 16 GB, LTX-2.5 runs at smaller sizes, and a video now peaks around 5.7 GB of memory (it was 9 GB). Full size needs 48 GB. Set aside about 40 GB of disk for the first install.
+4. With Homebrew: brew install zzet/tap/gortex. Then run gortex install for one-time setup and gortex daemon start --detach for the background daemon. It configures the agents it detects. 19 are supported, including Claude Code, Cursor, Codex CLI and Gemini CLI.

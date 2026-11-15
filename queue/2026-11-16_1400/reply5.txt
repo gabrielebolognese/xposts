@@ -1,2 +1,1 @@
-5. Runs on Android, macOS, Windows and Linux; iOS is experimental with no App Store or TestFlight build. The Windows installer needs no admin rights. The macOS app is not notarised yet. Quick CLI test:
-bmoe-cli -m model.gguf --auto -p "Explain MoE routing."
+5. Auto picks the model and effort for each request. Interim result: 54% cheaper with the same score on 85 coding tasks vs Opus 5.5 at xhigh. It is the only part that needs an account: the Caveman Cloud Free plan, $0 with capped usage (25,000 routing decisions).

@@ -1,1 +1,1 @@
-6. It's free and MIT licensed, so commercial use is allowed. One catch: without llama.cpp installed, the first run compiles llama-cpp-python from source. That took 22 minutes on a Core Ultra 9.
+6. The catches: streaming does not help a model that already fits in memory. Decode serves one sequence at a time, so it is not for multi-user serving. And v0.42.0 has a known issue: on Mac and Android, decode from the second load on is 15-20% slower than v0.39.

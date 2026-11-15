@@ -1,1 +1,1 @@
-2. It goes past short clips. One Shot makes a continuous shot of 30 seconds to 2 minutes. The Editor timeline exports to DaVinci Resolve, Premiere Pro or After Effects. With 24 GB you can train a character LoRA from 15 to 50 of your own photos.
+2. What it gives the agent: 100+ MCP tools for symbol lookup, call chains, blast radius, dataflow, clone detection and refactoring. It parses 257 languages via tree-sitter, with compiler-grade resolution for Python, TypeScript, Go, Java, Rust, C# and more.

@@ -1,1 +1,1 @@
-3. The free tier has every model, no account, no credits, no watermark and no per-render charge. Optional Pro funds the project: $15 a month, $120 a year, or $199 once for three years. If you can't afford Pro, the README says you can email for a free licence.
+3. Where it stands out: multi-repo by default. Several repos share one graph, and call chains and contracts cross repo boundaries, which helps with microservices. Bonus: its GCX1 output format uses 27% fewer tokens than JSON.

@@ -1,1 +1,1 @@
-1. It's a Mac app that runs models locally with MLX. It does text-to-video and image-to-video with sound on LTX-2.5 and MiniMax H3, plus images with FLUX.2 [klein] and Qwen-Image-Edit, full songs with vocals on YuE2 and speech on Qwen3-TTS.
+1. Gortex is a free, open-source engine that indexes your code into a graph of functions, call chains and references. Your agent queries it through a CLI or MCP server instead of grepping and reading files. Apache 2.0, commercial use included. Runs fully local.

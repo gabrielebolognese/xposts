@@ -1,1 +1,1 @@
-5. For developers: it has a local HTTP API and an MCP server, so Claude Code, Codex or any MCP agent can make media for you. The README has a CLI command that prints the exact claude mcp add phosphene line for your install.
+5. Keep expectations real: 50x is the upper bound, measured on the gortex repo itself. A High-severity file write/RCE bug affected v0.64.7 and older, fixed in v0.64.8. Run the latest, v0.64.11. Telemetry is opt-in and off by default.

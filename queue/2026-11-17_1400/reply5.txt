@@ -1,1 +1,1 @@
-5. Before you install: it reads your agents' sign-ins to find subscriptions (magpie accounts discovery off stops it) and sends a daily anonymous ping (you can turn it off in Settings). Claude Free/Pro/Max plans in other tools break Anthropic's terms, so use API keys.
+5. When not to use it: deeply nested or non-uniform data, where compact JSON often wins. Purely flat tables, where CSV is smaller (TOON adds about 5–10% for its guardrails). If latency matters, measure: some local or quantized models process compact JSON faster.

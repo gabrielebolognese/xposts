@@ -1,1 +1,1 @@
-1. magpie runs one local gateway that all your agents talk to. You pick a model per agent from one list, and it edits the one key that matters in that agent's own config. Menu bar app, TUI, web UI and CLI on macOS, Windows and Linux, plus Docker and Termux.
+1. Picking a local model often means downloading several multi-GB files to see what fits. whichllm reads your GPU, RAM and memory bandwidth, finds which open models fit, estimates their speed, ranks them by benchmarks and prints the command for the top pick.

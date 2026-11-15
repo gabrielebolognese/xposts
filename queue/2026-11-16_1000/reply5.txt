@@ -1,1 +1,5 @@
-5. Before you install: it reads your agents' sign-ins to find subscriptions (magpie accounts discovery off stops it) and sends a daily anonymous ping (you can turn it off in Settings). Claude Free/Pro/Max plans in other tools break Anthropic's terms, so use API keys.
+5. Run it without installing: uvx whichllm@latest
+
+Shopping for a GPU? Simulate one: uvx whichllm@latest --gpu "RTX 4090"
+
+whichllm run downloads the top pick and opens a chat. Needs Python 3.11+. Or install with pip install whichllm

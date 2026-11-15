@@ -1,0 +1,1 @@
+3. Hardware: Meta publishes official 4-bit GGUF quants. Q4_K_M is 16.8 GB and Q4_K_XL is 19.7 GB. Meta says it is small enough to run on a Mac or PC with a single consumer GPU, so your agent's data stays on your machine.

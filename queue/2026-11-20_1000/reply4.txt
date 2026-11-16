@@ -1,1 +1,1 @@
-4. On macOS 15+, install with Homebrew: add the tap listed in the README, then run brew install --cask coucou. It's the same signed and notarized build as the GitHub download. There are also builds for Windows 10/11 and Linux (AppImage, deb, rpm).
+4. When a quota runs out, magpie moves to your next account. Routing groups can switch to another model or provider instead. With one account and no group, there is nothing to move to and the error reaches the agent.

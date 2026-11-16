@@ -1,1 +1,4 @@
-3. Away from the Mac? Sessions follow you to your iPhone: Lock Screen, Dynamic Island, widgets, Siri. The iPhone app is a free TestFlight beta, capped at 10,000 testers. The App Store version isn't out yet. Android 11+ pairs over Wi-Fi with the Windows or Linux app.
+3. One command per agent:
+magpie claude deepseek/deepseek-v4-pro
+magpie codex moonshot/kimi-k2.5
+The first puts Claude Code on DeepSeek, the second puts Codex on Kimi. Or pick the model from one list in the menu bar.

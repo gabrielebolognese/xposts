@@ -1,1 +1,1 @@
-6. Worth knowing: official builds send limited usage analytics by default, you can opt out in Settings. Files are edited and converted on your machine, only AI calls leave it. License is Apache-2.0, except the ee/ folder, which has its own enterprise license.
+6. Limits the README admits: for trivial edits, graph context can be bigger than a plain file read. Impact analysis is conservative, so expect false positives in large dependency graphs. Flow detection is strongest for Python and PHP/Laravel; JS and Go need work.

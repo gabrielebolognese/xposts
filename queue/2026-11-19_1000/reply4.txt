@@ -1,1 +1,1 @@
-4. Files stay intact: only the parts you edit get rewritten. Everything else survives byte-for-byte, so they keep working in Word, Excel and PowerPoint. AI edits land as tracked changes with one-click rollback, and Sheets get live formulas, not pasted numbers.
+4. Setup needs Python 3.10+. Run uv tool install code-review-graph, then code-review-graph install, then code-review-graph build. Install detects and configures tools like Claude Code, Codex, Cursor, Windsurf, Zed, GitHub Copilot and Gemini CLI.

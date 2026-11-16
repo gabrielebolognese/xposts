@@ -1,1 +1,0 @@
-5. Then run code-review-graph detect-changes --brief on a change. Since v2.3.5 it also shows a Token Savings panel. The GitHub Action runs on your own CI runner and sends no source code to an external service.

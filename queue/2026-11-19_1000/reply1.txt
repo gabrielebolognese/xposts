@@ -1,1 +1,1 @@
-1. GenOffice is a free, open-source desktop suite for macOS, Windows and Linux. Docs, Sheets, Slides, PDF, Markdown and HTML editors in one app. It opens and saves native .docx, .xlsx and .pptx, with an AI agent next to every document.
+1. AI review agents often re-read big parts of a repo for every change. code-review-graph builds a structural map of your code with Tree-sitter, keeps it updated incrementally, and serves compact context over MCP. The assistant reads only the files a change touches.

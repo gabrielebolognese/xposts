@@ -1,3 +1,0 @@
-Keep Claude Code, pay DeepSeek instead: one free, MIT-licensed command swaps the model behind your coding agent. You only pay the provider you pick.
-
-Here's how it works, the exact commands, and the catches to know first.

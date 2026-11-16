@@ -1,1 +1,0 @@
-3. Why trust 6.65x: the 63x compares the graph against reading the whole corpus. 6.65x is the median against a realistic grep-based agent, across 18 questions on 6 repos, range 4.2x to 72.6x. Whole-corpus example on Flask: 143,594 tokens vs 2,196.

@@ -1,1 +1,1 @@
-5. Pricing, exactly: the apps have no trial and no paid tier. The AI is not free to run. It uses Genspark credits or your own API key, and your provider's charges may apply. You can also point it at a local OpenAI-compatible server.
+5. Then run code-review-graph detect-changes --brief on a change. Since v2.3.5 it also shows a Token Savings panel. The GitHub Action runs on your own CI runner and sends no source code to an external service.

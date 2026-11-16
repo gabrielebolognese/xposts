@@ -1,1 +1,0 @@
-4. Setup needs Python 3.10+. Run uv tool install code-review-graph, then code-review-graph install, then code-review-graph build. Install detects and configures tools like Claude Code, Codex, Cursor, Windsurf, Zed, GitHub Copilot and Gemini CLI.

@@ -1,1 +1,1 @@
-2. The part for developers: it ships a genoffice CLI and a skill for Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode and Windsurf. The CLI makes no model calls. Your agent does the thinking, the CLI builds and checks the files.
+2. For any change it shows what can break: the callers, dependents and tests it can reach, with a risk score. It stays on your machine as one SQLite file with no cloud service, and cloud embeddings are opt-in. It exposes 30 MCP tools by default.

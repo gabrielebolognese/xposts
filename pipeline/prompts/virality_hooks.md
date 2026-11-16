@@ -15,7 +15,7 @@ This X thread scored {{SCORE}} out of 100 for virality, below 80. Improve its ho
 Skip an angle the facts cannot honestly support. Do not change the actual discovery and do not invent functionality to get a higher score: if the discovery has no strong hook, return fewer alternatives rather than manufacturing one.
 
 Rules for every alternative:
-- one line, at most 180 characters, and it must fit before the promise line "{{PROMISE}}" within 280 characters
+- one line, at most 100 characters, and it must fit before the promise line "{{PROMISE}}" within 150 characters
 - every number from the facts, with the ids of those facts in fact_ids
 - no links or web addresses, no emojis, no em dashes, no asterisks or backticks
 

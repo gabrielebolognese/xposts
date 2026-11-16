@@ -1,21 +1,23 @@
 ---
 name: x-threads
-description: Rulebook for the auto post threads (tool, repository and free alternative discoveries posted as X threads). Use whenever writing, drafting, editing or reviewing threads for this autoposter.
+description: Rulebook for the auto post threads (Claude Code and Codex tools, skills and token savers posted as X threads). Use whenever writing, drafting, editing or reviewing threads for this autoposter.
 ---
 
 # How to use this rulebook
 
 1. Write every thread by the rules below.
 2. Put one thread in a .txt file: the main post first, then each reply, separated by a line with only `#--#`.
-3. Run `node .claude/skills/x-threads/check.mjs <thread file>` and fix every problem it reports. It checks the measurable rules: reply count, length of every part, the main post layout, numbering, emojis, em dashes, markdown symbols, links, the access reply.
+3. Run `node .claude/skills/x-threads/check.mjs <thread file>` and fix every problem it reports. It checks the measurable rules: reply count, length of every part and of the hook line, the main post layout, numbering, a number in every reply, emojis, em dashes, markdown symbols, links, the access reply.
 4. Go through the quality checklist at the end by hand for the rest.
 
 ## Format in this autoposter
 
-- The thread is a main post plus 4 to 7 replies. The runner posts the main post, then each reply as an answer to the one before it.
-- Main post: the hook on line 1, an empty line, then one short promise line that says what the thread delivers. At most 280 characters in total.
-- Replies: 4 to 7, one distinct piece of information each, at most 280 characters including the number. They start with `1.`, `2.`, `3.` in order (the runner adds the numbers).
-- The last reply is always the access reply (see "The final reply").
+- The thread is a main post plus 4 to 7 replies. The runner posts the main post, then each reply as an answer to the one before it. One thread goes out a day, so each one must be worth it: quality over quantity.
+- Main post: the hook on line 1 (one line, at most 100 characters), an empty line, then one short promise line that says what the thread delivers. At most 150 characters in total.
+- Replies: 4 to 7, one distinct piece of information each, at most 560 characters including the number. They start with `1.`, `2.`, `3.` in order (the runner adds the numbers).
+- Every reply carries at least one real number from the facts: a price, a token or cost saving, stars, a size, a time, a limit, a version.
+- The thread is actionable: the reader can act on it right away. Give concrete steps: the exact command, the setting to change, the file to edit, the click path.
+- The last reply is always the access reply, and it can be longer: at most 1,000 characters (see "The final reply").
 - Zero emojis. No em dashes. No links anywhere in the thread: no URLs and no web addresses such as example.com, because X turns them into links and links cut the post's reach. Name the tool, site or repository in words instead. Writing a repository as owner/name is fine, it is not a link.
 - X shows posts sent through the API as plain text, so markdown such as `**bold**` or backticks would appear as literal symbols. Write commands and names as plain text.
 
@@ -34,11 +36,11 @@ Write in a direct, concise, high-value, curiosity-driven style. The first post m
 
 ## 2. Content direction
 
-The account discovers and shares problem-solving technologies, tools, repositories, software, AI models, free alternatives, and useful resources. The central question behind every thread:
+The account shares tools, skills and workflows for people who code with Claude Code and Codex. The central question behind every thread:
 
-**What problem does this solve, how much time or money does it save, and why should someone know about it?**
+**What problem does this solve, how many tokens, how much time or money does it save, and why should a Claude Code or Codex user know about it?**
 
-Prioritize free tools that replace expensive software, open-source alternatives to paid products, GitHub repositories with practical applications, AI tools and models that solve real problems, tools that reduce API and token costs, automation and productivity software, developer utilities, video editing and content creation resources, tools that eliminate repetitive work, and lesser-known software that provides significant value. Discovery is not limited to AI.
+Prioritize popular, proven tools over obscure ones: Claude Code skills, plugins and hooks, MCP servers for coding, subagent and multi-agent workflows, CLAUDE.md and AGENTS.md rule sets, tools that cut token use and cost, context and memory management, usage and limit trackers, Codex CLI tools, running other models inside Claude Code or Codex, agent code review and testing, planning workflows, repo maps, browser tools for agents, and session and worktree managers. Nothing else: no video, voice, transcription or image models, and no tools unrelated to coding with Claude Code or Codex.
 
 The goal is to share things people can actually use, not to report that something exists. Every thread must have a clear reason to exist; never publish a generic list just because several tools were found.
 
@@ -71,11 +73,13 @@ The main post holds the hook and establishes the promise. The replies deliver th
 2. Introduction: the tool or repository and what it actually does.
 3. Main benefits: the most important features and practical advantages.
 4. Practical application: a real-world example of how someone can use it.
-5. Instructions: how to access, install, configure or use it, when appropriate.
+5. Instructions: how to access, install, configure or use it, with the exact commands and settings.
 6. Bonus: a useful trick, limitation, alternative or extra application, when relevant.
-7. The final reply: access instructions and CTA.
+7. The final reply: a mini setup guide, access instructions and CTA.
 
 ## 5. The final reply
+
+The final reply is a mini setup guide of up to 1,000 characters: how to find the tool, then the numbered steps to install, configure and use it (the exact commands, settings and files), so a reader can get it running from this reply alone.
 
 NEVER, UNDER ANY CIRCUMSTANCES, INCLUDE A CLICKABLE URL OR DIRECT LINK IN THE FINAL REPLY. Tell the reader how to find the resource instead, so it is easy to find without a link. Examples:
 - "Go to GitHub and search for: [repository name]."
@@ -97,7 +101,8 @@ Before a thread is approved:
 - [ ] The project is legitimate.
 - [ ] Its pricing is correctly described.
 - [ ] The claims are supported by evidence.
-- [ ] Every reply provides value.
+- [ ] Every reply provides value and carries at least one real number.
+- [ ] The thread gives concrete steps the reader can follow right away.
 - [ ] There is no unnecessary repetition.
 - [ ] The thread is readable on mobile.
 - [ ] The final reply has no clickable link.

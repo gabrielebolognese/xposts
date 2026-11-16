@@ -76,7 +76,7 @@ try { tab = localStorage.getItem('tab') || 'ready'; } catch {}
 if (!TABS.some(([k]) => k === tab)) tab = 'ready';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const GROUP = { scheduled: 'ready', waiting: 'ready', posting: 'ready', 'posted-now': 'posted', posted: 'posted', lost: 'dropped' };
+const GROUP = { scheduled: 'ready', waiting: 'ready', posting: 'ready', 'posted-now': 'posted', posted: 'posted', lost: 'dropped', expired: 'dropped', removed: 'dropped' };
 const group = (t) => GROUP[t.status] || t.status;
 const byScore = (a, b) => (b.score ?? -1) - (a.score ?? -1) || String(a.slot || '~').localeCompare(String(b.slot || '~'));
 function when(slot) {
@@ -101,6 +101,8 @@ function statusText(t) {
     case 'posting': return 'Posting now...';
     case 'review': return 'Needs review';
     case 'dropped': return 'Dropped';
+    case 'expired': return 'Expired: not posted within 7 days';
+    case 'removed': return 'Removed: outside Claude Code and Codex';
     default: return t.status;
   }
 }

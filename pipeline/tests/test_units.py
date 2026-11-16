@@ -138,6 +138,17 @@ class Virality(unittest.TestCase):
         new = old + [e("d", 94, "2026-11-14T08:00")]  # a newer thread that scores higher goes first, c no longer fits
         self.assertEqual(virality.assign(new, slots), {"2026-11-14_1400": "d", "2026-11-15_0600": "a", "2026-11-15_1000": "b"})
 
+    def test_threads_expire_after_seven_days(self):
+        now = datetime.fromisoformat("2026-11-20T09:55").replace(tzinfo=core.ROME)
+        e = lambda status, created, slot=None: {"status": status, "created": created, "slot": slot, "score": 75, "name": "x"}
+        pool = {"old": e("waiting", "2026-11-12T08:00+01:00"), "new": e("waiting", "2026-11-18T08:00+01:00"),
+                "due": e("scheduled", "2026-11-12T08:00+01:00", "2026-11-20_1000"),
+                "later": e("scheduled", "2026-11-12T09:00+01:00", "2026-11-21_1000"),
+                "posted": e("posted", "2026-11-01T08:00+01:00")}
+        self.assertEqual(virality.expire(pool, now, 7, 15), ["2026-11-21_1000"])
+        self.assertEqual({k: v["status"] for k, v in pool.items()},
+                         {"old": "expired", "new": "waiting", "due": "scheduled", "later": "expired", "posted": "posted"})
+
     def test_slots_three_a_day_four_days_ahead(self):
         at = lambda s: datetime.fromisoformat(s).replace(tzinfo=core.ROME)
         slots = virality.upcoming_slots(at("2026-11-14T12:00"), ["06:00", "10:00", "14:00"], 4, 15)
@@ -170,8 +181,8 @@ class QueueLock(unittest.TestCase):
 
 class Checker(unittest.TestCase):
     MAIN = "this free tool replaces a paid one\n\nhow it works and where to get it:"
-    REPLIES = ["1. It does the job.", "2. It is open source.", "3. It installs in a minute.",
-               "4. Go to GitHub and search for: owner/tool"]
+    REPLIES = ["1. It cuts tokens by 30%.", "2. It has 4,200 stars.", "3. It installs in 1 minute.",
+               "4. Go to GitHub and search for: owner/tool, then run step 1"]
 
     def run_check(self, parts):
         with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as f:
@@ -190,10 +201,14 @@ class Checker(unittest.TestCase):
         cases = {
             "3 replies, needs 4 to 7": [self.MAIN, *r[:2], r[3].replace("4.", "3.")],
             "8 replies": [self.MAIN] + [f"{i}. point {i}" for i in range(1, 8)] + ["8. search for owner/tool"],
-            "has 290 characters": [self.MAIN, "1. " + "x" * 287, *r[1:]],
-            'must start with "2."': [self.MAIN, r[0], "It is open source.", *r[2:]],
+            "has 570 characters": [self.MAIN, "1. 5 " + "x" * 565, *r[1:]],
+            "has 1010 characters, max 1000": [self.MAIN, *r[:3], "4. search for owner/tool 1 " + "x" * 983],
+            "main post has 160 characters, max 150": ["a short hook\n\n" + "p" * 146, *r],
+            "hook line has 101 characters, max 100": ["h" * 101 + "\n\nshort promise", *r],
+            "reply 2 has no number": [self.MAIN, r[0], "2. It is open source.", *r[2:]],
+            'must start with "2."': [self.MAIN, r[0], "It has 4,200 stars.", *r[2:]],
             "contains a link": [self.MAIN, *r[:3], "4. Get it at https://example.com, search for it"],
-            "contains an emoji": [self.MAIN, "1. It does the job \U0001F680", *r[1:]],
+            "contains an emoji": [self.MAIN, "1. It saves 2 hours \U0001F680", *r[1:]],
             "hook line, an empty line": ["just one line", *r],
             "how to find the tool": [self.MAIN, *r[:3], "4. That is all."],
         }

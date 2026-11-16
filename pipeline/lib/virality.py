@@ -92,6 +92,22 @@ def arrange() -> list[str]:
         return _arrange()
 
 
+def expire(pool: dict, now: datetime, days: int, lead: int) -> list[str]:
+    """Threads not posted within days of being made are stale: status expired, for good. A slot that is due right now is
+    left to the posting loop. Returns the queue slots freed."""
+    freed = []
+    for e in pool.values():
+        if now - datetime.fromisoformat(e["created"]) <= timedelta(days=days):
+            continue
+        future = e["status"] == "scheduled" and core.slot_time(e["slot"]) > now + timedelta(minutes=lead)
+        if e["status"] == "waiting" or future:
+            if future:
+                freed.append(e["slot"])
+            e.update(status="expired", slot=None)
+            core.say("DROP", f"[{e['score']}] {e['name']} expired: not posted within {days} days of being made")
+    return freed
+
+
 def _arrange() -> list[str]:
     if core.cfg("push", True):  # anything scheduled from the phone or another PC
         stages.git("pull", "--rebase", "--autostash", "-q")
@@ -115,6 +131,9 @@ def _arrange() -> list[str]:
             elif (core.ROOT / "missed" / e["slot"]).exists():
                 core.say("SLOT", f"[{e['score']}] {e['name']} missed {e['slot']} (the PC was off), back in the virality queue")
                 e.update(status="waiting", slot=None, missed=e.get("missed", 0) + 1)
+    for slot in expire(pool, now, core.cfg("virality.expire_days", 7), lead):
+        shutil.rmtree(QUEUE / slot, ignore_errors=True)
+        touched.append(slot)
     ours = {e["slot"]: e for e in pool.values()
             if e["status"] == "scheduled" and core.slot_time(e["slot"]) > now + timedelta(minutes=lead)}
     slots = [s for s in upcoming_slots(now, core.cfg("slots.times"), core.cfg("slots.horizon_days", 4), lead)

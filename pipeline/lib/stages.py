@@ -212,8 +212,8 @@ def hook_problems(text: str, facts: list[dict], taken: set[str]) -> list[str]:
     problems = []
     if "\n" in t:
         problems.append("more than one line")
-    if len(t) > 180:
-        problems.append(f"{len(t)} characters, max 180")
+    if len(t) > 100:
+        problems.append(f"{len(t)} characters, max 100")
     if EMOJI_DASH_STAR.search(t):
         problems.append("an emoji, em dash, asterisk or backtick")
     if links(t):
@@ -437,7 +437,7 @@ def better_hook(run: Path, draft: dict, ev: dict) -> dict | None:
     hooks = [draft["hook"]]
     for alt in out["alternatives"]:
         t = alt["text"].strip()
-        if t not in hooks and not hook_problems(t, facts, set()) and len(f"{t}\n\n{draft['promise']}") <= 280:
+        if t not in hooks and not hook_problems(t, facts, set()) and len(f"{t}\n\n{draft['promise']}") <= 150:
             hooks.append(t)
     if len(hooks) == 1:
         return None

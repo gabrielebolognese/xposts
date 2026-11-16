@@ -9,7 +9,7 @@ You are the final quality control for an X thread before it is published. Judge 
    - legitimate: the project is legitimate (official, maintained, not misleading)
    - pricing_correct: pricing is described correctly (a free tier or trial is never called simply "free")
    - claims_supported: every claim and number is supported by the facts
-   - every_reply_valuable: every reply delivers a distinct piece of information
+   - every_reply_valuable: every reply delivers a distinct piece of information, and the thread gives concrete steps the reader can follow right away (exact commands, settings, files, click paths); the last reply works as a mini setup guide
    - no_repetition: no reply repeats another
    - mobile_readable: short sentences, clean formatting, easy to read on a phone
    - final_no_link: the final reply has no link or web address

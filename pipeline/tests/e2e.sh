@@ -22,6 +22,7 @@ c["poster"]["interval_seconds"] = 2
 c["runner"].update(idle_minutes=1, error_pause_minutes=0)
 c["retries"]["transient_backoff_seconds"] = []
 c["discovery"]["searches_per_day"] = 1
+c["virality"]["max_per_day"] = 20  # the scenarios make many threads in one day
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
 EOF
 printf 'pipeline/data/\npipeline/runs/\npipeline/review/\npipeline/logs/\npipeline/.lock\n__pycache__/\n' > "$W/.gitignore"
@@ -70,14 +71,14 @@ slot="$(ls queue 2>/dev/null | head -1)"
 grep -q "^5\. Go to GitHub and search for: fakeorg/" "queue/$slot/reply5.txt" || fail "no access reply" "$(cat "queue/$slot/reply5.txt")"
 (cat "queue/$slot/post.txt"; for i in 1 2 3 4 5; do printf '\n#--#\n'; cat "queue/$slot/reply$i.txt"; done) > "$T/thread.txt"
 node .claude/skills/x-threads/check.mjs "$T/thread.txt" >/dev/null || fail "queued thread breaks the rulebook" "$(node .claude/skills/x-threads/check.mjs "$T/thread.txt")"
-case "${slot:11:4}" in 0600|1000|1400) ;; *) fail "slot $slot is not 06:00, 10:00 or 14:00";; esac
+[ "${slot:11:4}" = 1000 ] || fail "slot $slot is not 10:00"
 [ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "pipeline: arrange the thread queue" ] || fail "not pushed" "$out"
 printf '%s' "$out" | grep -q "Stopped. This session: 1 threads ready, 0 sent to review/, 0 dropped, 1 category searches. 1 threads are scheduled, through" || fail "stop summary" "$out"
 [ ! -f pipeline/.lock ] || fail "lock left behind"
 c="$(calls)"; [ "$c" = "discover analyze score hooks hook_critic thread editor virality " ] || fail "unexpected call order" "calls: $c"
-[ "$(rotation_last)" = 1 ] || fail "rotation not at category 1"
-[ "$(status_of "Open-source LLMs Tool")" = ready ] || fail "discovery not marked ready"
-ok "search, analyze ... virality: thread arranged into $slot and pushed, summary printed, rotation at category 1"
+[ "$(rotation_last)" = 201 ] || fail "rotation not at the first category (201)"
+[ "$(status_of "Claude Code skills Tool")" = ready ] || fail "discovery not marked ready"
+ok "search, analyze ... virality: thread arranged into $slot and pushed, summary printed, rotation at the first category"
 
 # B: an archived repository is dropped before any model call, with the reason
 seed "Archived thing"
@@ -119,7 +120,7 @@ FAKE_VIRAL=95 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 0 ] || fail "viral winner exit $rc"
 [ "$(slot_of "Viral winner")" = "$(nth_slot 1)" ] || fail "the best thread is not first" "$(ls queue)"
 grep -q "Viral winner" "queue/$(nth_slot 1)/post.txt" || fail "first slot does not hold the winner"
-[ "$(slot_of "Open-source LLMs Tool")" = "$(nth_slot 2)" ] && [ "$(slot_of "Resumable tool")" = "$(nth_slot 3)" ] \
+[ "$(slot_of "Claude Code skills Tool")" = "$(nth_slot 2)" ] && [ "$(slot_of "Resumable tool")" = "$(nth_slot 3)" ] \
   || fail "the older threads were not pushed back in order" "$(cat pipeline/data/virality.json)"
 : > "$FAKE_LOG"
 ok "virality 94 beats 85: it took $(nth_slot 1), the others moved back one slot each"
@@ -148,7 +149,7 @@ backdate_searches
 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 13 ] || fail "search exit $rc"
 c="$(calls)"; [ "$c" = "discover " ] || fail "search order" "calls: $c"
-[ "$(rotation_last)" = 2 ] || fail "rotation did not move to category 2"
+[ "$(rotation_last)" = 202 ] || fail "rotation did not move to the second category (202)"
 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 c="$(calls)"; case "$c" in discover*) fail "searched twice in one day" "calls: $c";; esac
 ok "quota: one search a day here, then selection; the rotation moved to category 2"
@@ -156,11 +157,11 @@ ok "quota: one search a day here, then selection; the rotation moved to category
 # H: a tool found again is merged, not added twice, and the rotation goes on
 backdate_searches
 n="$(python -c 'import json; print(len(json.load(open("pipeline/data/discoveries.json"))))')"
-FAKE_TOOL="Open-source LLMs Tool" python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
+FAKE_TOOL="Claude Code skills Tool" python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 13 ] || fail "duplicate search exit $rc"
 [ "$(python -c 'import json; print(len(json.load(open("pipeline/data/discoveries.json"))))')" = "$n" ] || fail "duplicate added"
 python -c 'import json; s=json.load(open("pipeline/data/searches.json"))[-1]; assert (s["new"], s["known"]) == (0, 1), s' || fail "not counted as known"
-[ "$(rotation_last)" = 3 ] || fail "rotation did not move to category 3"
+[ "$(rotation_last)" = 203 ] || fail "rotation did not move to the third category (203)"
 : > "$FAKE_LOG"
 ok "duplicate discovery merged; rotation at category 3"
 
@@ -194,8 +195,8 @@ python pipeline/lib/step.py >/dev/null 2>&1
 python -c 'import json; e=[x for x in json.load(open("pipeline/data/virality.json")).values() if x["name"]=="Viral winner"][0]; assert e["status"]=="posted" and e["posted_now"], e' \
   || fail "posted-now thread not marked posted"
 grep -q "Viral winner" queue/*/post.txt && fail "the posted thread is back in queue/"
-[ "$(slot_of "Open-source LLMs Tool")" = "$first" ] || fail "the next best thread did not take the freed slot"
-[ "$(ls queue | wc -l)" = $((count - 1)) ] || fail "queue size after post-now" "$(ls queue)"
+[ "$(slot_of "Claude Code skills Tool")" = "$first" ] || fail "the next best thread did not take the freed slot"
+[ "$(ls queue | wc -l)" -le "$count" ] || fail "queue grew after post-now" "$(ls queue)"  # a waiting thread may refill the 4-day horizon
 ok "post now: posted by the posting loop, folder removed and pushed, $first went to the next best thread"
 
 # L1: the posting loop posts what is due (a single post and a thread), moves them to posted/, commits and pushes
@@ -221,20 +222,23 @@ grep -q "POSTED .*posted $due -> https://x.com/i/status/fake" pipeline/logs/runn
 ok "posting loop: a due post and a 3-part thread went out (fake X), moved to posted/ and pushed"
 
 # L2: a thread that missed its slot (PC off, post.js moved it to missed/) goes back to the virality queue
-python - <<'EOF'
+name="$(python - <<'EOF'
 import json, shutil
 pool = json.load(open("pipeline/data/virality.json"))
-e = next(x for x in pool.values() if x["name"] == "Weak hook tool")
+e = max((x for x in pool.values() if x["status"] == "scheduled"), key=lambda x: x["slot"])  # the last scheduled thread
 shutil.move(f"queue/{e['slot']}", "missed/2026-01-01_0600")
 e["slot"] = "2026-01-01_0600"
 json.dump(pool, open("pipeline/data/virality.json", "w"))
+print(e["name"])
 EOF
+)"
 python pipeline/lib/step.py >/dev/null 2>&1
-python -c 'import json; e=[x for x in json.load(open("pipeline/data/virality.json")).values() if x["name"]=="Weak hook tool"][0]; assert e["status"]=="scheduled" and e["slot"]!="2026-01-01_0600" and e["missed"]==1, e' \
-  || fail "the missed thread did not get a new slot" "$(cat pipeline/data/virality.json)"
-[ -d "queue/$(slot_of "Weak hook tool")" ] || fail "no queue folder for the rescheduled thread"
+python -c 'import json,sys; e=[x for x in json.load(open("pipeline/data/virality.json")).values() if x["name"]==sys.argv[1]][0]; assert e["status"] in ("scheduled", "waiting") and e["slot"]!="2026-01-01_0600" and e["missed"]==1, e' "$name" \
+  || fail "the missed thread did not go back to the virality queue" "$(cat pipeline/data/virality.json)"
+w="$(slot_of "$name")"  # with 1 slot a day the stronger threads may hold all 4 slots, so it can wait
+[ "$w" = waiting ] || [ -d "queue/$w" ] || fail "no queue folder for the rescheduled thread"
 grep -q "missed 2026-01-01_0600 (the PC was off), back in the virality queue" pipeline/logs/runner.log || fail "no log line for the missed thread"
-ok "missed slot: the thread went back to the virality queue and got $(slot_of "Weak hook tool")"
+ok "missed slot: $name went back to the virality queue ($w)"
 
 # L3: the posting loop and an arrangement at the same time take turns (the queue lock), git stays clean
 python pipeline/lib/poster.py & bg=$!

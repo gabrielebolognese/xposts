@@ -17,7 +17,10 @@ const start = (s) => (len(s) > 50 ? [...s].slice(0, 50).join('') + '...' : s);
 const name = (i) => (i === 0 ? 'main post' : `reply ${i}`);
 const MIN_REPLIES = 4;
 const MAX_REPLIES = 7;
-const MAX_CHARS = 280;
+const MAX_MAIN = 150; // the whole main post (hook line, empty line, promise line)
+const MAX_HOOK = 100; // the hook line on its own
+const MAX_REPLY = 560;
+const MAX_LAST = 1000; // the last reply, the mini setup guide
 
 function check() {
   const problems = [];
@@ -26,7 +29,8 @@ function check() {
     problems.push(`${replies.length} replies, needs ${MIN_REPLIES} to ${MAX_REPLIES}`);
   }
   parts.forEach((p, i) => {
-    if (len(p) > MAX_CHARS) problems.push(`${name(i)} has ${len(p)} characters, max ${MAX_CHARS}: "${start(p)}"`);
+    const max = i === 0 ? MAX_MAIN : i === parts.length - 1 ? MAX_LAST : MAX_REPLY;
+    if (len(p) > max) problems.push(`${name(i)} has ${len(p)} characters, max ${max}: "${start(p)}"`);
     if (/[\p{Extended_Pictographic}\p{Regional_Indicator}]/u.test(p)) problems.push(`${name(i)} contains an emoji`);
     if (p.includes(String.fromCharCode(0x2014))) problems.push(`${name(i)} contains an em dash`);
     if (/\*\*|`|(^|\s)\*\S/m.test(p)) problems.push(`${name(i)} contains * or \` markdown, X shows it as literal symbols`);
@@ -36,12 +40,15 @@ function check() {
   const blocks = main.split(/\n[ \t]*\n/).map((b) => b.trim()).filter(Boolean);
   if (blocks.length !== 2 || blocks.some((b) => b.includes('\n'))) {
     problems.push('main post must be the hook line, an empty line, then one promise line');
+  } else if (len(blocks[0]) > MAX_HOOK) {
+    problems.push(`the hook line has ${len(blocks[0])} characters, max ${MAX_HOOK}: "${start(blocks[0])}"`);
   }
 
   replies.forEach((r, i) => {
     const want = `${i + 1}. `;
     if (!r.startsWith(want)) problems.push(`reply ${i + 1} must start with "${want.trim()}": "${start(r)}"`);
     else if (!r.slice(want.length).trim()) problems.push(`reply ${i + 1} is empty`);
+    else if (!/\d/.test(r.slice(want.length))) problems.push(`reply ${i + 1} has no number: give a real figure (price, stars, size, time, limit, version)`);
   });
   const last = replies.at(-1) ?? '';
   if (replies.length && !/\b(search|find|look for|look up|dm|comment|message)\b/i.test(last)) {

@@ -7,7 +7,7 @@ You decide whether a verified discovery deserves an X thread. Not every discover
 - usefulness: can readers actually use it now, in practice?
 - novelty: would most readers not know it yet, or is something genuinely new about it?
 - ease: how easy is it to adopt (install, learning curve, price)?
-- relevance: how relevant is it to developers, creators and people who build things?
+- relevance: how relevant is it to people who code with Claude Code or Codex? 0 for anything outside that (video, voice, transcription or image models, general software)
 - reliability: is it maintained, credible and safe to recommend?
 - hook_strength: how strong a problem-solving hook can it honestly carry?
 

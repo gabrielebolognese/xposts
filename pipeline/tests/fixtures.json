@@ -91,6 +91,14 @@
     "date": "2026-11-01",
     "quote": "pip install toolx",
     "primary": true
+   },
+   {
+    "id": "F4",
+    "claim": "{NAME} has 4,200 stars on GitHub",
+    "url": "https://github.com/{REPO}",
+    "date": "2026-11-01",
+    "quote": "4,200 stars",
+    "primary": true
    }
   ],
   "recommend": true,
@@ -271,11 +279,11 @@
  "thread": {
   "promise": "What it does, how to set it up, and where to find it:",
   "replies": [
-   "Long prompts get expensive fast. Every repeated instruction and pasted document is billed again on each call, and much of it adds nothing the model needs.",
-   "{NAME} is an open-source library that compresses a prompt before you send it. It drops low-value tokens and keeps the parts the answer depends on.",
+   "Long prompts get expensive fast. Every repeated instruction is billed again on each call, and much of it adds nothing the model needs. {NAME} has 4,200 stars on GitHub for fixing exactly that.",
+   "{NAME} is an open-source library that compresses a prompt before you send it. In 1 pass it drops low-value tokens and keeps the parts the answer depends on.",
    "In its own benchmark it reduces token usage by 30% with no change to your prompts or your model. It is MIT licensed, so you can use it at work too.",
-   "Setup takes one line: pip install toolx. Then pass your prompt through its compress call right before the request goes out.",
-   "Go to GitHub and search for: {REPO}"
+   "Setup takes 1 line: pip install toolx. Then pass your prompt through its compress call right before the request goes out.",
+   "Go to GitHub and search for: {REPO}. Step 1: pip install toolx. Step 2: call compress on your prompt before each request goes out."
   ],
   "snippets": [
    {
@@ -287,6 +295,10 @@
    {
     "text": "30%",
     "fact_id": "F2"
+   },
+   {
+    "text": "4,200",
+    "fact_id": "F4"
    }
   ]
  },
@@ -348,11 +360,11 @@
   "hook": "{NAME} cuts LLM token use by 30% before the prompt ever reaches the API",
   "promise": "What it does, how to set it up, and where to find it:",
   "replies": [
-   "Long prompts get expensive fast. Every repeated instruction and pasted document is billed again on each call, and much of it adds nothing the model needs.",
-   "{NAME} is an open-source library that compresses a prompt before you send it. It drops low-value tokens and keeps the parts the answer depends on.",
+   "Long prompts get expensive fast. Every repeated instruction is billed again on each call, and much of it adds nothing the model needs. {NAME} has 4,200 stars on GitHub for fixing exactly that.",
+   "{NAME} is an open-source library that compresses a prompt before you send it. In 1 pass it drops low-value tokens and keeps the parts the answer depends on.",
    "In its own benchmark it reduces token usage by 30% with no change to your prompts or your model. It is MIT licensed, so you can use it at work too.",
-   "Setup takes one line: pip install toolx. Then pass your prompt through its compress call right before the request goes out.",
-   "Go to GitHub and search for: {REPO}"
+   "Setup takes 1 line: pip install toolx. Then pass your prompt through its compress call right before the request goes out.",
+   "Go to GitHub and search for: {REPO}. Step 1: pip install toolx. Step 2: call compress on your prompt before each request goes out."
   ],
   "snippets": [
    {
@@ -364,6 +376,10 @@
    {
     "text": "30%",
     "fact_id": "F2"
+   },
+   {
+    "text": "4,200",
+    "fact_id": "F4"
    }
   ],
   "changes": "fixture: nothing changed"

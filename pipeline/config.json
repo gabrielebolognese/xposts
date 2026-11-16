@@ -3,9 +3,7 @@
  "push": true,
  "slots": {
   "times": [
-   "06:00",
-   "10:00",
-   "14:00"
+   "10:00"
   ],
   "horizon_days": 4
  },
@@ -82,7 +80,7 @@
   "limit_margin_seconds": 120
  },
  "discovery": {
-  "searches_per_day": 5,
+  "searches_per_day": 2,
   "candidates_per_search": 10,
   "first_since_days": 120,
   "gh_min_stars": 30,
@@ -90,14 +88,15 @@
   "signals_max": 40,
   "triage_min": 9,
   "revisit_min_days": 60,
-  "max_searches_per_day": 15
+  "max_searches_per_day": 4
  },
  "select": {
   "min_total": 16,
   "hard_min": {
    "problem_solving": 2,
    "usefulness": 2,
-   "reliability": 2
+   "reliability": 2,
+   "relevance": 2
   },
   "max_inactive_days": 365,
   "similar_ratio": 0.8
@@ -111,8 +110,9 @@
   "optimize_below": 80,
   "hook_weight": 0.65,
   "alternative_hooks": 10,
-  "min_per_day": 4,
-  "max_per_day": 20
+  "min_per_day": 1,
+  "max_per_day": 3,
+  "expire_days": 7
  },
  "caps": {
   "inspect_fix_rounds": 3,

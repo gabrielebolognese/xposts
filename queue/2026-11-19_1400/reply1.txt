@@ -1,1 +1,1 @@
-1. Muse Glimmer is Meta's open model for always-on local agents, released August 10, 2026. About 29.6B parameters, takes text and images together, 131,072+ token context, trained on data in more than 100 languages.
+1. Granola's free Basic plan only keeps 30 days of meeting history. Yogurt is an open-source desktop app from Frigade for Mac, Windows and Linux. It records your calls without a bot joining the meeting.

@@ -1,1 +1,1 @@
-2. Transcription runs locally with Whisper through whisper.cpp. Summaries and answers come from a local Gemma 4, gpt-oss or Qwen3 model through llama.cpp, picked to fit your hardware. After the one-time model download it works offline.
+2. The part for developers: it ships a genoffice CLI and a skill for Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode and Windsurf. The CLI makes no model calls. Your agent does the thinking, the CLI builds and checks the files.

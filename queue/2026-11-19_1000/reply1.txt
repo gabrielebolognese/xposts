@@ -1,1 +1,1 @@
-1. Granola's free Basic plan only keeps 30 days of meeting history. Yogurt is an open-source desktop app from Frigade for Mac, Windows and Linux. It records your calls without a bot joining the meeting.
+1. GenOffice is a free, open-source desktop suite for macOS, Windows and Linux. Docs, Sheets, Slides, PDF, Markdown and HTML editors in one app. It opens and saves native .docx, .xlsx and .pptx, with an AI agent next to every document.

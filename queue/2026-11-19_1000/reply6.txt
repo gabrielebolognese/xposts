@@ -1,1 +1,1 @@
-6. The catches: the repo was only created on 2026-11-10, so expect rough edges. Speaker names from Zoom, Teams and Meet work on Mac only. The Windows build isn't signed yet, so at the SmartScreen warning click More info, then Run anyway.
+6. Worth knowing: official builds send limited usage analytics by default, you can opt out in Settings. Files are edited and converted on your machine, only AI calls leave it. License is Apache-2.0, except the ee/ folder, which has its own enterprise license.

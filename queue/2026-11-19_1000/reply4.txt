@@ -1,1 +1,1 @@
-4. Good fit if you take confidential calls in legal, healthcare, finance or HR. Meeting data stays on your machine. It only goes online for model downloads and update checks. Since there's no bot, tell the others you're recording.
+4. Files stay intact: only the parts you edit get rewritten. Everything else survives byte-for-byte, so they keep working in Word, Excel and PowerPoint. AI edits land as tracked changes with one-click rollback, and Sheets get live formulas, not pasted numbers.

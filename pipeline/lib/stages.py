@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import difflib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -479,14 +480,23 @@ def virality(run: Path) -> str:
 
 # Git (the arrangement in virality.py commits and pushes queue/) --------------------------------------------------------
 
+GIT_ENV = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never", "GIT_ASKPASS": "", "SSH_ASKPASS": ""}
+
+
 def git(*args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", *args], cwd=core.ROOT, capture_output=True, timeout=180)
+    """Never waits for a sign-in window: without a stored GitHub login a push fails at once (a WARN line) instead of
+    hanging, which would block the posting loop while it holds the queue lock."""
+    return subprocess.run(["git", *args], cwd=core.ROOT, capture_output=True, timeout=180, env=GIT_ENV)
 
 
 def push() -> bool:
     """Send local pipeline commits to GitHub; False (and a WARN line) when it fails, the next step tries again."""
     for args in (("pull", "--rebase", "--autostash", "-q"), ("push", "-q")):
-        p = git(*args)
+        try:
+            p = git(*args)
+        except subprocess.TimeoutExpired:  # GitHub slow or waiting for a sign-in: the next push catches up
+            core.say("WARN", f"git {args[0]} timed out, will retry")
+            return False
         if p.returncode:
             core.say("WARN", f"git {args[0]} failed, will retry: {p.stderr.decode('utf-8', 'replace').strip()[:200]}")
             return False

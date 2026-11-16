@@ -390,17 +390,19 @@ def next_slot() -> str:
 def stage_queue(p: Path) -> str:
     brief = load(p, "brief.json")
     with core.queue_lock():
-        slot = next_slot()
+        slot = state(p).get("slot")  # a retry reuses the slot it already took, so the post is never queued twice
+        if not slot or not (core.ROOT / "queue" / slot).exists():
+            slot = next_slot()
+            save_state(p, slot=slot)
         q = core.ROOT / "queue" / slot
-        q.mkdir(parents=True)
+        q.mkdir(parents=True, exist_ok=True)
         shutil.copy2(p / "post.txt", q / "post.txt")
         shutil.copy2(p / "video.mp4", q / "video.mp4")
         paths = [f"queue/{slot}/post.txt", f"studio/projects/{p.name}"]  # the project's code too; .gitignore keeps the video out
         stages.git("add", "--", *paths)
         stages.git("commit", "-q", "-m", f"studio: queue {brief['title']}", "--", *paths)
         if core.cfg("push", True):
-            stages.push()
-    save_state(p, slot=slot)
+            stages.push()  # a failed push only warns: the posting loop pushes pending commits later
     core.say("STUDIO", f"today's build is ready: {brief['title']}, posts {slot}. Look at it: bash studio/open.sh {p.name}")
     return "queued"
 

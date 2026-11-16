@@ -1,5 +1,5 @@
 {
- "stage": "queue",
+ "stage": "queued",
  "created": "2026-11-16T18:29:17+01:00",
  "number": 1,
  "errors": 0,
@@ -10,5 +10,6 @@
  "turns": 270,
  "model_id": "claude-opus-5-5",
  "review_score": 8.9,
- "review_round": 2
+ "review_round": 2,
+ "slot": "2026-11-17_1700"
 }

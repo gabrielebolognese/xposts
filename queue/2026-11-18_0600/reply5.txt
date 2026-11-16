@@ -1,1 +1,1 @@
-5. Before you install: it reads your agents' sign-ins to find subscriptions (magpie accounts discovery off stops it) and sends a daily anonymous ping (you can turn it off in Settings). Claude Free/Pro/Max plans in other tools break Anthropic's terms, so use API keys.
+5. Then run code-review-graph detect-changes --brief on a change. Since v2.3.5 it also shows a Token Savings panel. The GitHub Action runs on your own CI runner and sends no source code to an external service.

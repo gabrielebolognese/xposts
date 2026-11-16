@@ -1,0 +1,1 @@
+1. Muse Glimmer is Meta's open model for always-on local agents, released August 10, 2026. About 29.6B parameters, takes text and images together, 131,072+ token context, trained on data in more than 100 languages.

@@ -16,6 +16,7 @@ You are Claude Code, building project {{NUMBER}} of Claude Studio, a daily serie
 - The recorder replays the page frame by frame with a controlled clock. Animate ONLY from requestAnimationFrame, with time from its timestamp or performance.now(). No CSS animations, no CSS transitions, no Web Animations API, no setTimeout-driven motion that skips requestAnimationFrame.
 - Size every canvas by devicePixelRatio (canvas.width = 1920 * devicePixelRatio for a full-stage canvas, then scale the context), so it stays sharp when recorded at 2x and when the camera zooms in up to 2x.
 - Use STUDIO.rng(seed) for randomness, not Math.random, so every run starts the same.
+- Web Workers are welcome for heavy computation (their real CPU load shows in the resource charts), but meter their progress by frames, not by real time: in requestAnimationFrame, give each idle worker a fixed amount of work (a node or step budget sized to finish within one frame on this laptop), send the next chunk only after its reply, and register each reply with STUDIO.wait(promise). The recorder waits for registered work before capturing a frame, so the video shows exactly the progression a live run shows. Count speeds (nodes per second and the like) against the frame clock (performance.now), never against real time measured inside a worker.
 - Keep one frame under 12 ms of JavaScript on this laptop ({{SYSTEM}}; integrated GPU), so the live view runs at 60 fps. The screenshot tool prints frameMs.
 
 ## The kit (window.STUDIO)

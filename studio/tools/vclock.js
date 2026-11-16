@@ -9,6 +9,7 @@
   const raf = new Map();
   const timers = new Map();
   let ids = 0;
+  window.__STUDIO_REAL_TIMEOUT__ = window.setTimeout.bind(window); // real time, for the kit's safety timeout
   performance.now = () => now;
   class VDate extends RealDate {
     constructor(...a) {

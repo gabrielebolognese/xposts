@@ -15,6 +15,8 @@
 //   STUDIO.perf()               {fps, frameMs, heapMB, frames} of this page
 //   STUDIO.rng(seed)            seeded random generator: () => number in [0, 1)
 //   STUDIO.report(obj)          headline numbers of the run (nodes searched, particles, epochs...), used in the post
+//   STUDIO.wait(promise)        registers this frame's asynchronous work (a Web Worker's reply): the recorder waits
+//                               for it before capturing the frame, so the video shows what a live run shows
 //   STUDIO.warmup               seconds the recorder runs the page before the first recorded frame
 // The page puts everything inside <div id="stage"> sized 1920x1080; the kit scales it to the window (live) or moves
 // the camera over it (render).
@@ -58,8 +60,19 @@
     report(obj) {
       Object.assign(state.report, obj);
     },
+    wait(promise) {
+      const p = Promise.resolve(promise);
+      const tracked = p.finally(() => pending.delete(tracked));
+      pending.add(tracked);
+      return p;
+    },
     ready: null,
   };
+  // Work registered before the call; at most 10 s, so a reply that never comes cannot hang the recorder
+  const pending = new Set();
+  window.__STUDIO_SETTLE__ = () => pending.size
+    ? Promise.race([Promise.allSettled([...pending]), new Promise((r) => (window.__STUDIO_REAL_TIMEOUT__ || setTimeout)(r, 10000))])
+    : null;
 
   // Render mode: recorded samples, t in seconds of the live run's page clock
   function sampleAt(t) {

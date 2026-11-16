@@ -57,10 +57,12 @@ export async function run(page, seconds, fps = 60) {
   const frames = Math.round(seconds * fps);
   for (let i = 0; i < frames; i += 30) {
     const k = Math.min(30, frames - i);
-    const ms = await page.evaluate((s, k) => {
+    const ms = await page.evaluate(async (s, k) => {
       let worst = 0, sum = 0;
       for (let j = 0; j < k; j++) {
         const m = window.__STUDIO_ADVANCE__(s);
+        const wait = window.__STUDIO_SETTLE__ && window.__STUDIO_SETTLE__(); // the frame's worker replies
+        if (wait) await wait;
         sum += m;
         worst = Math.max(worst, m);
       }

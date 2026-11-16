@@ -74,8 +74,10 @@ try {
   const frames = Math.round(seconds * fps);
   for (let i = 0; i < frames; i++) {
     const c = cameraAt(keys, i / fps);
-    const ms = await page.evaluate((step, c) => {
+    const ms = await page.evaluate(async (step, c) => {
       const m = window.__STUDIO_ADVANCE__(step);
+      const wait = window.__STUDIO_SETTLE__ && window.__STUDIO_SETTLE__(); // the frame's worker replies
+      if (wait) await wait;
       window.__STUDIO_CAMERA__(c.cx, c.cy, c.zoom);
       return m;
     }, 1000 / fps, c);

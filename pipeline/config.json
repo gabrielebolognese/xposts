@@ -63,11 +63,11 @@
   },
   "studio_brief": {
    "model": "opus",
-   "effort": "max"
+   "effort": "high"
   },
   "studio_build": {
    "model": "opus",
-   "effort": "max"
+   "effort": "xhigh"
   },
   "studio_critic": {
    "model": "opus",

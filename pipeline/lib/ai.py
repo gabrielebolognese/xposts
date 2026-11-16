@@ -60,9 +60,10 @@ def schema_errors(schema: dict, data) -> list[str]:
     return [f"{'/'.join(map(str, e.absolute_path)) or '$'}: {e.message}" for e in v.iter_errors(data)][:8]
 
 
-def call(role: str, stage_dir: Path, name: str, prompt: str, schema: str | None = None,
-         tools: list[str] | None = None, timeout: int | None = None):
-    """Run one model call. Returns the structured output (schema given) or the result text. Raises AIError."""
+def call(role: str, stage_dir: Path, name: str, prompt: str, schema: str | Path | None = None,
+         tools: list[str] | None = None, timeout: int | None = None, add_dirs: list[str] | None = None):
+    """Run one model call. Returns the structured output (schema given) or the result text. Raises AIError.
+    schema is a name in pipeline/schemas or a path; add_dirs are folders the model may read (with the Read tool)."""
     calls = Path(stage_dir) / "calls"
     calls.mkdir(parents=True, exist_ok=True)
     model = core.cfg(f"models.{role}.model")
@@ -70,7 +71,7 @@ def call(role: str, stage_dir: Path, name: str, prompt: str, schema: str | None 
     timeout = timeout or core.cfg("timeouts.call_seconds", 1800)
     schema_obj = None
     if schema:
-        schema_obj = core.load_json(core.PIPE / "schemas" / f"{schema}.json")
+        schema_obj = core.load_json(schema if isinstance(schema, Path) else core.PIPE / "schemas" / f"{schema}.json")
         cli_schema = {k: v for k, v in schema_obj.items() if k not in ("$schema", "$id")}
     tools = tools or []
     resume, schema_retry, tries = None, False, 0
@@ -87,6 +88,8 @@ def call(role: str, stage_dir: Path, name: str, prompt: str, schema: str | None 
         if tools:
             cmd += ["--allowedTools", *tools]
         cmd += ["--disallowedTools", "Bash", "Edit", "Write", "Read(.env)", "Read(.env.*)"]
+        for d in add_dirs or []:
+            cmd += ["--add-dir", d]
         if resume:
             cmd += ["--resume", resume]
         if schema_obj:

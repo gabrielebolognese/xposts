@@ -1,0 +1,32 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["title", "slug", "subject", "why_hard", "angle", "science", "headline_numbers", "design", "panels", "controls", "mid_work", "warmup_seconds", "video_seconds", "camera", "uses_api", "post_angle"],
+ "properties": {
+  "title": {"type": "string", "description": "short project name, under 50 characters"},
+  "slug": {"type": "string", "pattern": "^[a-z0-9-]{3,40}$"},
+  "subject": {"type": "string", "description": "what is simulated, in one sentence"},
+  "why_hard": {"type": "string", "description": "what makes this push Claude to the edge"},
+  "angle": {"type": "string", "description": "the build angle, for example: Opus, no libraries, one night"},
+  "science": {"type": "string", "description": "the real algorithms and equations, precisely enough to implement them, and what each number on screen means"},
+  "headline_numbers": {"type": "array", "minItems": 3, "maxItems": 8, "items": {"type": "object", "additionalProperties": false, "required": ["key", "meaning"], "properties": {"key": {"type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"}, "meaning": {"type": "string"}}}},
+  "design": {"type": "object", "additionalProperties": false, "required": ["layout", "regions", "mode", "palette", "fonts", "feel"],
+   "properties": {
+    "layout": {"type": "string", "description": "the layout structure and why it fits the subject"},
+    "regions": {"type": "array", "minItems": 3, "items": {"type": "object", "additionalProperties": false, "required": ["name", "x", "y", "w", "h", "contents"], "properties": {"name": {"type": "string"}, "x": {"type": "integer"}, "y": {"type": "integer"}, "w": {"type": "integer"}, "h": {"type": "integer"}, "contents": {"type": "string"}}}},
+    "mode": {"type": "string", "enum": ["dark", "light"]},
+    "palette": {"type": "object", "additionalProperties": false, "required": ["background", "surface", "line", "text", "muted", "accents", "up", "down", "warn", "active"], "properties": {"background": {"type": "string"}, "surface": {"type": "string"}, "line": {"type": "string"}, "text": {"type": "string"}, "muted": {"type": "string"}, "accents": {"type": "array", "items": {"type": "string"}}, "up": {"type": "string"}, "down": {"type": "string"}, "warn": {"type": "string"}, "active": {"type": "string"}}},
+    "fonts": {"type": "string"},
+    "feel": {"type": "string", "description": "the visual references and the mood"}
+   }},
+  "panels": {"type": "array", "minItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["name", "region", "shows"], "properties": {"name": {"type": "string"}, "region": {"type": "string"}, "shows": {"type": "string"}}}},
+  "controls": {"type": "array", "minItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["name", "kind", "value", "range"], "properties": {"name": {"type": "string"}, "kind": {"type": "string"}, "value": {"type": "string"}, "range": {"type": "string"}}}},
+  "mid_work": {"type": "string"},
+  "warmup_seconds": {"type": "integer", "minimum": 10, "maximum": 45},
+  "video_seconds": {"type": "integer", "minimum": 35, "maximum": 60},
+  "camera": {"type": "array", "minItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["t", "cx", "cy", "zoom", "focus"], "properties": {"t": {"type": "number"}, "cx": {"type": "number"}, "cy": {"type": "number"}, "zoom": {"type": "number", "minimum": 1, "maximum": 2}, "focus": {"type": "string"}}}},
+  "uses_api": {"type": "boolean"},
+  "post_angle": {"type": "string"}
+ }
+}

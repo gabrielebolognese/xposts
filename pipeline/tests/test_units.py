@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from datetime import timedelta
 from pathlib import Path
 
@@ -13,6 +14,9 @@ import discover  # noqa: E402
 import stages  # noqa: E402
 import virality  # noqa: E402
 from datetime import datetime  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "studio" / "lib"))
+import studio  # noqa: E402
 
 CHECKER = core.ROOT / ".claude" / "skills" / "x-threads" / "check.mjs"
 CATS = [{"id": i, "name": f"cat {i}"} for i in (1, 2, 3)]
@@ -145,7 +149,8 @@ class Virality(unittest.TestCase):
                 "due": e("scheduled", "2026-11-12T08:00+01:00", "2026-11-20_1000"),
                 "later": e("scheduled", "2026-11-12T09:00+01:00", "2026-11-21_1000"),
                 "posted": e("posted", "2026-11-01T08:00+01:00")}
-        self.assertEqual(virality.expire(pool, now, 7, 15), ["2026-11-21_1000"])
+        with unittest.mock.patch.object(core, "LOGS", Path(tempfile.mkdtemp())):  # its DROP lines stay out of runner.log
+            self.assertEqual(virality.expire(pool, now, 7, 15), ["2026-11-21_1000"])
         self.assertEqual({k: v["status"] for k, v in pool.items()},
                          {"old": "expired", "new": "waiting", "due": "scheduled", "later": "expired", "posted": "posted"})
 
@@ -228,6 +233,41 @@ class Links(unittest.TestCase):
         for t in ("Node.js and Next.js 15.2", "edit next.config.js", "README.md", "run setup.sh", "claude.ai", "Socket.IO",
                   "e.g. this", "version 2.1.0", "docs/setup.md", "it works. Then", "search for owner/tool on GitHub"):
             self.assertEqual(stages.links(t), [], t)
+
+
+class Studio(unittest.TestCase):
+    FACTS = "Build cost: $12.40. Lines of code: 1834. Page at 58 to 61 fps. nodes = 1284113. Video: 50 s at 60 fps, 1080p."
+
+    def test_model_name(self):
+        self.assertEqual(studio.model_name("claude-opus-5-5"), "Claude Opus 5.5")
+        self.assertEqual(studio.model_name("claude-haiku-5-5"), "Claude Haiku 5.5")
+
+    def test_post_rules(self):
+        good = "Opus built a chess engine brain overnight\n\nWhat it computes:\n\n1. It cost $12.40 and 1834 lines, at 61 fps."
+        self.assertEqual(studio.post_problems(good, "Opus built a chess engine brain overnight", "What it computes:", "$12.40",
+                                              self.FACTS), [])
+        cases = {
+            "the hook must be one line": ("x" * 101, "p"),
+            "the build cost $12.40 is missing": ("hook", "p"),
+            "numbers not in the facts: 999": ("hook", "p"),
+            "a hashtag": ("hook", "p"),
+        }
+        texts = {"the build cost $12.40 is missing": "hook\n\np\n\n1. it was cheap",
+                 "numbers not in the facts: 999": "hook\n\np\n\n1. $12.40 and 999 nodes",
+                 "a hashtag": "hook\n\np\n\n1. $12.40 #claude"}
+        for expected, (hook, promise) in cases.items():
+            text = texts.get(expected, f"{hook}\n\n{promise}\n\n1. $12.40")
+            probs = studio.post_problems(text, hook, promise, "$12.40", self.FACTS)
+            self.assertTrue(any(expected in p for p in probs), f"{expected}: {probs}")
+
+    def test_camera_eases_between_keyframes(self):
+        out = subprocess.run(["node", "-e", "import('./studio/tools/capture.mjs').then((m) => console.log(JSON.stringify("
+                              "[0, 2, 4, 9].map((t) => m.cameraAt([{t: 0, cx: 0.5, cy: 0.5, zoom: 1}, {t: 4, cx: 0.3, cy: 0.7, zoom: 2}], t)))))"],
+                             cwd=core.ROOT, capture_output=True, timeout=60).stdout.decode()
+        a, mid, b, after = json.loads(out)
+        self.assertEqual((a["zoom"], b["zoom"], after["zoom"]), (1, 2, 2))
+        self.assertAlmostEqual(mid["zoom"], 1.5)
+        self.assertAlmostEqual(mid["cx"], 0.4)
 
 
 if __name__ == "__main__":

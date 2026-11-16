@@ -14,7 +14,9 @@ const MIME = {
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.gif': 'image/gif',
+  '.mp4': 'video/mp4', // a Claude Studio video: X takes one video or up to 4 images per post
 };
+const isVideo = (f) => MIME[path.extname(f).toLowerCase()]?.startsWith('video/');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -39,7 +41,8 @@ export const started = (dir) => fs.existsSync(progressFile(dir));
 
 async function postMain(client, full, text) {
   const files = fs.readdirSync(full).sort();
-  const images = files.filter((f) => MIME[path.extname(f).toLowerCase()]).slice(0, 4);
+  const video = files.find(isVideo);
+  const images = video ? [video] : files.filter((f) => MIME[path.extname(f).toLowerCase()]).slice(0, 4);
   if (!text && images.length === 0) throw new Error('empty post (no post.txt and no image)');
 
   const mediaIds = [];
@@ -48,10 +51,10 @@ async function postMain(client, full, text) {
     const buf = fs.readFileSync(path.join(full, img));
     let id;
     try {
-      // v2 upload endpoint
+      // v2 upload endpoint (chunked; for a video it waits until X has processed it)
       id = await client.v2.uploadMedia(buf, {
         media_type: MIME[ext],
-        media_category: ext === '.gif' ? 'tweet_gif' : 'tweet_image',
+        media_category: isVideo(img) ? 'tweet_video' : ext === '.gif' ? 'tweet_gif' : 'tweet_image',
       });
     } catch (err) {
       // fallback: v1.1 upload, which accepts OAuth 1.0a keys

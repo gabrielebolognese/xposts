@@ -85,6 +85,7 @@ COLORS = {
     "DROP": ORANGE, "MISSED": ORANGE, "REVIEW": ORANGE,   # discarded, missed its time, or sent to review/
     "ERROR": RED, "WARN": YELLOW,
     "SLOT": BLUE, "POST": BLUE, "IDLE": BLUE, "LIMIT": BLUE,  # important status: queue changes, posting, waiting
+    "STUDIO": BLUE,                                           # the daily Claude Studio build
 }  # every other tag (STEP, PICK, SEARCH, SCORE, HOOK...) is routine progress: dark gray
 
 

@@ -1,0 +1,22 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["scores", "issues", "summary"],
+ "properties": {
+  "scores": {"type": "object", "additionalProperties": false,
+   "required": ["subject_fit", "complex_but_clean", "no_defects", "alive", "mid_work", "real_numbers", "wow"],
+   "properties": {
+    "subject_fit": {"type": "integer", "minimum": 1, "maximum": 10},
+    "complex_but_clean": {"type": "integer", "minimum": 1, "maximum": 10},
+    "no_defects": {"type": "integer", "minimum": 1, "maximum": 10},
+    "alive": {"type": "integer", "minimum": 1, "maximum": 10},
+    "mid_work": {"type": "integer", "minimum": 1, "maximum": 10},
+    "real_numbers": {"type": "integer", "minimum": 1, "maximum": 10},
+    "wow": {"type": "integer", "minimum": 1, "maximum": 10}
+   }},
+  "issues": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["severity", "where", "problem", "fix"],
+   "properties": {"severity": {"type": "string", "enum": ["critical", "major", "minor"]}, "where": {"type": "string"}, "problem": {"type": "string"}, "fix": {"type": "string"}}}},
+  "summary": {"type": "string"}
+ }
+}

@@ -96,3 +96,16 @@ test('a folder without replies is still one single post', async () => {
   assert.deepEqual(calls, [{ text: 'the hook\n\nthe promise:' }]);
   assert.ok(!fs.existsSync(path.join('posted', DUE, 'thread.json')));
 });
+
+test('a Claude Studio folder posts its video as the one media item, uploaded as a tweet_video', async () => {
+  const dir = setup([]);
+  fs.writeFileSync(path.join(dir, 'video.mp4'), 'fake mp4');
+  fs.writeFileSync(path.join(dir, 'still.png'), 'fake png');
+  const { client, calls } = fakeClient('a');
+  const uploads = [];
+  client.v2.uploadMedia = async (buf, opts) => (uploads.push(opts), 'vid1');
+  assert.equal(await main(client, onTime, noWait), false);
+  assert.deepEqual(uploads, [{ media_type: 'video/mp4', media_category: 'tweet_video' }]);
+  assert.deepEqual(calls, [{ text: 'the hook\n\nthe promise:', media: { media_ids: ['vid1'] } }]);
+  assert.ok(fs.existsSync(path.join('posted', DUE, 'video.mp4')));
+});

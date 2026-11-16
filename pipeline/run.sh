@@ -3,8 +3,9 @@
 # Start it in Git Bash from the x-autopost folder:
 #   bash pipeline/run.sh          posts what is due every 30 seconds (the X keys come from .env), searches categories
 #                                 for tools, turns the best ones into threads scored for virality, and keeps queue/
-#                                 filled with the highest scored ones (3 a day, 4 days ahead) until you press Ctrl+C,
-#                                 then prints what it did. Nothing posts while it is stopped.
+#                                 filled with the highest scored ones (1 a day, 4 days ahead); from 00:30 it also builds
+#                                 the day's Claude Studio project (studio/lib/studio.py) and queues it for 17:00. Runs
+#                                 until you press Ctrl+C, then prints what it did. Nothing posts while it is stopped.
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
 #   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches
 #                                 more categories than the daily 5 when it needs them to reach N (the first fill)
@@ -45,14 +46,20 @@ $PY pipeline/lib/summary.py start
 every=$(cfg poster.interval_seconds)
 ( while :; do $PY pipeline/lib/poster.py; sleep "$every"; done ) &   # the posting loop, independent of the steps
 poster=$!
+studio=""
+if [ -f studio/lib/studio.py ] && [ -z "${POSTS_NO_STUDIO:-}" ]; then   # the daily Claude Studio build (from 00:30)
+  check=$(( $(cfg studio.check_minutes) * 60 ))
+  ( while :; do $PY studio/lib/studio.py; sleep "$check"; done ) &
+  studio=$!
+fi
 
 napper=""
 nap() { sleep "$1" & napper=$!; wait "$napper"; }   # wait returns at once when Ctrl+C arrives
 
 stop() {
   trap - INT TERM
-  kill "$poster" $napper 2>/dev/null
-  wait "$poster" 2>/dev/null
+  kill "$poster" $studio $napper 2>/dev/null
+  wait "$poster" $studio 2>/dev/null
   echo
   $PY pipeline/lib/summary.py stop
   rm -f "$LOCK"

@@ -97,3 +97,15 @@ Threads that still fail quality control after the fix rounds land in `pipeline/r
 - **Local state (never committed):** `pipeline/data/` (rotation, searches, discoveries, virality queue, history), `pipeline/runs/` (every file of every thread), `pipeline/logs/`.
 - **Requirements:** the `claude` CLI logged in (it shares your Claude usage limits; each thread takes about 10 Opus calls), `gh` logged in (the discovery searches GitHub), Python 3.11+ with `jsonschema`, Node 22, and `.env` with the X keys.
 - **Tests:** `node --test pipeline/tests/post.test.mjs pipeline/tests/dashboard.test.mjs`, `python -m unittest discover -s pipeline/tests -p "test_*.py"`, `bash pipeline/tests/e2e.sh` (fake model, discovery and X, no network, no posts).
+
+## Claude Studio
+
+Every night the runner builds one "pushing Claude to the edge" project: a live simulation that looks extremely complex (a chess engine's search tree, a full PC architecture, a particle accelerator...), records it as a video and queues it as one long post at 17:00. It starts at 00:30 and takes a few hours; `bash pipeline/run.sh` runs it, nothing else to start.
+
+1. **Brief.** Opus (maximum effort) picks the subject, the real science, and designs the screen for it: every project has its own layout, colours and light or dark mode, plus the camera moves for the video.
+2. **Build.** Claude Code (on the Claude subscription, Opus, no libraries) writes the project in `studio/projects/<date>/`, taking screenshots of its own work with `studio/tools/shot.mjs` and fixing what it sees.
+3. **Review.** A separate Opus critic scores frames; below 8 out of 10 the builder fixes the issues (at most 2 rounds). A project still under 6 is held, not posted.
+4. **Record.** A 90 second live run samples this PC's real CPU (per thread), RAM, GPU, disk and network; then the run is replayed frame by frame with a controlled clock at 2x resolution and encoded to 1080p 60 fps (`studio/tools/record.mjs`).
+5. **Post and queue.** The post is written from the measured numbers, including the build cost Claude Code reports, and goes into `queue/<date>_1700` with the video. The project's code is committed; videos stay on this PC.
+
+When a build is done the runner prints a light blue STUDIO line. Look at a project live, with this PC's real numbers: `bash studio/open.sh` (the latest) or `bash studio/open.sh 2026-11-16`. Start today's build at once, whatever the time: `python studio/lib/studio.py --now`. Projects load `studio/kit/studio-kit.js`, which gives them the clock, the measured numbers and the camera. Settings: the `studio` block and the `studio_*` models in `pipeline/config.json`.

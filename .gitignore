@@ -9,3 +9,12 @@ pipeline/.lock
 __pycache__/
 .env
 .env.*
+
+# Claude Studio: videos stay on this PC; screenshots, call logs and measurements are local
+*.mp4
+studio/data/
+studio/.lock
+studio/projects/_*/
+studio/projects/*/shots/
+studio/projects/*/calls/
+studio/projects/*/metrics.json

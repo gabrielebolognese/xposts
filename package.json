@@ -9,6 +9,7 @@
     "dashboard": "node dashboard.js"
   },
   "dependencies": {
+    "puppeteer-core": "^24.43.1",
     "twitter-api-v2": "^1.23.0"
   }
 }

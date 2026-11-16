@@ -139,10 +139,10 @@
   "min_fingerprint_score": 100
  },
  "studio": {
-  "start": "00:30",
+  "start": "22:30",
   "post_time": "17:00",
-  "build_hours": 4,
-  "build_budget_usd": 80,
+  "build_hours": 7,
+  "build_budget_usd": 160,
   "review_rounds": 2,
   "min_score": 8,
   "fps": 60,

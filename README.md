@@ -100,7 +100,7 @@ Threads that still fail quality control after the fix rounds land in `pipeline/r
 
 ## Claude Studio
 
-Every night the runner builds one "pushing Claude to the edge" project: a live simulation that looks extremely complex (a chess engine's search tree, a full PC architecture, a particle accelerator...), records it as a video and queues it as one long post at 17:00. It starts at 00:30 and takes a few hours; `bash pipeline/run.sh` runs it, nothing else to start.
+Every night the runner builds one "pushing Claude to the edge" project: a live simulation that looks extremely complex (a chess engine's search tree, a full PC architecture, a particle accelerator...), records it as a video and queues it as one long post at 17:00. It starts at 22:30 the evening before (each Claude Code session gets up to 7 hours and $160) and takes a few hours; `bash pipeline/run.sh` runs it, nothing else to start.
 
 1. **Brief.** Opus (maximum effort) picks the subject, the real science, and designs the screen for it: every project has its own layout, colours and light or dark mode, plus the camera moves for the video.
 2. **Build.** Claude Code (on the Claude subscription, Opus, no libraries) writes the project in `studio/projects/<date>/`, taking screenshots of its own work with `studio/tools/shot.mjs` and fixing what it sees.

@@ -3,9 +3,10 @@ as a video and queued as one long post at studio.post_time (17:00).
 
 run.sh runs this every studio.check_minutes. Each run does what is due:
   - a project half done (a restart, a crash): it resumes at its stage
-  - after studio.start (00:30) with no project for today: brief, build, review, record, post, queue (hours)
+  - from studio.start (22:30) on: tomorrow's project (brief, build, review, record, post, queue: hours), so it is
+    ready for tomorrow's 17:00; before 22:30, today's project if today has none (the PC was off at 22:30)
   - otherwise nothing
-  python studio/lib/studio.py --now    starts today's project at once, whatever the time (the first build, tests)
+  python studio/lib/studio.py --now    starts today's project at once if today has none (the first build, tests)
 
 Stages, each saved in studio/projects/<YYYY-MM-DD>/state.json so a restart resumes:
   brief    Opus picks the subject and designs the screen, the real science and the camera (brief.json)
@@ -411,13 +412,20 @@ def due(now_flag: bool) -> Path | None:
         if d.is_dir() and not d.name.startswith("_") and state(d).get("stage") not in DONE + (None,):
             return d
     now = core.now_rome()
-    today = PROJECTS / now.strftime("%Y-%m-%d")
-    start = datetime.fromisoformat(f"{now.date()}T{core.cfg('studio.start', '00:30')}").replace(tzinfo=core.ROME)
-    if not today.exists() and (now_flag or now >= start):
-        today.mkdir(parents=True)
-        save_state(today, stage="brief", created=now.isoformat(timespec="seconds"))
-        return today
+    start = datetime.fromisoformat(f"{now.date()}T{core.cfg('studio.start', '22:30')}").replace(tzinfo=core.ROME)
+    day = (now.date() + timedelta(days=1) if now >= start and not now_flag else now.date()).isoformat()
+    if not covered(day):
+        p = PROJECTS / day
+        p.mkdir(parents=True)
+        save_state(p, stage="brief", created=now.isoformat(timespec="seconds"))
+        return p
     return None
+
+
+def covered(day: str) -> bool:
+    """The day has its project: a folder named after it, or a project that holds its post slot (a late build)."""
+    return any(d.name == day or str(state(d).get("slot", "")).startswith(day)
+               for d in PROJECTS.iterdir() if d.is_dir() and not d.name.startswith("_"))
 
 
 def main(now_flag: bool = False) -> None:

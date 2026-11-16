@@ -1,0 +1,1 @@
+2. Claude Code permission requests show up as Allow / Deny / Always. AskUserQuestion prompts show their choices in the notch, up to 4 questions. Codex gets Allow / Deny. Each file edit shows the file name with added and removed line counts. Tap for the full diff.

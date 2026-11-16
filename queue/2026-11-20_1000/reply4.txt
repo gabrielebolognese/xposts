@@ -1,0 +1,1 @@
+4. On macOS 15+, install with Homebrew: add the tap listed in the README, then run brew install --cask coucou. It's the same signed and notarized build as the GitHub download. There are also builds for Windows 10/11 and Linux (AppImage, deb, rpm).

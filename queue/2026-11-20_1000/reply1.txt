@@ -1,0 +1,1 @@
+1. Coucou is a free, open-source app that lives in the Mac's notch, or at the top of the screen on Windows and Linux. It shows your coding agent sessions live: Claude Code, Codex, Cursor, Gemini CLI, Antigravity, Copilot CLI, OpenCode, Amp and others.

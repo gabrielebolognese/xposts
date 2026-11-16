@@ -1,0 +1,1 @@
+6. Bonus: the Mac app also does push-to-talk dictation. Hold a key, speak, let go, and your words are pasted where you type. It can run offline with Parakeet. It also records calls without a bot joining the meeting.

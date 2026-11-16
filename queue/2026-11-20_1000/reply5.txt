@@ -1,0 +1,1 @@
+5. Before touching anything, it backs up your Claude Code settings file, merges its hooks and shows you the diff. No telemetry, no account. Code is MIT, but the Coucou name and Mochi mascot are not. Windows installers are unsigned, so expect a warning on first run.

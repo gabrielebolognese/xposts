@@ -1,0 +1,1 @@
+7. There is no GitHub repo. Search for Meta Muse Glimmer 30B and open the official Hugging Face page under the meta-models org. Download only from that org, because look-alike repos exist for popular models.

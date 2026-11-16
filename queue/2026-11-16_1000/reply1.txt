@@ -1,1 +1,1 @@
-1. It's a Mac app that runs models locally with MLX. It does text-to-video and image-to-video with sound on LTX-2.5 and MiniMax H3, plus images with FLUX.2 [klein] and Qwen-Image-Edit, full songs with vocals on YuE2 and speech on Qwen3-TTS.
+1. It's called mini-swe-agent, built by the Princeton and Stanford team behind SWE-bench and SWE-agent. Their goal: an agent 100x simpler than SWE-agent that still works nearly as well. It solves GitHub issues or helps you in your command line.

@@ -1,1 +1,1 @@
-6. Limits: it is not explicitly optimized for video, which is processed as individual frames. Outputs may be inaccurate or biased. The comparisons against Gemma4-31B and Qwen3.6-27B are Meta's own, so test it on your real agent tasks first.
+6. The catches: the repo was only created on 2026-11-10, so expect rough edges. Speaker names from Zoom, Teams and Meet work on Mac only. The Windows build isn't signed yet, so at the SmartScreen warning click More info, then Run anyway.

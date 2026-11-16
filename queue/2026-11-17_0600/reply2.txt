@@ -1,1 +1,1 @@
-2. The author's own benchmarks, not independently verified: Qwen3.6-35B-A3B at 5-6 tok/s on a 12 GB Android phone, 6 tok/s on a 12 GB iPhone, 18-24 tok/s on a 16 GB Apple-silicon laptop. DeepSeek V4 Flash 284B (91 GB) at 1 tok/s on a 12 GB Android phone.
+2. Version 4.0 has six parts, all on after install, each with its own switch. The two core ones: Say less makes replies short, and Read less compresses logs, JSON, CSV and test output before the model reads them.

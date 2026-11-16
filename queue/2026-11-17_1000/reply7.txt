@@ -1,3 +1,1 @@
-7. Go to GitHub and search for: Andyyyy64/whichllm
-
-Or search the web for whichllm and open the official repo.
+7. Free and open source under Apache-2.0. You bring your own hardware and a MoE model in GGUF format. Go to GitHub and search for: Helldez/BigMoeOnEdge. Or search the web for BigMoeOnEdge.

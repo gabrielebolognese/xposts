@@ -1,1 +1,1 @@
-1. TOON is an open-source encoding of the JSON data model, built for LLM prompts. Nested objects use YAML-style indentation. Arrays of uniform objects become CSV-style tables: one header with the field names, then one row per item. Round-trips to JSON are lossless.
+1. Picking a local model often means downloading several multi-GB files to see what fits. whichllm reads your GPU, RAM and memory bandwidth, finds which open models fit, estimates their speed, ranks them by benchmarks and prints the command for the top pick.

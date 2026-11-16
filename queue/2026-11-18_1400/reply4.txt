@@ -1,1 +1,1 @@
-4. Good fit if you take confidential calls in legal, healthcare, finance or HR. Meeting data stays on your machine. It only goes online for model downloads and update checks. Since there's no bot, tell the others you're recording.
+4. When a quota runs out, magpie moves to your next account. Routing groups can switch to another model or provider instead. With one account and no group, there is nothing to move to and the error reaches the agent.

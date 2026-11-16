@@ -1,1 +1,0 @@
-6. It's free and MIT licensed, so commercial use is allowed. One catch: without llama.cpp installed, the first run compiles llama-cpp-python from source. That took 22 minutes on a Core Ultra 9.

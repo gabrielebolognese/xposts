@@ -1,1 +1,0 @@
-2. The author's own benchmarks, not independently verified: Qwen3.6-35B-A3B at 5-6 tok/s on a 12 GB Android phone, 6 tok/s on a 12 GB iPhone, 18-24 tok/s on a 16 GB Apple-silicon laptop. DeepSeek V4 Flash 284B (91 GB) at 1 tok/s on a 12 GB Android phone.

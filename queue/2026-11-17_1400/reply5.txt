@@ -1,2 +1,0 @@
-5. Runs on Android, macOS, Windows and Linux; iOS is experimental with no App Store or TestFlight build. The Windows installer needs no admin rights. The macOS app is not notarised yet. Quick CLI test:
-bmoe-cli -m model.gguf --auto -p "Explain MoE routing."

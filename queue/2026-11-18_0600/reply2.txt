@@ -1,1 +1,0 @@
-2. Why a 35B model works on 8 GB: it's a mixture-of-experts model, so each token only uses about 3B of its parameters. When a model doesn't fit in VRAM, whichllm moves the experts to system RAM first. A plain fits-in-VRAM check would skip it.

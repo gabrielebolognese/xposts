@@ -1,1 +1,0 @@
-6. The catches: the repo was only created on 2026-11-10, so expect rough edges. Speaker names from Zoom, Teams and Meet work on Mac only. The Windows build isn't signed yet, so at the SmartScreen warning click More info, then Run anyway.

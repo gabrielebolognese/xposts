@@ -1,3 +1,0 @@
-Claude Code can make AI video on your Mac. This free app ships an MCP server, so any MCP agent can render video, images and speech locally on Apple Silicon.
-
-What it can do, what it really costs, and the catches to know first:

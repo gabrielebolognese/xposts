@@ -1,3 +1,0 @@
-4. Practical use: a private local endpoint for coding agents. The server speaks the OpenAI API and the Anthropic API, with streaming, tool calls and reasoning. Start it with:
-bmoe-server -m model.gguf -c 32768
-Web UI on port 8765.

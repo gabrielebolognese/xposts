@@ -1,1 +1,0 @@
-3. Quality comes from Artificial Analysis and LiveBench, put on one scale and averaged. Every pick is held to 8 tok/s. Below that, its score is scaled down, so a stronger model at 3 tok/s doesn't outrank one at 25.

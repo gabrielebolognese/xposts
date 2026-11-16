@@ -1,1 +1,0 @@
-3. Setup is mostly automatic: --auto measures your machine and the model, then picks cache size, threads and which device does what. Works with any MoE GGUF llama.cpp loads, in any quantization. Backends: CPU, Metal, CUDA, HIP, Vulkan, OpenCL and the Hexagon NPU.

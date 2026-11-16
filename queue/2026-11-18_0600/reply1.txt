@@ -1,1 +1,0 @@
-1. Picking a local model often means downloading several multi-GB files to see what fits. whichllm reads your GPU, RAM and memory bandwidth, finds which open models fit, estimates their speed, ranks them by benchmarks and prints the command for the top pick.

@@ -1,1 +1,1 @@
-1. It's called mini-swe-agent, built by the Princeton and Stanford team behind SWE-bench and SWE-agent. Their goal: an agent 100x simpler than SWE-agent that still works nearly as well. It solves GitHub issues or helps you in your command line.
+1. It started as Alibaba's internal official AI code review assistant. Alibaba says that over two years it served tens of thousands of developers and found millions of code defects. Now it's an open-source CLI under Apache-2.0, so commercial use is allowed.

@@ -1,1 +1,1 @@
-5. For developers: it has a local HTTP API and an MCP server, so Claude Code, Codex or any MCP agent can make media for you. The README has a CLI command that prints the exact claude mcp add phosphene line for your install.
+5. It starts in confirm mode: the model proposes a command, you press Enter to run it or type why you reject it. yolo mode (/y) runs commands without asking. Keep that for docker or another sandbox, not your main machine.

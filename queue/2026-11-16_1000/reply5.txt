@@ -1,1 +1,5 @@
-5. It starts in confirm mode: the model proposes a command, you press Enter to run it or type why you reject it. yolo mode (/y) runs commands without asking. Keep that for docker or another sandbox, not your main machine.
+5. Setup needs Git 2.41 or later. Install with npm:
+
+npm install -g @alibaba-group/open-code-review
+
+Connect your model, then review your diffs. For code with no meaningful diff, ocr scan reviews entire files, useful for auditing an unfamiliar codebase.

@@ -1,5 +1,1 @@
-4. Install with one command on Mac, Linux or Windows. It needs Node.js 22.13+.
-
-npx @caveman-ai/cli@latest
-
-It finds your agents and logins, shows what it will change, and you press Enter.
+4. Hardware: Apple Silicon M1 to M5 with 16 GB or more. No Intel Macs, no Windows. On 16 GB, LTX-2.5 runs at smaller sizes, and a video now peaks around 5.7 GB of memory (it was 9 GB). Full size needs 48 GB. Set aside about 40 GB of disk for the first install.

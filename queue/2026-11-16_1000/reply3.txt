@@ -1,1 +1,1 @@
-3. The README reports >74% on SWE-bench Verified and says it starts much faster than Claude Code. That score depends on the model you plug in, not the scaffold alone. Environments: local, docker/podman, singularity/apptainer, bubblewrap and more.
+3. Built-in rules cover NPE, thread-safety, XSS and SQL injection. Bring any OpenAI- or Anthropic-compatible model. It runs on Windows, macOS and Linux, inside Claude Code, Codex and Cursor, and in GitHub Actions, GitLab CI, GitFlic CI and Gerrit.

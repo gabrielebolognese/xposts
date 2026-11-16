@@ -1,10 +1,1 @@
-4. Needs Python 3.10+ and an API key or a local model.
-
-pip install mini-swe-agent
-mini
-
-Try it without installing for good:
-pip install uv && uvx mini-swe-agent
-
-Skipped the setup wizard? Run:
-mini-extra config setup
+4. The benchmark is AACR-Bench: 50 popular open-source repos, 200 real PRs, 10 languages and 1,505 issues cross-checked by 80+ senior engineers. Alibaba published the dataset on Hugging Face, so you can inspect it yourself.

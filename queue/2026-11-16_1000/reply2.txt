@@ -1,1 +1,1 @@
-2. The only tool is bash. It doesn't use the model's tool-calling interface, so it works with any model through litellm, openrouter or portkey. Every command runs as its own subprocess.run call, so sandboxing is just swapping that for docker exec.
+2. How it works: it reads your Git diff, groups the changed files into bundles, and gives each bundle to a sub-agent with isolated context. Fixed code picks the files and matches the rules. The LLM agent writes the line-level comments.

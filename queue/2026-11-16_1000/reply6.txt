@@ -1,9 +1,1 @@
-6. Python bindings for your own scripts:
-
-agent = DefaultAgent(
-    LitellmModel(model_name=...),
-    LocalEnvironment(),
-)
-agent.run("Write a sudoku game")
-
-No custom tools by design. If you need them, the same team's SWE-agent is the bigger option.
+6. The catch: recall is lower than general agents like Claude Code. That's on purpose, it favors precision over noise. The benchmark is Alibaba's own. The CLI costs nothing, but you pay for your model's API calls, and your code goes to that endpoint.

@@ -1,1 +1,1 @@
-6. The catches: streaming does not help a model that already fits in memory. Decode serves one sequence at a time, so it is not for multi-user serving. And v0.42.0 has a known issue: on Mac and Android, decode from the second load on is 15-20% slower than v0.39.
+6. The 65% headline is not a promise: the README cites a JetBrains A/B test on 86 real coding tasks with 8.5% fewer output tokens and no measurable quality loss. The CLI also sends usage stats by default. Opt out: caveman telemetry off or DO_NOT_TRACK=1

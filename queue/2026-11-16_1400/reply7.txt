@@ -1,1 +1,1 @@
-7. To get it, go to GitHub and search for: mrbizarro/Phosphene. Or search for Phosphene local AI video Mac and open the official website. It also installs with one click through Pinokio.
+7. The software is free and MIT licensed. You only pay your model provider for API calls, or run a local model. Go to GitHub and search for: SWE-agent/mini-swe-agent. Or search for mini-swe-agent to find the official docs.

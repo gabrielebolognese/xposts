@@ -1,1 +1,1 @@
-3. Use it as a translation layer. Keep JSON in your code and encode to TOON only right before the data goes into a prompt. It works best on uniform, table-like data. The README's weather example drops from ~117 to ~66 tokens.
+3. Quality comes from Artificial Analysis and LiveBench, put on one scale and averaged. Every pick is held to 8 tok/s. Below that, its score is scaled down, so a stronger model at 3 tok/s doesn't outrank one at 25.

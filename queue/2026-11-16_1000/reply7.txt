@@ -1,1 +1,1 @@
-7. The software is free and MIT licensed. You only pay your model provider for API calls, or run a local model. Go to GitHub and search for: SWE-agent/mini-swe-agent. Or search for mini-swe-agent to find the official docs.
+7. Go to GitHub and search for: alibaba/open-code-review. Or search for Alibaba Open Code Review and open the official repo.

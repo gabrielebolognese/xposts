@@ -1,3 +1,3 @@
-The SWE-bench creators built a free, MIT-licensed alternative to Claude Code in about 100 lines of Python. With a strong model it scores >74% on SWE-bench Verified.
+Alibaba open-sourced the AI code reviewer its developers used for 2 years. Same model as Claude Code, about 1/9 the tokens, higher precision in Alibaba's test on 200 real PRs.
 
-How it works, how to install it, and where it falls short:
+How it works, how to set it up, and the catch.

@@ -1,3 +1,3 @@
-Claude Code can make AI video on your Mac. This free app ships an MCP server, so any MCP agent can render video, images and speech locally on Apple Silicon.
+The SWE-bench creators built a free, MIT-licensed alternative to Claude Code in about 100 lines of Python. With a strong model it scores >74% on SWE-bench Verified.
 
-What it can do, what it really costs, and the catches to know first:
+How it works, how to install it, and where it falls short:

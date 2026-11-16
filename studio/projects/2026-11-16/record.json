@@ -1,0 +1,26 @@
+{
+ "project": "2026-11-16",
+ "fps": 60,
+ "seconds": 52,
+ "scale": 2,
+ "warmup": 30,
+ "live": 92,
+ "errors": [],
+ "render_seconds": 856,
+ "frame_ms": {
+  "avg": 8.58,
+  "max": 22
+ },
+ "report": {
+  "nodes_total": 577254980,
+  "nps_peak": 7209287,
+  "depth_max": 17,
+  "seldepth_max": 37,
+  "be6_found_depth": 5,
+  "be6_eval_cp": 111,
+  "cutoff_first_pct": 89.6,
+  "workers_busy_pct": 86.4
+ },
+ "video": "video.mp4",
+ "mb": 107.7
+}

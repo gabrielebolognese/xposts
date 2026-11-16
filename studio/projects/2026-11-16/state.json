@@ -1,0 +1,14 @@
+{
+ "stage": "queue",
+ "created": "2026-11-16T18:29:17+01:00",
+ "number": 1,
+ "errors": 0,
+ "session": "e2e4bbff-1994-485b-bf73-8fa67fafd3f7",
+ "build_started": "2026-11-16T19:14:30+01:00",
+ "cost_usd": 113.6497,
+ "build_seconds": 13220,
+ "turns": 270,
+ "model_id": "claude-opus-5-5",
+ "review_score": 8.9,
+ "review_round": 2
+}

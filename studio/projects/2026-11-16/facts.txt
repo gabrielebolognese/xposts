@@ -1,0 +1,24 @@
+Project: Engine Room: The Game of the Century: A chess engine written from scratch reviews Byrne–Fischer, New York 1956 (the Game of the Century) move by move, with the search split across 8 Web Workers. Every part of its thinking is drawn live: the search tree, pruning, hash table, move ordering and threads.
+Why it is hard: Everything is real and written by hand. Pieces: a legal chess engine in plain JS. The 0x88 move generator handles castling, en passant and promotion and is checked by perft up to 4,865,609 nodes. The search is PVS with a transposition table, null move, LMR, futility pruning and quiescence, and it has to reach depth 12–14 in 7 s per position. On top of that sits a root-split parallel search over 8 Web Workers that shares no memory. It uses speculative null-window scouts and re-searches, and it must stay exactly correct. The tree is instrumented live from inside the hot loop without killing the node rate. The screen draws a radial tree of about 2,500 nodes plus 11 other dense panels at 60 fps on an integrated GPU while 8 of the 16 threads run at 100%. The pieces are vector paths drawn by hand. No libraries, no images, no glyph fonts.
+The science: GAME (D. Byrne – R. Fischer, New York 1956, 0–1, 82 plies): 1.Nf3 Nf6 2.c4 g6 3.Nc3 Bg7 4.d4 O-O 5.Bf4 d5 6.Qb3 dxc4 7.Qxc4 c6 8.e4 Nbd7 9.Rd1 Nb6 10.Qc5 Bg4 11.Bg5 Na4 12.Qa3 Nxc3 13.bxc3 Nxe4 14.Bxe7 Qb6 15.Bc4 Nxc3 16.Bc5 Rfe8+ 17.Kf1 Be6 18.Bxb6 Bxc4+ 19.Kg1 Ne2+ 20.Kf1 Nxd4+ 21.Kg1 Ne2+ 22.Kf1 Nc3+ 23.Kg1 axb6 24.Qb4 Ra4 25.Qxb6 Nxd1 26.h3 Rxa2 27.Kh2 Nxf2 28.Re1 Rxe1 29.Qd8+ Bf8 30.Nxe1 Bd5 31.Nf3 Ne4 32.Qb8 b5 33.h4 h5 34.Ne5 Kg7 35.Kg1 Bc5+ 36.Kf1 Ng3+ 37.Ke1 Bb4+ 38.Kd1 Bb3+ 39.Kc1 Ne2+ 40.Kb1 Nc3+ 41.Kc1 Rc2#. The moves are replayed by matching each SAN move against the engine's own generated legal moves, which is a second correctness check.
+
+ENGINE: one JS source, used by the main thread for SAN, attack maps and SEE, and by the workers through a Blob URL. Board: 0x88 Int8Array(128) with piece lists, side to move, 4 castling bits, en-passant square and halfmove clock. Zobrist hashing uses two 32-bit halves seeded by xorshift32 and is updated incrementally in make and unmake. A move is an int32: from (7 bits), to (7 bits), promotion (3 bits) and flags (capture, en passant, castle, double push). Moves are generated pseudo-legally; a move is legal if the king is not attacked after make. Perft self-test at load:
+- start position, d1–5: 20 / 400 / 8,902 / 197,281 / 4,865,609
+- Kiwipete 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -', d1–4: 48 / 2,039 / 97,862 / 4,085,603
+- position 3 '8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -', d1–5: 14 / 191 / 2,812 / 43,
+Built by Claude Opus 5.5 in Claude Code, alone, no libraries, effort xhigh
+Build time: 220 minutes of Claude Code work, 270 turns
+Build cost: $113.65 (the cost Claude Code reports for these sessions at API prices)
+Review rounds by a separate critic: 2; final critic score 8.9 out of 10
+Lines of code: 4166
+Live run on AMD Ryzen 7 5700U with Radeon Graphics (8 cores, 16 threads), 15.3 GB RAM, AMD Radeon(TM) Graphics, Microsoft Windows 11 Home: page at 19 to 60 fps, CPU 53.2% average (max 90.5%), RAM 12.24 of 15.3 GB in use, GPU 52.9% average
+Video: 52 s at 60 fps, 1080p, rendered frame by frame at 2x in 856 s
+Headline numbers from the run:
+- nodes_total = 577254980 (Total positions searched by all workers since page load (quick pass + deep pass), at the last recorded frame)
+- nps_peak = 7209287 (Highest nodes per second summed over the 8 workers, over a 1 s window)
+- depth_max = 17 (Deepest fully resolved iteration in any deep think)
+- seldepth_max = 37 (Deepest ply reached in any search, including quiescence)
+- be6_found_depth = 5 (Iteration at which 17...Be6 became, and stayed, the engine's best move in the position after 17.Kf1 (0 if never))
+- be6_eval_cp = 111 (Final exact score of 17...Be6 from Black's point of view, in centipawns, at the last completed depth)
+- cutoff_first_pct = 89.6 (Percentage of beta cutoffs produced by the first move searched (move-ordering quality), whole run)
+- workers_busy_pct = 86.4 (Mean busy time of the 8 workers during the deep pass (load balance of the root split))

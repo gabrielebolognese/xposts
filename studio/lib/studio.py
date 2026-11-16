@@ -264,11 +264,14 @@ def stage_review(p: Path) -> str:
         schema=STUDIO / "schemas" / "critic.json", tools=["Read"], add_dirs=[str(p)], timeout=1800)
     score = round(sum(crit["scores"].values()) / len(crit["scores"]), 1)
     critical = [i for i in crit["issues"] if i["severity"] == "critical"]
+    major = [i for i in crit["issues"] if i["severity"] == "major"]
     core.save_json(p / f"review-{rnd}.json", {"score": score, "critic": crit, "shots": shot})
     save_state(p, review_score=score, review_round=rnd)
-    core.say("REVIEW" if critical or score < core.cfg("studio.min_score", 8) else "PASS",
-             f"studio review {rnd}: {score}/10, {len(critical)} critical, {len(crit['issues'])} issues: {crit['summary'][:150]}")
-    if score >= core.cfg("studio.min_score", 8) and not critical:
+    good = score >= core.cfg("studio.min_score", 8) and not critical and not major  # majors show in the video: fixed first
+    core.say("PASS" if good else "REVIEW",
+             f"studio review {rnd}: {score}/10, {len(critical)} critical, {len(major)} major, {len(crit['issues'])} issues: "
+             f"{crit['summary'][:150]}")
+    if good:
         return "record"
     if rnd >= core.cfg("studio.review_rounds", 2):
         if score < 6 or critical:
@@ -314,7 +317,7 @@ def facts(p: Path) -> tuple[str, str, str]:
         f"Project: {brief['title']}: {brief['subject']}",
         f"Why it is hard: {brief['why_hard']}",
         f"The science: {brief['science'][:1500]}",
-        f"Built by {model} in Claude Code, alone, no libraries, effort max",
+        f"Built by {model} in Claude Code, alone, no libraries, effort {core.cfg('models.studio_build.effort', 'xhigh')}",
         f"Build time: {round(st.get('build_seconds', 0) / 60)} minutes of Claude Code work, {st.get('turns', 0)} turns",
         f"Build cost: {cost} (the cost Claude Code reports for these sessions at API prices)",
         f"Review rounds by a separate critic: {st.get('review_round', 0)}; final critic score {st.get('review_score', '?')} out of 10",

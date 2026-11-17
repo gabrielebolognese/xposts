@@ -1,1 +1,3 @@
-2. The headline number comes from the author's own bench. On the 36 rows with 10 KB or more of raw output, the median reply was 99.4% smaller than the raw output. Results will vary with your workload. Your data stays local: one context.db per project in ~/.context-mode, zero telemetry, and it works offline after install.
+2. The token math comes from the authors' own preprint: 10× lower token use and 2.1× fewer tool calls than file-by-file exploration. An earlier five-query test measured about 3,400 vs about 412,000 tokens for structural questions.
+
+Here is the tradeoff. The same paper reports 83% answer quality vs 92% for a file-exploration agent. So use the graph for structure questions, and let the agent still open files for the details.

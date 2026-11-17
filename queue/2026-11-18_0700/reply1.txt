@@ -1,1 +1,3 @@
-1. Every file read, command result and fetched page lands in your agent's context window. Long sessions burn tokens and hit compaction early. Context Mode is a local plugin for 11 coding agents, including Claude Code, Codex, Gemini CLI and Copilot CLI. It keeps big tool output out of the context. The full output goes into a SQLite FTS5 index on your machine, and the agent gets back only the part it asks for.
+1. Coding agents re-read files and grep your repo every session just to work out its structure. That burns tokens and tool calls.
+
+codebase-memory-mcp is an MCP server written in C. It indexes a repo into a persistent local knowledge graph of code, docs, config and infrastructure. On the Linux kernel, 28M lines and 75K files become 4.81M nodes and 7.72M edges. A full index of Django takes about 6 seconds.

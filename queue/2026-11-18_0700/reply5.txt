@@ -1,1 +1,3 @@
-5. Is it legit? 34K GitHub stars, 840K npm downloads, and v2.2.0 shipped on 2026-11-14. One real caveat: the sandbox is not isolation. Code from ctx_execute runs on your host as your user, with your files, your network and your environment. So keep your agent's permission prompts on.
+5. Bonus: CBM Lens, an optional browser companion in open beta (v0.0.1). It has a source reader, architecture maps, the Galaxy graph, coverage diagnostics and local code chat.
+
+Limits: Smart CI test selection is experimental and only narrows tests for C/C++ code. When evidence is missing or stale, it runs all tests. Call paths are static, so they show possible relationships, not real runtime execution. On Windows, SmartScreen may warn about the unsigned binaries.

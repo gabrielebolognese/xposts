@@ -1,1 +1,1 @@
-2. The token cut did not cost accuracy in their test. Across 244 retrieval questions on 4 models, TOON scored 72.2% vs 71.4% for JSON. Headers also declare the row count [N] and the field list {fields}, so truncated or malformed output can't slip through.
+2. The headline number comes from the author's own bench. On the 36 rows with 10 KB or more of raw output, the median reply was 99.4% smaller than the raw output. Results will vary with your workload. Your data stays local: one context.db per project in ~/.context-mode, zero telemetry, and it works offline after install.

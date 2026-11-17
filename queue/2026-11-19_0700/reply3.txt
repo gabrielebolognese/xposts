@@ -1,1 +1,7 @@
-3. Practical example: debugging from a long log. Without the plugin, the agent reads the whole thing into context. With Code Mode, it writes a short script instead, and only what the script prints reaches the context. In the bench, a full debugging session went from 281,261 B raw to 3,266 B in context. That is roughly 70K tokens down to 817 (estimated at 4 B per token).
+3. Beyond the defaults there are 50+ optional packs for databases, Kubernetes, Docker, AWS/GCP/Azure and Terraform. Most are off. Turn them on in dcg's config file:
+
+"database.postgresql" blocks DROP TABLE, TRUNCATE
+"kubernetes.kubectl" blocks kubectl delete namespace
+"cloud.aws" blocks aws ec2 terminate-instances
+
+To see why a command was blocked, run dcg explain "command". There's also a scan mode for pre-commit hooks and CI that catches dangerous commands in code review.

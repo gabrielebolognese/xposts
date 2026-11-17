@@ -1,1 +1,1 @@
-3. Why trust 6.65x: the 63x compares the graph against reading the whole corpus. 6.65x is the median against a realistic grep-based agent, across 18 questions on 6 repos, range 4.2x to 72.6x. Whole-corpus example on Flask: 143,594 tokens vs 2,196.
+3. Use it as a translation layer. Keep JSON in your code and encode to TOON only right before the data goes into a prompt. It works best on uniform, table-like data. The README's weather example drops from ~117 to ~66 tokens.

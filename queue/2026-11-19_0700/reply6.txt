@@ -1,12 +1,8 @@
-6. Setup for Claude Code:
-Go to GitHub and search for: mksglu/context-mode
-Or search the web for: Context Mode plugin mksglu
+6. Mini setup guide. Go to GitHub and search for: Dicklesworthstone/destructive_command_guard. Or do a web search for: dcg Destructive Command Guard.
 
-1. Install Node 24.15.0 or later. On Windows, also install Git for Windows.
-2. Add the marketplace:
-claude plugin marketplace add mksglu/context-mode
-3. Install the plugin:
-claude plugin install context-mode@context-mode
-4. Start a session and work as usual. Large tool output now stays out of the context and goes into the local index.
-
-Using Codex, Gemini CLI, Copilot CLI or another agent? Open the README and pick your agent for its own install steps.
+1. On Linux, macOS or WSL with Homebrew, run: brew install dicklesworthstone/tap/dcg. Then follow the README's hook setup for your agent.
+2. Or use the verified install script from the README. It detects your platform, downloads the right binary and sets up hooks for supported agents. Native Windows has its own PowerShell installer.
+3. Make sure you're on v0.15.2 or later.
+4. Optional: turn on packs in dcg's config file, for example "database.postgresql".
+5. To see why something was blocked, run: dcg explain "command"
+6. For unattended runs, turn on fail-closed mode as described in the README.

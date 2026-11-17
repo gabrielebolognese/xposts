@@ -1,1 +1,5 @@
-2. The headline number comes from the author's own bench. On the 36 rows with 10 KB or more of raw output, the median reply was 99.4% smaller than the raw output. Results will vary with your workload. Your data stays local: one context.db per project in ~/.context-mode, zero telemetry, and it works offline after install.
+2. It blocks dangerous git and filesystem commands out of the box, with no config. A block looks like this:
+
+Reason: git reset --hard destroys uncommitted changes ... Tip: Consider using 'git stash' first to save your changes.
+
+It reads what a command does, not just its text. grep "rm -rf" runs, rm -rf / gets blocked. It also catches python -c "os.remove(...)" and scripts inside heredocs. On native Windows, 2 extra packs are on by default and block del /s, rd /s and format.

@@ -3,7 +3,7 @@
  "push": true,
  "slots": {
   "times": [
-   "10:00"
+   "07:00"
   ],
   "horizon_days": 4
  },
@@ -144,7 +144,7 @@
  },
  "studio": {
   "start": "22:30",
-  "post_time": "17:00",
+  "post_time": "11:00",
   "build_hours": 7,
   "build_budget_usd": 160,
   "review_rounds": 2,
@@ -154,10 +154,10 @@
   "check_minutes": 5
  },
  "bip": {
-  "time": "20:00",
+  "time": "14:00",
   "day": 5,
   "day_date": "2026-11-17",
-  "brief_minutes": 720,
+  "brief_minutes": 1440,
   "fix_rounds": 2,
   "port": 3003,
   "jarvis_api": "http://127.0.0.1:4317",

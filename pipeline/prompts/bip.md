@@ -27,5 +27,5 @@ Format rules, for every part:
 Claude Studio notes:
 {{STUDIO}}
 
-Today's brief (what got done in the last 12 hours, from the owner's dashboard):
+Today's brief (what got done in the last 24 hours, since the previous build-in-public post, from the owner's dashboard):
 {{BRIEF}}

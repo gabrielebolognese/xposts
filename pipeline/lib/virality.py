@@ -1,7 +1,7 @@
 """The virality queue and the slot arrangement.
 
 Every thread that passes quality control and the virality stage waits in data/virality.json with its final virality
-score. arrange() keeps queue/ filled for the next horizon_days (3 slots a day: 06:00, 10:00 and 14:00 Rome) with the
+score. arrange() keeps queue/ filled for the next horizon_days (the slots.times, 07:00 Rome) with the
 highest scored threads, the highest in the earliest slot. A newer thread that scores higher takes the earliest slot
 and pushes the others back, out of queue/ when they no longer fit; a thread can wait indefinitely. Slots that are due
 or within lead_minutes, and folders that are not auto threads, are never touched.

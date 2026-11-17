@@ -1,4 +1,4 @@
-"""The daily build-in-public post. run.sh runs this every minute. From bip.time (20:00), until today's post is made,
+"""The daily build-in-public post. run.sh runs this every minute. From bip.time (14:00), until today's post is made,
 it serves a small form at http://127.0.0.1:<bip.port> and opens it in the browser: the replies written today and
 today's views. On submit:
   1. Jarvis's /mbrief for the last bip.brief_minutes (Jarvis's API on this PC): what got done today, all projects
@@ -304,7 +304,7 @@ def main() -> None:
     st = load(d)
     if st.get("status") in ("queued", "posted"):
         return
-    if now < datetime.fromisoformat(f"{d}T{core.cfg('bip.time', '20:00')}").replace(tzinfo=core.ROME):
+    if now < datetime.fromisoformat(f"{d}T{core.cfg('bip.time', '14:00')}").replace(tzinfo=core.ROME):
         return
     port = core.cfg("bip.port", 3003)
     try:

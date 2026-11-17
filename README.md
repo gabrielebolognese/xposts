@@ -62,7 +62,7 @@ While the runner is on, posts go out within about 30 seconds of their time. When
 
 ## Auto threads
 
-A runner discovers tools, skills and workflows for Claude Code and Codex, writes an X thread about the best ones, scores each thread for virality, and keeps `queue/` filled with the highest scored threads: 1 a day at 10:00 (Italian time), at most 4 days ahead. Start it in Git Bash from this folder:
+A runner discovers tools, skills and workflows for Claude Code and Codex, writes an X thread about the best ones, scores each thread for virality, and keeps `queue/` filled with the highest scored threads: 1 a day at 07:00 (Italian time), at most 4 days ahead. Start it in Git Bash from this folder:
 
 ```
 bash pipeline/run.sh
@@ -100,21 +100,21 @@ Threads that still fail quality control after the fix rounds land in `pipeline/r
 
 ## Claude Studio
 
-Every night the runner builds one "pushing Claude to the edge" project: a live simulation that looks extremely complex (a chess engine's search tree, a full PC architecture, a particle accelerator...), records it as a video and queues it as one long post at 17:00. It starts at 22:30 the evening before (each Claude Code session gets up to 7 hours and $160) and takes a few hours; `bash pipeline/run.sh` runs it, nothing else to start.
+Every night the runner builds one "pushing Claude to the edge" project: a live simulation that looks extremely complex (a chess engine's search tree, a full PC architecture, a particle accelerator...), records it as a video and queues it as one long post at 11:00. It starts at 22:30 the evening before (each Claude Code session gets up to 7 hours and $160) and takes a few hours; `bash pipeline/run.sh` runs it, nothing else to start.
 
 1. **Brief.** Opus (maximum effort) picks the subject, the real science, and designs the screen for it: every project has its own layout, colours and light or dark mode, plus the camera moves for the video.
 2. **Build.** Claude Code (on the Claude subscription, Opus, no libraries) writes the project in `studio/projects/<date>/`, taking screenshots of its own work with `studio/tools/shot.mjs` and fixing what it sees.
 3. **Review.** A separate Opus critic scores frames; below 8 out of 10 the builder fixes the issues (at most 2 rounds). A project still under 6 is held, not posted.
 4. **Record.** A 90 second live run samples this PC's real CPU (per thread), RAM, GPU, disk and network; then the run is replayed frame by frame with a controlled clock at 2x resolution and encoded to 1080p 60 fps (`studio/tools/record.mjs`).
-5. **Post and queue.** The post is written from the measured numbers, including the build cost Claude Code reports, and goes into `queue/<date>_1700` with the video. The project's code is committed; videos stay on this PC.
+5. **Post and queue.** The post is written from the measured numbers, including the build cost Claude Code reports, and goes into `queue/<date>_1100` with the video. The project's code is committed; videos stay on this PC.
 
 When a build is done the runner prints a light blue STUDIO line. Look at a project live, with this PC's real numbers: `bash studio/open.sh` (the latest) or `bash studio/open.sh 2026-11-16`. Start today's build at once, whatever the time: `python studio/lib/studio.py --now`. Projects load `studio/kit/studio-kit.js`, which gives them the clock, the measured numbers and the camera. Settings: the `studio` block and the `studio_*` models in `pipeline/config.json`.
 
 ## Build in public
 
-Every day at 20:00 the runner opens a small form in the browser (http://127.0.0.1:3003): type the replies you wrote today and today's views, press Submit. Then, by itself:
+Every day at 14:00 the runner opens a small form in the browser (http://127.0.0.1:3003): type the replies you wrote today and today's views, press Submit. Then, by itself:
 
-1. **Brief.** It asks Jarvis (its API on this PC, so Jarvis must be running) for `/mbrief` over the last 12 hours: what got done across all projects.
+1. **Brief.** It asks Jarvis (its API on this PC, so Jarvis must be running) for `/mbrief` over the last 24 hours (since the previous post): what got done across all projects.
 2. **Screenshots.** Jarvis's STATISTICS tab (`pipeline/lib/bip-shot.mjs`) and a frame of today's Claude Studio project.
 3. **Post.** Opus writes a hook about building (never about the build itself), the day's Claude Studio project in one sentence, and what got done (`pipeline/prompts/bip.md`). The code puts it together: the hook, "This is day N of building Claude Studio in public.", "Today's Claude Studio project: ...", "On X today: N replies written and N views." (your typed numbers, nothing is read from X), what got done, and the closer ("See you on day N+1", 1000 followers, monetization). It checks the format: sentences up to 150 characters, list items up to 60, at most 3 paragraphs.
 4. **Posting.** The post and both screenshots go into `queue/<now>` and the posting loop sends them within 30 seconds. The form shows each step, then the post and its link.

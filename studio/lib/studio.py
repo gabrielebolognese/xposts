@@ -1,10 +1,10 @@
 """Claude Studio: one edge-pushing project a day, built overnight by Claude Code (on the Claude subscription), recorded
-as a video and queued as one long post at studio.post_time (17:00).
+as a video and queued as one long post at studio.post_time (11:00).
 
 run.sh runs this every studio.check_minutes. Each run does what is due:
   - a project half done (a restart, a crash): it resumes at its stage
   - from studio.start (22:30) on: tomorrow's project (brief, build, review, record, post, queue: hours), so it is
-    ready for tomorrow's 17:00; before 22:30, today's project if today has none (the PC was off at 22:30)
+    ready for tomorrow's 11:00; before 22:30, today's project if today has none (the PC was off at 22:30)
   - otherwise nothing
   python studio/lib/studio.py --now    starts today's project at once if today has none (the first build, tests)
 
@@ -14,7 +14,7 @@ Stages, each saved in studio/projects/<YYYY-MM-DD>/state.json so a restart resum
   review   a separate critic scores frames; below studio.min_score the builder fixes and it is reviewed again
   record   a live run with real resource sampling, then a frame-by-frame render (metrics.json, video.mp4)
   post     the long post from the measured numbers (post.txt)
-  queue    post.txt and video.mp4 into queue/<date>_1700, committed and pushed (the video stays on this PC)
+  queue    post.txt and video.mp4 into queue/<date>_1100, committed and pushed (the video stays on this PC)
 """
 from __future__ import annotations
 
@@ -375,7 +375,7 @@ def stage_post(p: Path) -> str:
 
 
 def next_slot() -> str:
-    t = core.cfg("studio.post_time", "17:00")
+    t = core.cfg("studio.post_time", "11:00")
     now = core.now_rome()
     day = now.date()
     for _ in range(30):

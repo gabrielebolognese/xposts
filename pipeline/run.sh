@@ -4,7 +4,7 @@
 #   bash pipeline/run.sh          posts what is due every 30 seconds (the X keys come from .env), searches categories
 #                                 for tools, turns the best ones into threads scored for virality, and keeps queue/
 #                                 filled with the highest scored ones (1 a day, 4 days ahead); from 22:30 it also builds
-#                                 tomorrow's Claude Studio project (studio/lib/studio.py) and queues it for 17:00. Runs
+#                                 tomorrow's Claude Studio project (studio/lib/studio.py) and queues it for 11:00. Runs
 #                                 until you press Ctrl+C, then prints what it did. Nothing posts while it is stopped.
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
 #   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches
@@ -53,7 +53,7 @@ if [ -f studio/lib/studio.py ] && [ -z "${POSTS_NO_STUDIO:-}" ]; then   # the da
   studio=$!
 fi
 bip=""
-if [ -z "${POSTS_NO_BIP:-}" ]; then   # the daily build-in-public post: a form opens at bip.time (20:00)
+if [ -z "${POSTS_NO_BIP:-}" ]; then   # the daily build-in-public post: a form opens at bip.time (14:00)
   ( while :; do $PY pipeline/lib/bip.py; sleep 60; done ) &
   bip=$!
 fi

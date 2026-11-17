@@ -34,7 +34,7 @@ git -C "$W" config core.autocrlf false
 git -C "$W" add -A && git -C "$W" commit -qm init
 git -C "$W" remote add origin "$T/remote.git" && git -C "$W" push -q -u origin main 2>/dev/null
 
-export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log"
+export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1
 cd "$W" || exit 1
 
 seed() {  # seed <tool name>: a pending discovery, as a category search would leave it

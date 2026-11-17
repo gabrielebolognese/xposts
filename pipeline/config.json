@@ -77,6 +77,10 @@
    "model": "opus",
    "effort": "high"
   },
+  "bip": {
+   "model": "opus",
+   "effort": "high"
+  },
   "limit_fallback": {
    "model": "opus",
    "effort": "medium"
@@ -148,5 +152,15 @@
   "fps": 60,
   "scale": 2,
   "check_minutes": 5
+ },
+ "bip": {
+  "time": "20:00",
+  "day": 5,
+  "day_date": "2026-11-17",
+  "brief_minutes": 720,
+  "fix_rounds": 2,
+  "port": 3003,
+  "jarvis_api": "http://127.0.0.1:4317",
+  "jarvis_web": "http://127.0.0.1:5173"
  }
 }

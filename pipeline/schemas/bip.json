@@ -1,0 +1,11 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["hook", "studio", "x", "done"],
+ "properties": {
+  "hook": {"type": "string", "description": "One sentence: something that happened today"},
+  "studio": {"type": "string", "description": "What Claude Studio built today, 500 to 700 characters"},
+  "x": {"type": "string", "description": "Today's replies and views on X, the numbers written exactly as given"},
+  "done": {"type": "string", "description": "What got done today, rewritten as a post"}
+ }
+}

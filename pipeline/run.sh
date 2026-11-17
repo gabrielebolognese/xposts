@@ -52,14 +52,19 @@ if [ -f studio/lib/studio.py ] && [ -z "${POSTS_NO_STUDIO:-}" ]; then   # the da
   ( while :; do $PY studio/lib/studio.py; sleep "$check"; done ) &
   studio=$!
 fi
+bip=""
+if [ -z "${POSTS_NO_BIP:-}" ]; then   # the daily build-in-public post: a form opens at bip.time (20:00)
+  ( while :; do $PY pipeline/lib/bip.py; sleep 60; done ) &
+  bip=$!
+fi
 
 napper=""
 nap() { sleep "$1" & napper=$!; wait "$napper"; }   # wait returns at once when Ctrl+C arrives
 
 stop() {
   trap - INT TERM
-  kill "$poster" $studio $napper 2>/dev/null
-  wait "$poster" $studio 2>/dev/null
+  kill "$poster" $studio $bip $napper 2>/dev/null
+  wait "$poster" $studio $bip 2>/dev/null
   echo
   $PY pipeline/lib/summary.py stop
   rm -f "$LOCK"

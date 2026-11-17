@@ -3,8 +3,10 @@ it serves a small form at http://127.0.0.1:<bip.port> and opens it in the browse
 today's views. On submit:
   1. Jarvis's /mbrief for the last bip.brief_minutes (Jarvis's API on this PC): what got done today, all projects
   2. two screenshots: Jarvis's STATISTICS tab (lib/bip-shot.mjs) and today's Claude Studio project
-  3. Opus writes the parts from pipeline/prompts/bip.md (hook, what Claude Studio built, the X numbers, what got
-     done); the code adds the fixed lines (the day opener and the closer) and checks the format
+  3. Opus writes the parts from pipeline/prompts/bip.md (a hook about building, the day's Claude Studio project in
+     one sentence, what got done); the code adds the fixed lines (the day opener, "Today's Claude Studio project:",
+     "On X today: ..." with the typed numbers, the closer) and checks the format. A "hook" in the day's state file
+     is used as the first line instead of the model's.
   4. queue/<now> gets post.txt and the two screenshots; the posting loop posts it within 30 s
 The form shows each step, then the post and its link. State: pipeline/data/bip/<date>.json.
 """
@@ -34,7 +36,8 @@ PAGE = core.PIPE / "bip.html"
 CROSS = chr(0x274C)
 DASHES = f"[{chr(0x2014)}{chr(0x2013)}]"
 EMOJI = f"[{chr(0x1F000)}-{chr(0x1FAFF)}{chr(0x2600)}-{chr(0x27BF)}]"
-SENTENCE_MAX, ITEM_MAX, PARAGRAPHS_MAX, STUDIO_CHARS = 150, 60, 3, (500, 700)
+SENTENCE_MAX, ITEM_MAX, PARAGRAPHS_MAX = 150, 60, 3
+TODAY_LABEL = "Today's Claude Studio project:"
 SAVING = threading.Lock()
 
 
@@ -124,25 +127,22 @@ def sentences(line: str) -> list[str]:
     return [s for s in re.split(r"(?<=[.!?])\s+", line.strip()) if s]
 
 
-def problems(parts: dict, replies: str, views: str) -> list[str]:
-    """The measurable rules: lengths, the numbers, the mix in what got done, plain text."""
+def problems(parts: dict, label: str = TODAY_LABEL) -> list[str]:
+    """The measurable rules: one-sentence hook and project line, the mix in what got done, lengths, plain text."""
     out = []
-    hook = parts.get("hook", "").strip()
-    if "\n" in hook or len(sentences(hook)) != 1:
-        out.append("hook: exactly one sentence on one line")
-    n = len(parts.get("studio", "").strip())
-    if not STUDIO_CHARS[0] <= n <= STUDIO_CHARS[1]:
-        out.append(f"studio: {n} characters, it must be {STUDIO_CHARS[0]} to {STUDIO_CHARS[1]}")
-    for value, what in ((replies, "replies"), (views, "views")):
-        if value not in parts.get("x", ""):
-            out.append(f"x: write the {what} exactly as {value}")
+    for key in ("hook", "studio"):
+        text = parts.get(key, "").strip()
+        if "\n" in text or len(sentences(text)) != 1:
+            out.append(f"{key}: exactly one sentence on one line")
+    if len(f"{label} {parts.get('studio', '').strip()}") > SENTENCE_MAX:
+        out.append(f"studio: with \"{label} \" in front it must stay within {SENTENCE_MAX} characters")
     lines = [ln.strip() for ln in parts.get("done", "").splitlines() if ln.strip()]
     if not any(ln.startswith("- ") for ln in lines) or all(ln.startswith("- ") for ln in lines):
         out.append("done: mix a list with sentences and paragraphs")
     paragraphs = [ln for ln in lines if not ln.startswith("- ") and len(sentences(ln)) >= 2]
     if len(paragraphs) > PARAGRAPHS_MAX:
         out.append(f"done: {len(paragraphs)} paragraphs, at most {PARAGRAPHS_MAX}")
-    for key in ("hook", "studio", "x", "done"):
+    for key in ("hook", "studio", "done"):
         text = parts.get(key, "")
         for line in (ln.strip() for ln in text.splitlines()):
             if line.startswith("- "):
@@ -161,31 +161,44 @@ def problems(parts: dict, replies: str, views: str) -> list[str]:
     return out
 
 
-def assemble(parts: dict, day: int) -> str:
+def assemble(parts: dict, day: int, replies: str, views: str, label: str = TODAY_LABEL) -> str:
     return "\n\n".join([parts["hook"].strip(), f"This is day {day} of building Claude Studio in public.",
-                        parts["studio"].strip(), parts["x"].strip(), parts["done"].strip(), f"See you on day {day + 1}",
-                        f"1000 followers {CROSS}\nmonetization {CROSS}"])
+                        f"{label} {parts['studio'].strip()}", f"On X today: {replies} replies written and {views} views.",
+                        parts["done"].strip(), f"See you on day {day + 1}", f"1000 followers {CROSS}\nmonetization {CROSS}"])
+
+
+def recent_hooks(d: date) -> list[str]:
+    """The first lines of the last week's posts, so the hook does not repeat itself."""
+    texts = [core.load_json(DIR / f"{d - timedelta(days=i)}.json", {}).get("text", "") for i in range(1, 8)]
+    return [t.splitlines()[0] for t in texts if t]
 
 
 def write_post(d: date, brief: str, project: Path | None, replies: str, views: str, work: Path) -> str:
-    studio = "(no Claude Studio project yet)"
+    studio, label = "(no Claude Studio project yet)", TODAY_LABEL
     if project:
         facts = (project / "facts.txt").read_text(encoding="utf-8") if (project / "facts.txt").exists() else ""
         when = str(core.load_json(project / "state.json", {}).get("slot", ""))[:10] or project.name  # the day it posts
-        studio = f"Project date: {when}\n\nIts X post:\n{(project / 'post.txt').read_text(encoding='utf-8')}\n\nMeasured facts:\n{facts[:4000]}"
-    prompt = core.render("bip", DATE=str(d), DAY=str(day_number(d)), REPLIES=replies, VIEWS=views, STUDIO=studio, BRIEF=brief)
-    parts = ai.call("bip", work, "write", prompt, schema="bip")
+        label = TODAY_LABEL if when == str(d) else "Latest Claude Studio project:"
+        studio = f"Its X post:\n{(project / 'post.txt').read_text(encoding='utf-8')}\n\nMeasured facts:\n{facts[:4000]}"
+    given = load(d).get("hook")  # a first line the owner chose for this day, used as it is
+    prompt = core.render("bip", DATE=str(d), DAY=str(day_number(d)), LABEL=label, STUDIO=studio, BRIEF=brief,
+                         RECENT="\n".join(f"- {h}" for h in recent_hooks(d)) or "(none yet)")
+
+    def ask(name: str, text: str) -> dict:
+        parts = ai.call("bip", work, name, text, schema="bip")
+        return {**parts, "hook": given} if given else parts
+
+    parts = ask("write", prompt)
     for rnd in range(core.cfg("bip.fix_rounds", 2)):
-        probs = problems(parts, replies, views)
+        probs = problems(parts, label)
         if not probs:
             break
-        parts = ai.call("bip", work, f"fix-{rnd + 1}", f"{prompt}\n\nYour last answer:\n{json.dumps(parts, ensure_ascii=False, indent=1)}"
-                        "\n\nIt breaks these rules. Fix them and return all four parts again:\n" + "\n".join(f"- {p}" for p in probs),
-                        schema="bip")
-    probs = problems(parts, replies, views)
+        parts = ask(f"fix-{rnd + 1}", f"{prompt}\n\nYour last answer:\n{json.dumps(parts, ensure_ascii=False, indent=1)}"
+                    "\n\nIt breaks these rules. Fix them and return all three parts again:\n" + "\n".join(f"- {p}" for p in probs))
+    probs = problems(parts, label)
     if probs:
         raise RuntimeError("the post still breaks the format: " + "; ".join(probs[:4]))
-    return assemble(parts, day_number(d))
+    return assemble(parts, day_number(d), replies, views, label)
 
 
 def queue_post(text: str, images: list[Path]) -> str:

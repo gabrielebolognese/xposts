@@ -116,7 +116,7 @@ Every day at 20:00 the runner opens a small form in the browser (http://127.0.0.
 
 1. **Brief.** It asks Jarvis (its API on this PC, so Jarvis must be running) for `/mbrief` over the last 12 hours: what got done across all projects.
 2. **Screenshots.** Jarvis's STATISTICS tab (`pipeline/lib/bip-shot.mjs`) and a frame of today's Claude Studio project.
-3. **Post.** Opus writes the hook, what Claude Studio built (500 to 700 characters), the replies and views, and what got done (`pipeline/prompts/bip.md`); the code adds "This is day N of building Claude Studio in public." after the hook and the closer ("See you on day N+1", 1000 followers, monetization), and checks the format: sentences up to 150 characters, list items up to 60, at most 3 paragraphs.
+3. **Post.** Opus writes a hook about building (never about the build itself), the day's Claude Studio project in one sentence, and what got done (`pipeline/prompts/bip.md`). The code puts it together: the hook, "This is day N of building Claude Studio in public.", "Today's Claude Studio project: ...", "On X today: N replies written and N views." (your typed numbers, nothing is read from X), what got done, and the closer ("See you on day N+1", 1000 followers, monetization). It checks the format: sentences up to 150 characters, list items up to 60, at most 3 paragraphs.
 4. **Posting.** The post and both screenshots go into `queue/<now>` and the posting loop sends them within 30 seconds. The form shows each step, then the post and its link.
 
 The form stays open until the post is out or midnight; a failed step shows why, and Submit tries again. Day 5 was 2026-11-17, one more each day. Settings: the `bip` block in `pipeline/config.json`.

@@ -271,30 +271,27 @@ class Studio(unittest.TestCase):
 
 
 class BuildInPublic(unittest.TestCase):
-    STUDIO = ("Claude Opus 5.5 wrote a chess engine from scratch overnight. It replays the Game of the Century and reviews "
-              "it move by move. The search runs on 8 workers that share no memory. It searched 577 million positions. "
-              "The hard part was idle workers in forced lines with few legal moves. Opus split the main line one level "
-              "deeper so every worker had something to do. A separate critic reviewed it twice and gave it 8.9 out of 10. "
-              "The pieces are vector paths drawn by hand, and every node it searches is drawn live on screen.")
-    GOOD = {"hook": "Claude Opus 5.5 genuinely mesmerized me today.", "studio": STUDIO,
-            "x": "On X I wrote 20 replies today. They brought 1,234 views.",
+    GOOD = {"hook": "Today Claude Opus 5.5 proved to be EXTREMELY capable even with tight time and budget.",
+            "studio": "a chess engine written from scratch that replays the Game of the Century.",
             "done": "Big day for the video tool.\n\n- Fixed the posting queue\n- Added a stats tab\n\n"
                     "The thread writer got stricter. Every reply now needs a number."}
 
     def test_good_post_passes_and_assembles(self):
         import bip
-        self.assertEqual(bip.problems(self.GOOD, "20", "1,234"), [])
-        text = bip.assemble(self.GOOD, 5)
-        self.assertTrue(text.startswith("Claude Opus 5.5 genuinely mesmerized me today.\n\nThis is day 5 of building Claude Studio in public.\n\n"))
-        self.assertTrue(text.endswith(f"See you on day 6\n\n1000 followers {chr(0x274C)}\nmonetization {chr(0x274C)}"))
+        self.assertEqual(bip.problems(self.GOOD), [])
+        self.assertEqual(bip.assemble(self.GOOD, 5, "20", "1,234"), "\n\n".join([
+            self.GOOD["hook"], "This is day 5 of building Claude Studio in public.",
+            "Today's Claude Studio project: a chess engine written from scratch that replays the Game of the Century.",
+            "On X today: 20 replies written and 1,234 views.", self.GOOD["done"], "See you on day 6",
+            f"1000 followers {chr(0x274C)}\nmonetization {chr(0x274C)}"]))
 
     def test_rules(self):
         import bip
-        bad = {**self.GOOD, "hook": "One. Two.", "studio": "too short", "x": "20 replies, 1234 views",
+        bad = {"hook": "One. Two.", "studio": "x " * 70,
                "done": "- " + "x" * 61 + "\n" + ("A sentence. Another one.\n" * 4) + "Long " * 40 + "." + chr(0x2014)}
-        probs = " | ".join(bip.problems(bad, "20", "1,234"))
-        for want in ("hook: exactly one sentence", "studio: 9 characters", "views exactly as 1,234",
-                     "list item over 60", "4 paragraphs", "sentence over 150", "no em or en dashes"):
+        probs = " | ".join(bip.problems(bad))
+        for want in ("hook: exactly one sentence", "studio: with", "list item over 60", "4 paragraphs",
+                     "sentence over 150", "no em or en dashes"):
             self.assertIn(want, probs)
 
     def test_day_number(self):

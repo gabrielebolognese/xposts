@@ -1,0 +1,31 @@
+Today Claude Opus 5.5 proved to be EXTREMELY capable even with tight time and budget.
+
+This is day 5 of building Claude Studio in public.
+
+Today's Claude Studio project: a chess engine written from scratch that reviews the Game of the Century on 8 Web Workers, its thinking drawn live.
+
+On X today: 477 replies written and 45,670 views.
+
+The trickiest moment: in forced lines full of checks, five of eight workers sat idle, until Opus split the main line one level deeper.
+
+Outside the studio, I built a job search helper that:
+- keeps searching until it has 5 to 7 jobs to apply for
+- waits 1 to 2 minutes before each job page opens
+- opens the apply pages in the browser after each run
+
+Then came a comment helper for other people's posts. Its first run drafted 4 comments for a human to check. It follows a style guide I wrote by studying 27 top comments under 16 posts from four creators.
+
+Daytime posts drew far more views than evening ones, so my posting slots moved to 7 AM, 11 AM, 2 PM and 9 PM.
+
+For the X pipeline:
+- posted today's thread with all 7 replies
+- drafted about 240 replies before the sources ran dry
+- rebuilt this post: hook, then work, then a closing line
+- added a command that sums up my day in neutral words
+
+I also set up a third video channel and queued its first idea, about making money from the GTA 6 launch with AI. A finished AI video went from idea through recording to posting, and is queued to go out automatically today.
+
+See you on day 6
+
+1000 followers ❌
+monetization ❌

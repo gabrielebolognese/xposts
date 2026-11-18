@@ -1,0 +1,33 @@
+Today Claude Opus 5.5 worked ALONE for 271 minutes and never needed the backup plan it had built for itself.
+
+This is day 6 of building Claude Studio in public.
+
+Today's Claude Studio project: a scarred heart simulated cell by cell on the GPU, where one early beat starts a spiral wave and a shock ends it.
+
+On X today: 547 replies written and 31,013 views.
+
+Most of today went into building the video and article side of my pipeline.
+
+- Six scenario videos, each with poster and captions
+- Fixed the checks and writing rules for the GTA video
+- Reset the GTA run back to the start of research
+- Stopped the scenario runner from starting new stories
+
+None of the six videos uses the new narrator voice yet. A test copy of the runner works, so the live channel is untouched.
+
+I also built a weekly export tool for long-form articles, with a wide cover that looks right on desktop and phone. The Post button passed every end to end check, and the work is saved and pushed.
+
+Today's article was regenerated from corrected numbers, cover checked and ready for review.
+
+- Nine saved updates, from comment links to job date limits
+- Coding tip captions checked, a few still need fixes
+- 173 replies drafted for the posting account
+- Drafts queued for a warm contact list
+- Six replies queued for big AI company accounts
+
+Nothing is posted yet. Every draft sits on the review sheet, waiting for me.
+
+See you on day 7
+
+1000 followers ❌
+monetization ❌

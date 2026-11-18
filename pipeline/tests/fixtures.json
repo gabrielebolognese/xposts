@@ -517,5 +517,14 @@
  },
  "article_cover": {
   "html": "<!doctype html><html><body style=\"margin:0;width:1500px;height:600px;background:#000;color:#fff\"><h1 style=\"font:900 120px Arial;margin:60px\">$287 for two builds</h1></body></html>"
+ },
+ "teaser_find": {
+  "status": "ok",
+  "post_id": "1900000000000000777",
+  "title_seen": "Two overnight Claude Code builds cost $287. The cheaper one won.",
+  "note": "pinned article post"
+ },
+ "teaser_write": {
+  "post": "people running claude code overnight\none number predicted my whole bill.\n\nTwo nights ago Claude Code built a project on my PC while I slept. In the morning the cost was higher than the cap I had set for it.\n\nNothing had gone wrong. The cap did exactly what I told it to do. That was the part that bothered me.\n\nSo I went through both overnight builds line by line. Every session, every fix round, every turn.\n\nOne of them cost 53% more than the other. It was not the harder model or the longer prompt that explained it.\n\nThe answer was sitting in a number I had never looked at. Once I saw it, I could predict what the next build would cost before it started.\n\nI also found the gate in my tool pipeline that throws away more good tools than any other. I built it myself and never noticed.\n\nIf you let an agent work while nobody watches, you are making the same bet I was.\n\nI wrote down everything I found, with the real numbers, in the article below."
  }
 }

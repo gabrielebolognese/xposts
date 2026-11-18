@@ -1,0 +1,11 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["status", "post_id", "title_seen", "note"],
+ "properties": {
+  "status": {"type": "string", "enum": ["ok", "not_found", "no_browser", "logged_out", "limited"]},
+  "post_id": {"type": "string", "pattern": "^[0-9]{0,25}$", "description": "The article post's id, or empty"},
+  "title_seen": {"type": "string"},
+  "note": {"type": "string"}
+ }
+}

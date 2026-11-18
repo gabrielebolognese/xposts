@@ -1,0 +1,8 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["post"],
+ "properties": {
+  "post": {"type": "string", "description": "The full post text, about 1,000 characters"}
+ }
+}

@@ -16,6 +16,7 @@ queue/
 ```
 
 - Images are posted in alphabetical order (name them 1.png, 2.png if order matters).
+- A `quote.txt` holding a post id makes the post quote that post (the Friday post quotes the week's X Article).
 - A post more than 3 hours late goes to `missed/` instead of being posted.
 - No links in post.txt: a post with a URL costs $0.20 instead of $0.015.
 
@@ -142,3 +143,13 @@ Every Wednesday the runner writes one X Article. X has no API for Articles, so y
 4. **Page.** `articles/<date>/article.html` shows the cover and the article. At 09:00 (or when it is ready later) it opens in the browser. Press **Post**: the cover downloads and the article is copied with its formatting. On X: Articles, Write, add the cover, paste the title (**Copy title**) and the article, publish.
 
 Not ready by 18:00: skipped that week. Make this week's now, whatever the day: `python pipeline/lib/article.py --now` (the runner opens it). The pages stay on this PC (`articles/` is not committed). Settings: the `article` block and the `article_*` models in `pipeline/config.json`.
+
+## Friday post about the article
+
+Every Friday at 09:00 the runner posts about 1,000 characters about that week's X Article, quoting it so the article card shows right under the text. It is not a summary: it opens a question the article answers, teases one surprising detail and holds back the answer, so people open the article to get it (`pipeline/prompts/teaser_write.md`).
+
+1. **Find.** From 06:20 (waiting while xAutoReply uses Chrome, like the trending post) a Claude in Chrome session finds Wednesday's article on your profile and takes its post id (`pipeline/prompts/teaser_find.md`, read only).
+2. **Write.** Opus writes the post from the article. The code checks it: 800 to 1,300 characters, the two-line hook, paragraphs up to 250 characters, no links, hashtags, emojis, dashes or markdown, and the AI-tells check; up to 2 fixes, else `pipeline/review/teaser-<date>.txt`.
+3. **Posting.** `queue/<date>_0900` gets `post.txt` and `quote.txt` (the article's post id); the posting loop sends it as a quote.
+
+No article that week, or it is not on your profile (not posted): no Friday post, and the runner says so. Not made by 16:00: skipped. See one without posting: `python pipeline/lib/teaser.py --now --dry`. Settings: the `teaser` block and the `teaser_*` models in `pipeline/config.json`.

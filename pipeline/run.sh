@@ -7,7 +7,8 @@
 #                                 tomorrow's Claude Studio project (studio/lib/studio.py) and queues it for 11:00; on
 #                                 Tuesday, Thursday and Saturday it reads X's Trending tab from 06:20 and queues a
 #                                 trending post for 09:00 (pipeline/lib/trend.py); on Wednesday it writes the week's
-#                                 X Article and opens its page at 09:00 (pipeline/lib/article.py, posted by hand).
+#                                 X Article and opens its page at 09:00 (pipeline/lib/article.py, posted by hand);
+#                                 on Friday a post quoting that article goes out at 09:00 (pipeline/lib/teaser.py).
 #                                 Runs until you press Ctrl+C, then prints what it did. Nothing posts while it is stopped.
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
 #   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches
@@ -70,14 +71,19 @@ if [ -z "${POSTS_NO_ARTICLE:-}" ]; then   # the weekly X Article (Wednesday): wr
   ( while :; do $PY pipeline/lib/article.py; sleep 60; done ) &
   article=$!
 fi
+teaser=""
+if [ -z "${POSTS_NO_TEASER:-}" ]; then   # the Friday post about the week's X Article (09:00), quoting it
+  ( while :; do $PY pipeline/lib/teaser.py; sleep 60; done ) &
+  teaser=$!
+fi
 
 napper=""
 nap() { sleep "$1" & napper=$!; wait "$napper"; }   # wait returns at once when Ctrl+C arrives
 
 stop() {
   trap - INT TERM
-  kill "$poster" $studio $bip $trend $article $napper 2>/dev/null
-  wait "$poster" $studio $bip $trend $article 2>/dev/null
+  kill "$poster" $studio $bip $trend $article $teaser $napper 2>/dev/null
+  wait "$poster" $studio $bip $trend $article $teaser 2>/dev/null
   echo
   $PY pipeline/lib/summary.py stop
   rm -f "$LOCK"

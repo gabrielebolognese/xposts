@@ -393,5 +393,33 @@ class Article(unittest.TestCase):
         self.assertEqual(article.pillar_for(date(2026, 11, 20))["key"], "field_report")  # same week
 
 
+class Teaser(unittest.TestCase):
+    def test_when_it_runs(self):
+        import teaser
+        at = lambda iso: datetime.fromisoformat(iso).replace(tzinfo=core.ROME)  # noqa: E731
+        fri = "2030-01-04"
+        self.assertFalse(teaser.due(at(f"{fri}T06:19"), {}))
+        self.assertTrue(teaser.due(at(f"{fri}T06:20"), {}))
+        self.assertTrue(teaser.due(at(f"{fri}T15:59"), {}))
+        self.assertFalse(teaser.due(at(f"{fri}T16:00"), {}))
+        self.assertFalse(teaser.due(at("2030-01-03T07:00"), {}))  # Thursday
+        for done in teaser.DONE:
+            self.assertFalse(teaser.due(at(f"{fri}T07:00"), {"status": done}))
+
+    def test_week_article_is_the_wednesday_before(self):
+        import article
+        import teaser
+        from datetime import date
+        with tempfile.TemporaryDirectory() as tmp:
+            with unittest.mock.patch.object(article, "DIR", Path(tmp)):
+                self.assertIsNone(teaser.week_article(date(2030, 1, 4)))
+                core.save_json(Path(tmp) / "2030-01-02.json", {"status": "opened"})
+                core.save_json(Path(tmp) / "2030-01-02" / "article.json", {"title": "T", "body": "B"})
+                self.assertEqual(teaser.week_article(date(2030, 1, 4)), (date(2030, 1, 2), {"title": "T", "body": "B"}))
+                self.assertIsNone(teaser.week_article(date(2030, 1, 11)))  # the next week has no article
+                core.save_json(Path(tmp) / "2030-01-02.json", {"status": "review"})
+                self.assertIsNone(teaser.week_article(date(2030, 1, 4)))
+
+
 if __name__ == "__main__":
     unittest.main()

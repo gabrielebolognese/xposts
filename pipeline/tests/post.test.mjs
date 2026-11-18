@@ -109,3 +109,20 @@ test('a Claude Studio folder posts its video as the one media item, uploaded as 
   assert.deepEqual(calls, [{ text: 'the hook\n\nthe promise:', media: { media_ids: ['vid1'] } }]);
   assert.ok(fs.existsSync(path.join('posted', DUE, 'video.mp4')));
 });
+
+test('quote.txt makes the post quote that post id (the Friday post quoting the X Article)', async () => {
+  const dir = setup([]);
+  fs.writeFileSync(path.join(dir, 'quote.txt'), '1900000000000000123\n');
+  const { client, calls } = fakeClient('a');
+  assert.equal(await main(client, onTime, noWait), false);
+  assert.deepEqual(calls, [{ text: 'the hook\n\nthe promise:', quote_tweet_id: '1900000000000000123' }]);
+});
+
+test('a quote.txt without a post id fails the post instead of posting without the quote', async () => {
+  const dir = setup([]);
+  fs.writeFileSync(path.join(dir, 'quote.txt'), 'https://x.com/someone/status/1');
+  const { client, calls } = fakeClient('a');
+  assert.equal(await main(client, onTime, noWait), true);
+  assert.deepEqual(calls, []);
+  assert.ok(fs.existsSync(path.join('queue', DUE)));
+});

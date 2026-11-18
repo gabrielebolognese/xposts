@@ -67,6 +67,12 @@ async function postMain(client, full, text) {
   const payload = {};
   if (text) payload.text = text;
   if (mediaIds.length) payload.media = { media_ids: mediaIds };
+  const quoteFile = path.join(full, 'quote.txt'); // the id of a post to quote (the Friday post quotes the X Article)
+  if (fs.existsSync(quoteFile)) {
+    const quote = fs.readFileSync(quoteFile, 'utf8').trim();
+    if (!/^\d{1,25}$/.test(quote)) throw new Error(`quote.txt must hold a post id, not "${quote.slice(0, 40)}"`);
+    payload.quote_tweet_id = quote;
+  }
   const { data } = await client.v2.tweet(payload);
   return data.id;
 }

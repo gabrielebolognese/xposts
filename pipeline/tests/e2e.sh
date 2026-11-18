@@ -25,6 +25,7 @@ c["discovery"]["searches_per_day"] = 1
 c["virality"]["max_per_day"] = 20  # the scenarios make many threads in one day
 c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699)  # no xAutoReply in the test copy
 c["article"].update(min_words=150, lock_port=47698)  # the fixture article is short
+c["teaser"].update(lock_port=47697)
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
 EOF
 printf 'pipeline/data/\npipeline/runs/\npipeline/review/\npipeline/logs/\npipeline/.lock\n__pycache__/\n' > "$W/.gitignore"
@@ -36,7 +37,7 @@ git -C "$W" config core.autocrlf false
 git -C "$W" add -A && git -C "$W" commit -qm init
 git -C "$W" remote add origin "$T/remote.git" && git -C "$W" push -q -u origin main 2>/dev/null
 
-export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1 POSTS_NO_ARTICLE=1
+export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1 POSTS_NO_ARTICLE=1 POSTS_NO_TEASER=1
 cd "$W" || exit 1
 
 seed() {  # seed <tool name>: a pending discovery, as a category search would leave it
@@ -331,6 +332,30 @@ POSTS_ARTICLE_NOW=2030-01-03T06:00 python pipeline/lib/article.py
 [ -z "$(calls)" ] && [ ! -f pipeline/data/article/2030-01-03.json ] || fail "article ran again or on a Thursday"
 unset POSTS_ARTICLE_FAKE
 ok "X article: Wednesday 05:00 written with its cover and page (Post button), opened at 09:00, once a week"
+
+# F: the Friday post. Friday 2030-01-04 06:20: it finds Wednesday's article on the profile (fake reader), writes
+#    the post and queues queue/2030-01-04_0900 with post.txt and quote.txt; post.js quotes the article
+export POSTS_TREND_FAKE=1
+: > "$FAKE_LOG"
+POSTS_TEASER_NOW=2030-01-04T06:20 python pipeline/lib/teaser.py
+c="$(calls)"; [ "$c" = "teaser_find teaser_write " ] || fail "Friday post call order" "calls: $c"
+[ -f queue/2030-01-04_0900/post.txt ] && [ "$(cat queue/2030-01-04_0900/quote.txt)" = 1900000000000000777 ]   || fail "no Friday post queued with the quote" "$(tail -5 pipeline/logs/runner.log)"
+POSTS_TEASER_NOW=2030-01-04T07:00 python pipeline/lib/teaser.py
+[ -z "$(calls)" ] || fail "Friday post ran twice"
+due="$(python -c 'import sys; sys.path.insert(0, "pipeline/lib"); import core; print(core.slot_name(core.now_rome()))')"
+mv queue/2030-01-04_0900 "queue/$due"
+out="$(POSTS_FAKE_X=1 node post.js 2>&1)"
+printf '%s' "$out" | grep -q '"quote_tweet_id":"1900000000000000777"' || fail "post.js did not quote the article" "$out"
+# the week after: no article was made that Wednesday, so no Friday post and no model call
+POSTS_TEASER_NOW=2030-01-11T06:20 python pipeline/lib/teaser.py
+grep -q '"status": "skipped"' pipeline/data/teaser/2030-01-11.json && [ -z "$(calls)" ] || fail "Friday post without an article"
+# an article made but not on the profile (not posted): skipped after the read, nothing queued
+cp pipeline/data/article/2030-01-02.json pipeline/data/article/2030-01-16.json
+mkdir -p pipeline/data/article/2030-01-16 && cp pipeline/data/article/2030-01-02/article.json pipeline/data/article/2030-01-16/
+FAKE_TEASER_NONE=1 POSTS_TEASER_NOW=2030-01-18T06:20 python pipeline/lib/teaser.py
+c="$(calls)"; [ "$c" = "teaser_find " ] && [ ! -d queue/2030-01-18_0900 ] || fail "article not on the profile" "calls: $c"
+unset POSTS_TREND_FAKE
+ok "Friday post: found the article, queued 2030-01-04_0900 quoting it (post.js sends quote_tweet_id); no article or not posted: no post"
 
 echo "all $pass passed"
 rm -rf "$T"

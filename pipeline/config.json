@@ -97,6 +97,14 @@
    "model": "opus",
    "effort": "high"
   },
+  "teaser_find": {
+   "model": "sonnet",
+   "effort": "medium"
+  },
+  "teaser_write": {
+   "model": "opus",
+   "effort": "high"
+  },
   "limit_fallback": {
    "model": "opus",
    "effort": "medium"
@@ -217,5 +225,16 @@
    600
   ],
   "lock_port": 47617
+ },
+ "teaser": {
+  "day": "fri",
+  "read_at": "06:20",
+  "time": "09:00",
+  "give_up": "16:00",
+  "min_chars": 800,
+  "max_chars": 1300,
+  "fix_rounds": 2,
+  "read_minutes": 20,
+  "lock_port": 47618
  }
 }

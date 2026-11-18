@@ -1,0 +1,3 @@
+Claude Code and Cursor often re-read much of your repo for every review. This free local tool gives them a code map instead: median 6.65x fewer tokens than a grep-based agent.
+
+What it does, how to set it up, and where it falls short.

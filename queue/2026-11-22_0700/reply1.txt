@@ -1,0 +1,1 @@
+1. AI review agents often re-read big parts of a repo for every change. code-review-graph builds a structural map of your code with Tree-sitter, keeps it updated incrementally, and serves compact context over MCP. The assistant reads only the files a change touches.

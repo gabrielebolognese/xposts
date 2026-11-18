@@ -131,3 +131,14 @@ On Tuesday, Thursday and Saturday the runner posts one long-form post about some
 4. **Posting.** The post and the screenshot go into `queue/<date>_0900` (or the next minute when it is ready later) and the posting loop sends them.
 
 When nothing on the tab fits the account there is no post that day, and the runner says so. A failed try runs once more 10 minutes later; after 10:30 the day is skipped, since the trends are stale by then. The Trending tab follows the location in X's Explore settings (Settings, then Explore settings): set it to where your audience is for English trends. See one without posting: `python pipeline/lib/trend.py --now --dry` (the post and the screenshot land in `pipeline/data/trend/<date>-dry/`). Settings: the `trend` block and the `trend_*` models in `pipeline/config.json`.
+
+## X Article (Wednesday)
+
+Every Wednesday the runner writes one X Article. X has no API for Articles, so you post it by hand from a page the runner makes:
+
+1. **Pillar.** The articles take turns, one a week (`pipeline/article-pillars.json`): a **field report** (what this PC's AI systems actually did, with the real costs, times, scores and failures), a **playbook** (the complete step-by-step guide to one Claude Code or Codex capability), a **ranked list** (the best tools the thread pipeline found and checked recently) and a **contrarian breakdown** (the week's biggest AI-building story and what most people get wrong).
+2. **Write.** From 05:00 Opus writes it from this PC's real numbers (Claude Studio builds, the thread pipeline's funnel, the tools it scored, the week's trends) plus web research (`pipeline/prompts/article_write.md`). The code checks it: 1,000 to 3,500 words, at least 3 sections, paragraphs up to 400 characters, headings, lists, quotes, bold and italic only, no emojis, dashes or hashtags, and the AI-tells check; up to 2 fixes, else it waits in `pipeline/review/article-<date>.txt`.
+3. **Cover.** Opus designs the cover as an HTML file for this article (`pipeline/prompts/article_cover.md`) and `pipeline/lib/article-shot.mjs` exports it as a 1500x600 PNG at 2x (5:2, the Article cover shape). Text that spills out of the frame gets one fix round.
+4. **Page.** `articles/<date>/article.html` shows the cover and the article. At 09:00 (or when it is ready later) it opens in the browser. Press **Post**: the cover downloads and the article is copied with its formatting. On X: Articles, Write, add the cover, paste the title (**Copy title**) and the article, publish.
+
+Not ready by 18:00: skipped that week. Make this week's now, whatever the day: `python pipeline/lib/article.py --now` (the runner opens it). The pages stay on this PC (`articles/` is not committed). Settings: the `article` block and the `article_*` models in `pipeline/config.json`.

@@ -1,0 +1,12 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["title", "cover_text", "topic", "body", "sources"],
+ "properties": {
+  "title": {"type": "string", "description": "The article title, ideally 50 to 80 characters, at most 100"},
+  "cover_text": {"type": "string", "description": "3 to 8 words for the cover image"},
+  "topic": {"type": "string", "description": "A short label of what the article covers"},
+  "body": {"type": "string", "description": "The article body in the markdown subset"},
+  "sources": {"type": "array", "items": {"type": "string"}, "description": "The URLs used to check the facts"}
+ }
+}

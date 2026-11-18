@@ -89,6 +89,14 @@
    "model": "opus",
    "effort": "high"
   },
+  "article_write": {
+   "model": "opus",
+   "effort": "high"
+  },
+  "article_cover": {
+   "model": "opus",
+   "effort": "high"
+  },
   "limit_fallback": {
    "model": "opus",
    "effort": "medium"
@@ -193,5 +201,21 @@
   "session_margin_minutes": 20,
   "xautoreply": "../xAutoReply",
   "lock_port": 47616
+ },
+ "article": {
+  "day": "wed",
+  "start": "05:00",
+  "time": "09:00",
+  "give_up": "18:00",
+  "first_date": "2026-11-18",
+  "min_words": 1000,
+  "max_words": 3500,
+  "fix_rounds": 2,
+  "write_minutes": 45,
+  "cover_size": [
+   1500,
+   600
+  ],
+  "lock_port": 47617
  }
 }

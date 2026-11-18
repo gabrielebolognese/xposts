@@ -505,5 +505,17 @@
   "sources": [
    "https://example.com/release-notes"
   ]
+ },
+ "article_write": {
+  "title": "Two overnight Claude Code builds cost $287. The cheaper one won.",
+  "cover_text": "$287 for two builds",
+  "topic": "Claude Studio build costs",
+  "body": "Two overnight builds cost $287.82. The cheaper one scored higher.\n\nThat surprised me, so I went through both runs line by line to see where the money went.\n\n## The setup\n\nEvery night Claude Code builds one project alone, capped at 7 hours and $160 per session. An Opus critic scores screenshots, and anything under 8 out of 10 goes back for fixes.\n\n- Build one: a chess engine, $113.65, 3.7 hours, 270 turns.\n- Build two: a heart simulation, $174.17, 4.5 hours, 387 turns.\n\n## Where the money went\n\n**Most of the extra cost came from fix rounds, not from the first draft.** The heart build spent its second hour chasing a rendering bug the critic kept flagging.\n\nThe chess build had a clear spec. The heart build had a vague one, and vague specs make the agent explore.\n\n## What I changed\n\n1. Every brief now names the three numbers the screen must show.\n2. The critic gets the brief too, so it stops asking for things nobody wanted.\n3. A build that fails the same check twice stops early.\n\n## Recap\n\n- Clear specs are cheaper than smart models.\n- Fix rounds are where budgets die.\n- Stop loops that repeat the same failure.\n\nI post a Claude Code thread every morning and a new Claude Studio build every night. Follow along if you want the next bill.",
+  "sources": [
+   "https://example.com/docs"
+  ]
+ },
+ "article_cover": {
+  "html": "<!doctype html><html><body style=\"margin:0;width:1500px;height:600px;background:#000;color:#fff\"><h1 style=\"font:900 120px Arial;margin:60px\">$287 for two builds</h1></body></html>"
  }
 }

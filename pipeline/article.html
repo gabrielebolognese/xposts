@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>X Article</title>
+<style>
+  :root { --bg: #111; --card: #1a1a1a; --line: #2a2a2a; --text: #e8e8e8; --dim: #9a9a9a; --blue: #1d9bf0; --green: #00ba7c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, "Segoe UI", Arial, sans-serif; }
+  main { max-width: 820px; margin: 0 auto; padding: 24px 16px 140px; }
+  .meta { color: var(--dim); font-size: 14px; letter-spacing: .02em; }
+  .cover { width: 100%; border-radius: 14px; border: 1px solid var(--line); display: block; margin: 16px 0 20px; }
+  .titlerow { display: flex; gap: 12px; align-items: flex-start; }
+  h1 { font-size: 34px; line-height: 1.2; margin: 0 0 6px; flex: 1; }
+  .small { background: none; border: 1px solid var(--line); color: var(--dim); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 13px; white-space: nowrap; margin-top: 8px; }
+  .small:hover { color: var(--text); border-color: var(--dim); }
+  .stats { color: var(--dim); font-size: 14px; margin-bottom: 24px; }
+  article { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 8px 28px 24px; font-size: 17px; }
+  article h2 { font-size: 24px; margin: 30px 0 8px; }
+  article h3 { font-size: 19px; margin: 22px 0 6px; }
+  article p { margin: 0 0 14px; }
+  article ul, article ol { margin: 0 0 14px; padding-left: 24px; }
+  article blockquote { margin: 0 0 14px; padding: 4px 16px; border-left: 3px solid var(--blue); color: #cfcfcf; }
+  article a { color: var(--blue); }
+  details { margin-top: 20px; color: var(--dim); font-size: 14px; }
+  details li { word-break: break-all; }
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(17,17,17,.94); border-top: 1px solid var(--line); padding: 14px 16px; }
+  .bar div { max-width: 820px; margin: 0 auto; display: flex; gap: 14px; align-items: center; }
+  #post { background: var(--blue); color: #fff; border: 0; border-radius: 999px; padding: 14px 30px; font-size: 17px; font-weight: 700; cursor: pointer; }
+  #post.done { background: var(--green); }
+  #status { color: var(--dim); font-size: 14px; }
+  @media (max-width: 560px) { h1 { font-size: 26px; } article { padding: 4px 16px 16px; } .titlerow { flex-direction: column; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="meta" id="meta"></div>
+  <img class="cover" id="cover" alt="Article cover">
+  <div class="titlerow"><h1 id="title"></h1><button class="small" id="copytitle">Copy title</button></div>
+  <div class="stats" id="stats"></div>
+  <article id="body"></article>
+  <details><summary>Sources the writer checked</summary><ul id="sources"></ul></details>
+</main>
+<div class="bar"><div><button id="post">Post</button><span id="status">Downloads the cover and copies the article.</span></div></div>
+<script id="data" type="application/json">/*DATA*/</script>
+<script>
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const $ = (id) => document.getElementById(id);
+  document.title = D.title;
+  $('meta').textContent = `X Article · ${D.day} · ${D.pillar}`;
+  $('cover').src = D.cover;
+  $('title').textContent = D.title;
+  $('stats').textContent = `${D.words.toLocaleString('en-US')} words · about ${Math.max(1, Math.round(D.words / 230))} min read`;
+  $('body').innerHTML = D.html;
+  for (const s of D.sources) { const li = document.createElement('li'); li.textContent = s; $('sources').append(li); }
+
+  async function copy(html, text) {
+    try {
+      if (!html) { await navigator.clipboard.writeText(text); return true; }
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([text], { type: 'text/plain' }),
+      })]);
+      return true;
+    } catch (e) {  // older browsers: copy a selected copy of the formatted text
+      const box = document.createElement('div');
+      box.contentEditable = 'true';
+      box.style.cssText = 'position:fixed;left:-9999px;top:0';
+      box.innerHTML = html || text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      document.body.append(box);
+      const range = document.createRange();
+      range.selectNodeContents(box);
+      getSelection().removeAllRanges();
+      getSelection().addRange(range);
+      const ok = document.execCommand('copy');
+      getSelection().removeAllRanges();
+      box.remove();
+      return ok;
+    }
+  }
+
+  $('post').onclick = async () => {
+    const a = document.createElement('a');
+    a.href = D.cover;
+    a.download = D.file;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    const ok = await copy(D.html, D.text);
+    $('post').classList.add('done');
+    $('post').textContent = ok ? 'Done' : 'Cover downloaded';
+    $('status').textContent = ok
+      ? `Cover saved as ${D.file} and the article copied. On X: Articles, Write, add the cover, paste the title (Copy title) and the article.`
+      : 'The cover was saved, but copying failed: select the article above and copy it by hand.';
+  };
+  $('copytitle').onclick = async () => {
+    const ok = await copy('', D.title);
+    $('copytitle').textContent = ok ? 'Title copied' : 'Copy failed';
+    setTimeout(() => { $('copytitle').textContent = 'Copy title'; }, 1500);
+  };
+</script>
+</body>
+</html>

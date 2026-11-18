@@ -1,0 +1,8 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["html"],
+ "properties": {
+  "html": {"type": "string", "description": "The complete self-contained cover HTML file"}
+ }
+}

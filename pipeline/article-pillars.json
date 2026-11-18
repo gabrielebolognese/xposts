@@ -1,0 +1,54 @@
+[
+ {
+  "key": "field_report",
+  "name": "Field report",
+  "goal": "Original data nobody else has: what the owner's own AI systems actually did this week and overall, with the real costs, times, scores and failures. First-hand numbers are the most shared and most quoted kind of article in this niche.",
+  "angle": "I let Claude Code run part of my work on its own. Here is exactly what it built, what it cost, what broke and what I would change. Pick ONE sharp angle from the data (the cost of autonomy, what fails when nobody watches, how quality was enforced, the funnel from 195 tools to a handful of posts), not a diary.",
+  "titles": [
+   "I let Claude Code build a project every night for a week. Here's the bill.",
+   "195 tools found, 140 rejected: what my AI pipeline learned about Claude Code tools",
+   "What $288 of autonomous Claude Code actually buys you"
+  ],
+  "structure": "Open with the most surprising number. Then: the setup in 3 to 5 lines; the numbers (a list or a ranked breakdown); what worked; what broke and why; the rules that fixed it (copyable); what it means for the reader's own setup; recap.",
+  "sources": ["studio", "pipeline", "bip"]
+ },
+ {
+  "key": "playbook",
+  "name": "Playbook",
+  "goal": "The definitive, step-by-step guide to one thing people want to do with Claude Code or Codex. The most bookmarked kind of article: readers save it to follow later.",
+  "angle": "Pick ONE capability that many builders use badly (project instructions, skills, hooks, subagents, plugins, MCP servers, token savings, review loops, running agents unattended) and write the complete setup from zero to working, with the exact files, commands and prompts, the mistakes to avoid and the tools from the data that make it easier. Verify every command against current official docs.",
+  "titles": [
+   "The complete guide to Claude Code hooks (with 7 you can copy today)",
+   "How to set up Claude Code so it stops wasting your tokens",
+   "Claude Code skills, explained from zero: the setup I use every day"
+  ],
+  "structure": "Open with the payoff (what the reader will have at the end). Then: why most setups fail; numbered steps with the exact commands, files and prompts; a section of ready-to-copy examples; the common mistakes; the best tools for it from the data; a checklist recap.",
+  "sources": ["tools"]
+ },
+ {
+  "key": "ranked_list",
+  "name": "Ranked list",
+  "goal": "A ranked roundup readers share and argue about: the best Claude Code and Codex tools, skills and plugins the owner's pipeline found and checked recently, ranked with reasons.",
+  "angle": "Rank 10 to 15 tools from the data (best first), one short section each: what it does in one line, the problem it solves, who should install it, the catch. Group them if a grouping helps (by use: tokens, reviews, automation, UI). Say how the list was made: the pipeline searched and scored N tools and rejected most.",
+  "titles": [
+   "The 12 best Claude Code tools I found this month (out of 195 I checked)",
+   "I tested every new Claude Code plugin this month. These 10 are worth installing.",
+   "Claude Code and Codex add-ons ranked: the 15 that actually save time"
+  ],
+  "structure": "Open with how many tools were checked and how few made it. Then: how they were picked (2 to 4 lines); the ranked list, one ## section or numbered block each with the same mini format; the honorable mentions in a short list; how to choose for your own setup; recap of the top 3.",
+  "sources": ["tools", "pipeline"]
+ },
+ {
+  "key": "breakdown",
+  "name": "Contrarian breakdown",
+  "goal": "A strong, defensible opinion on the biggest AI-building story of the week, the take people quote and reply to. Shares come from disagreement backed by evidence.",
+  "angle": "Take the biggest story of the week for people who build with AI (from this week's trends and the news), state what most people are getting wrong in one line, then prove the better reading with facts, first-hand experience from the owner's systems and concrete consequences for builders. Be fair to the other side, never rage bait.",
+  "titles": [
+   "Everyone is reading the new Claude release wrong",
+   "The AI coding agent story this week is not about the model",
+   "Stop panicking about AI agents writing code. Start worrying about this."
+  ],
+  "structure": "Open with the common take and why it is wrong, in 2 lines. Then: what actually happened (facts, verified); the evidence for the better reading; what it changes for people who build, with examples; what to do this week; recap.",
+  "sources": ["trends", "tools", "studio"]
+ }
+]

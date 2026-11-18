@@ -360,5 +360,38 @@ class Trend(unittest.TestCase):
                 held.close()
 
 
+class Article(unittest.TestCase):
+    def test_markdown(self):
+        import article
+        md = "\n".join(["Intro with **bold** and *italic*.", "", "## Steps", "", "1. One", "2. Two", "", "- a", "- b",
+                        "", "> A quote", "", "### Sub", "See https://example.com/x."])
+        self.assertEqual(article.to_html(md), "\n".join([
+            "<p>Intro with <strong>bold</strong> and <em>italic</em>.</p>", "<h2>Steps</h2>",
+            "<ol><li>One</li><li>Two</li></ol>", "<ul><li>a</li><li>b</li></ul>", "<blockquote>A quote</blockquote>",
+            "<h3>Sub</h3>", '<p>See <a href="https://example.com/x">https://example.com/x</a>.</p>']))
+        self.assertEqual(article.to_plain(md), "\n".join([
+            "Intro with bold and italic.", "", "Steps", "", "1. One", "2. Two", "", "- a", "- b", "", "A quote", "",
+            "Sub", "See https://example.com/x."]))
+        self.assertEqual(article.to_html("a < b & c"), "<p>a &lt; b &amp; c</p>")
+
+    def test_rules(self):
+        import article
+        bad = {"title": "Short", "cover_text": "two words", "topic": "x", "sources": [],
+               "body": "# Title\n\n" + "word " * 120 + chr(0x2014) + " `code` #hashtag\n\n| a | b |"}
+        with tempfile.TemporaryDirectory() as tmp:
+            probs = " | ".join(article.problems(bad, Path(tmp), 0))
+        for want in ("title: one line of 20 to 100", "cover_text: 3 to 8 words", "words, needs", "at least 3 ## sections",
+                     "no # heading", "no backticks", "no tables", "paragraph of", "body: no em or en dashes",
+                     "body: no hashtags"):
+            self.assertIn(want, probs)
+
+    def test_pillars_take_turns_weekly(self):
+        import article
+        from datetime import date
+        keys = [article.pillar_for(date(2026, 11, 18) + timedelta(days=7 * i))["key"] for i in range(5)]
+        self.assertEqual(keys, ["field_report", "playbook", "ranked_list", "breakdown", "field_report"])
+        self.assertEqual(article.pillar_for(date(2026, 11, 20))["key"], "field_report")  # same week
+
+
 if __name__ == "__main__":
     unittest.main()

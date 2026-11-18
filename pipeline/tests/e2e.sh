@@ -14,7 +14,7 @@ mkdir -p "$W/.claude/skills" "$W/pipeline"
 cp "$SRC/scheduler.js" "$SRC/post.js" "$SRC/post-now.js" "$SRC/package.json" "$SRC/x_long_form_post_writing_rules.txt" "$W/"
 cp -r "$SRC/.claude/skills/x-threads" "$W/.claude/skills/"
 for d in lib prompts schemas vendor tests; do cp -r "$SRC/pipeline/$d" "$W/pipeline/"; done
-cp "$SRC/pipeline/run.sh" "$SRC/pipeline/categories.json" "$W/pipeline/"
+cp "$SRC/pipeline/run.sh" "$SRC/pipeline/categories.json" "$SRC/pipeline/article.html" "$SRC/pipeline/article-pillars.json" "$W/pipeline/"
 python - "$SRC/pipeline/config.json" "$W/pipeline/config.json" <<'EOF'
 import json, sys
 c = json.load(open(sys.argv[1], encoding="utf-8"))
@@ -24,6 +24,7 @@ c["retries"]["transient_backoff_seconds"] = []
 c["discovery"]["searches_per_day"] = 1
 c["virality"]["max_per_day"] = 20  # the scenarios make many threads in one day
 c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699)  # no xAutoReply in the test copy
+c["article"].update(min_words=150, lock_port=47698)  # the fixture article is short
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
 EOF
 printf 'pipeline/data/\npipeline/runs/\npipeline/review/\npipeline/logs/\npipeline/.lock\n__pycache__/\n' > "$W/.gitignore"
@@ -35,7 +36,7 @@ git -C "$W" config core.autocrlf false
 git -C "$W" add -A && git -C "$W" commit -qm init
 git -C "$W" remote add origin "$T/remote.git" && git -C "$W" push -q -u origin main 2>/dev/null
 
-export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1
+export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1 POSTS_NO_ARTICLE=1
 cd "$W" || exit 1
 
 seed() {  # seed <tool name>: a pending discovery, as a category search would leave it
@@ -302,6 +303,34 @@ POSTS_TREND_NOW=2030-01-05T10:31 python pipeline/lib/trend.py
 grep -q '"status": "gave_up"' pipeline/data/trend/2030-01-05.json && [ -z "$(calls)" ] || fail "late Saturday not given up"
 unset POSTS_TREND_FAKE
 ok "trending post: Monday nothing; nothing fits: skipped without a post; after 10:30: given up"
+
+# W: the X Article. Wednesday (2030-01-02) from 05:00: written, cover made, articles/<date>/article.html built with
+#    the Post button; it opens at 09:00, once
+export POSTS_ARTICLE_FAKE=1
+: > "$FAKE_LOG"
+POSTS_ARTICLE_NOW=2030-01-02T04:59 python pipeline/lib/article.py
+[ ! -f pipeline/data/article/2030-01-02.json ] || fail "article ran before 05:00"
+POSTS_ARTICLE_NOW=2030-01-02T05:00 python pipeline/lib/article.py
+c="$(calls)"; [ "$c" = "article_write article_cover " ] || fail "article call order" "calls: $c"
+page=articles/2030-01-02/article.html
+[ -f "$page" ] && [ -f articles/2030-01-02/cover.png ] || fail "no article page" "$(tail -5 pipeline/logs/runner.log)"
+grep -q 'id="post"' "$page" && grep -q 'Two overnight Claude Code builds cost' "$page" || fail "page without the Post button or the title"
+python - "$page" <<'PY' || fail "the page data is broken"
+import json, re, sys
+page = open(sys.argv[1], encoding="utf-8").read()
+d = json.loads(re.search(r'<script id="data" type="application/json">(.*?)</script>', page, re.S).group(1))
+assert d["cover"].startswith("data:image/png;base64,") and "<h2>The setup</h2>" in d["html"] and "**" not in d["text"]
+assert d["words"] > 150 and d["pillar"]
+PY
+grep -q '"status": "ready"' pipeline/data/article/2030-01-02.json || fail "article not ready"
+POSTS_ARTICLE_NOW=2030-01-02T09:00 python pipeline/lib/article.py
+grep -q '"status": "opened"' pipeline/data/article/2030-01-02.json || fail "article page not opened at 09:00"
+grep -q "POST .*X article: the page is open in the browser" pipeline/logs/runner.log || fail "no POST line for the article"
+POSTS_ARTICLE_NOW=2030-01-02T09:30 python pipeline/lib/article.py
+POSTS_ARTICLE_NOW=2030-01-03T06:00 python pipeline/lib/article.py
+[ -z "$(calls)" ] && [ ! -f pipeline/data/article/2030-01-03.json ] || fail "article ran again or on a Thursday"
+unset POSTS_ARTICLE_FAKE
+ok "X article: Wednesday 05:00 written with its cover and page (Post button), opened at 09:00, once a week"
 
 echo "all $pass passed"
 rm -rf "$T"

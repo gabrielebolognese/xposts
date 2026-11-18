@@ -18,3 +18,6 @@ studio/projects/_*/
 studio/projects/*/shots/
 studio/projects/*/calls/
 studio/projects/*/metrics.json
+
+# the weekly X Article pages and covers stay on this PC
+articles/

@@ -1,0 +1,36 @@
+{
+ "project": "2026-11-18",
+ "fps": 60,
+ "seconds": 55,
+ "scale": 2,
+ "warmup": 30,
+ "live": 95,
+ "errors": [],
+ "render_seconds": 751,
+ "frame_ms": {
+  "avg": 2.01,
+  "max": 34
+ },
+ "report": {
+  "sinus_hr_bpm": 72,
+  "vt_hr_bpm": 138,
+  "qrs_sinus_ms": 101,
+  "qrs_vt_ms": ">200 (no isoelectric baseline in VT)",
+  "qtc_ms": 306,
+  "phase_singularities_peak": 2,
+  "shock_to_sinus_ms": 1038,
+  "cell_updates_per_s": 121889196,
+  "cell_updates_per_s_note": "per second of GPU time (EXT_disjoint_timer_query on the solver pass, incl. ECG reduction)",
+  "cell_updates_delivered_per_s": 42757200,
+  "gpu_solver_ms_per_frame": 5.85,
+  "pr_ms": 190,
+  "vt_cycle_ms": 436,
+  "s2_ci_ms": 320,
+  "excitable_cells": 23754,
+  "grid_cells": 262144,
+  "substeps_per_frame": 30,
+  "qrs_ms": "101 sinus / >200 VT"
+ },
+ "video": "video.mp4",
+ "mb": 100.5
+}

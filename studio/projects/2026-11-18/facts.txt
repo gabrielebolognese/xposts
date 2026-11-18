@@ -1,0 +1,34 @@
+Project: Reentry: A Heart Stops and Restarts: A post-infarct human heart slice simulated cell by cell on the GPU (Aliev–Panfilov excitable media plus an event-driven Purkinje tree): a single premature beat at the scar border induces a spiral wave and ventricular tachycardia, a shock defibrillates it, and the 12-lead ECG is computed live from the tissue's own currents.
+Why it is hard: Everything is written by hand with no libraries: a WebGL2 float-texture reaction-diffusion solver with diffusion that varies across the tissue (atria, AV node, myocardium, scar border zone, dead scar) running about 27 substeps per frame on a 512² grid. It is coupled both ways to a CPU Purkinje network that fires on events. A pseudo-ECG comes from lead fields that are exact discrete adjoints of the gradient, giving 9 electrodes and 12 leads. A real ECG measurement pipeline (Pan–Tompkins R detection, QRS/QT/QTc, frontal axis) runs on that signal. Phase-singularity detection uses topological charge, and local activation time, APD and conduction-velocity maps are built on the GPU. A 1D-cable S1–S2 restitution lab runs in a Web Worker. The arrhythmia cannot be faked: the model must be tuned so that a real S2 in the vulnerable window actually causes unidirectional block and reentry around the scar, and a real field shock actually ends it, on cue for the camera, while every panel stays dense, aligned and moving on an integrated Radeon GPU.
+The science: MODEL (monodomain Aliev–Panfilov 1996), per cell on a 512×512 grid (WebGL2, RGBA32F ping-pong textures, EXT_color_buffer_float):
+∂u/∂t = ∇·(D(x)∇u) − k·u·(u−a)·(u−1) − u·v + I_stim
+∂v/∂t = ε(u,v)·(−v − k·u·(u−a−1)),  ε = ε0·h(x) + μ1·v/(u+μ2)
+Parameters: k=8, a=0.15, ε0=0.002, μ1=0.2, μ2=0.3. Discretisation: forward Euler, dt=0.02 model units, dx=0.3, 5-point Laplacian written in flux form, ∇·(D∇u) ≈ Σ_nbr D_face(u_nbr−u)/dx² with D_face = harmonic mean of the two D values, so the scar and the outside of the heart are no-flux (D=0). Stability check: dt ≤ dx²/(4·Dmax) = 0.0225 when Dmax=1. Calibration: t_ms = 12.9·t, Vm[mV] = 100·u − 80. Playback runs at 0.5× real time (≈415 sim ms per wall second → about 27 substeps per frame at 60 fps ≈ 7.1 M cell updates per frame). Shown as measured cell updates per second.
+ANATOMY (procedural four-chamber long-axis slice, a 'tissue' RGBA texture: D, h, type, scar): RA and LA thin walls (D=1). A fibrous AV annulus with D=0 isolates the atria from the ventricles except at the AV node bridge (D=0.08, which gives a PR delay of about 150 ms). LV and RV walls plus the septum (D=1). A transmural heterogeneity h(x) (epicardium h=1.35, endocardium h=1.0) shortens epicardial APD so the T wave is upright. An anterolateral LV infarct: a dense scar (D=0, non-excitable) ringed by a border zone (D=0.25, ε0×1.2) with one surviving isthmus channel.
+PACING AND CONDUCTION SYSTEM: the SA node sits in the high RA and delivers I_stim=0.5 to a 6-cell disc for 1
+Built by Claude Opus 5.5 in Claude Code, alone, no libraries, effort xhigh
+Build time: 271 minutes of Claude Code work, 387 turns
+Build cost: $174.17 (the cost Claude Code reports for these sessions at API prices)
+Review rounds by a separate critic: 2; final critic score 8.3 out of 10
+Lines of code: 5251
+Live run on AMD Ryzen 7 5700U with Radeon Graphics (8 cores, 16 threads), 15.3 GB RAM, AMD Radeon(TM) Graphics, Microsoft Windows 11 Home: page at 1 to 60 fps, CPU 12.3% average (max 55.8%), RAM 13.15 of 15.3 GB in use, GPU 24.3% average
+Video: 55 s at 60 fps, 1080p, rendered frame by frame at 2x in 751 s
+Headline numbers from the run:
+- sinus_hr_bpm = 72 (heart rate in sinus rhythm before the arrhythmia, from Pan–Tompkins R-peak detection on the computed lead II)
+- vt_hr_bpm = 138 (ventricular tachycardia rate after the premature beat, measured from RR intervals on lead II)
+- qrs_sinus_ms = 101 ()
+- qrs_vt_ms = >200 (no isoelectric baseline in VT) ()
+- qtc_ms = 306 (Bazett-corrected QT interval of the last sinus beat)
+- phase_singularities_peak = 2 (maximum number of spiral-wave tips (topological charge ±1) detected at once during VT)
+- shock_to_sinus_ms = 1038 (sim time from the defibrillation shock to the first detected sinus QRS)
+- cell_updates_per_s = 121889196 (measured Aliev–Panfilov cell updates per second on the integrated Radeon GPU)
+- cell_updates_per_s_note = per second of GPU time (EXT_disjoint_timer_query on the solver pass, incl. ECG reduction) ()
+- cell_updates_delivered_per_s = 42757200 ()
+- gpu_solver_ms_per_frame = 5.85 ()
+- pr_ms = 190 (PR interval produced by slow AV-node conduction, measured on the ECG)
+- vt_cycle_ms = 436 ()
+- s2_ci_ms = 320 ()
+- excitable_cells = 23754 ()
+- grid_cells = 262144 ()
+- substeps_per_frame = 30 ()
+- qrs_ms = 101 sinus / >200 VT (QRS width in sinus rhythm vs during VT, measured on the 12-lead spatial velocity (shows the wide-complex tachycardia))

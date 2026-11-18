@@ -1,0 +1,409 @@
+{
+ "title": "Reentry: A Heart Stops and Restarts",
+ "slug": "reentry-heart-vt",
+ "subject": "A post-infarct human heart slice simulated cell by cell on the GPU (Aliev–Panfilov excitable media plus an event-driven Purkinje tree): a single premature beat at the scar border induces a spiral wave and ventricular tachycardia, a shock defibrillates it, and the 12-lead ECG is computed live from the tissue's own currents.",
+ "why_hard": "Everything is written by hand with no libraries: a WebGL2 float-texture reaction-diffusion solver with diffusion that varies across the tissue (atria, AV node, myocardium, scar border zone, dead scar) running about 27 substeps per frame on a 512² grid. It is coupled both ways to a CPU Purkinje network that fires on events. A pseudo-ECG comes from lead fields that are exact discrete adjoints of the gradient, giving 9 electrodes and 12 leads. A real ECG measurement pipeline (Pan–Tompkins R detection, QRS/QT/QTc, frontal axis) runs on that signal. Phase-singularity detection uses topological charge, and local activation time, APD and conduction-velocity maps are built on the GPU. A 1D-cable S1–S2 restitution lab runs in a Web Worker. The arrhythmia cannot be faked: the model must be tuned so that a real S2 in the vulnerable window actually causes unidirectional block and reentry around the scar, and a real field shock actually ends it, on cue for the camera, while every panel stays dense, aligned and moving on an integrated Radeon GPU.",
+ "angle": "Week 1, Opus at maximum effort, no libraries: raw WebGL2 shaders + canvas 2D + one Web Worker, built in one night",
+ "science": "MODEL (monodomain Aliev–Panfilov 1996), per cell on a 512×512 grid (WebGL2, RGBA32F ping-pong textures, EXT_color_buffer_float):\n∂u/∂t = ∇·(D(x)∇u) − k·u·(u−a)·(u−1) − u·v + I_stim\n∂v/∂t = ε(u,v)·(−v − k·u·(u−a−1)),  ε = ε0·h(x) + μ1·v/(u+μ2)\nParameters: k=8, a=0.15, ε0=0.002, μ1=0.2, μ2=0.3. Discretisation: forward Euler, dt=0.02 model units, dx=0.3, 5-point Laplacian written in flux form, ∇·(D∇u) ≈ Σ_nbr D_face(u_nbr−u)/dx² with D_face = harmonic mean of the two D values, so the scar and the outside of the heart are no-flux (D=0). Stability check: dt ≤ dx²/(4·Dmax) = 0.0225 when Dmax=1. Calibration: t_ms = 12.9·t, Vm[mV] = 100·u − 80. Playback runs at 0.5× real time (≈415 sim ms per wall second → about 27 substeps per frame at 60 fps ≈ 7.1 M cell updates per frame). Shown as measured cell updates per second.\nANATOMY (procedural four-chamber long-axis slice, a 'tissue' RGBA texture: D, h, type, scar): RA and LA thin walls (D=1). A fibrous AV annulus with D=0 isolates the atria from the ventricles except at the AV node bridge (D=0.08, which gives a PR delay of about 150 ms). LV and RV walls plus the septum (D=1). A transmural heterogeneity h(x) (epicardium h=1.35, endocardium h=1.0) shortens epicardial APD so the T wave is upright. An anterolateral LV infarct: a dense scar (D=0, non-excitable) ringed by a border zone (D=0.25, ε0×1.2) with one surviving isthmus channel.\nPACING AND CONDUCTION SYSTEM: the SA node sits in the high RA and delivers I_stim=0.5 to a 6-cell disc for 1 model unit once every sinus cycle length (60000/HR ms). His/Purkinje: a binary tree of about 120 segments generated along the LV and RV endocardium. When u>0.5 at the His entry cell (the ventricular end of the AV bridge), the tree is activated as events: each segment adds delay = length / CV_P. When a terminal Purkinje–myocardial junction is reached, it injects I_stim into a 3-cell disc, but only if the local myocardium is not refractory (v<0.6). Each segment has a refractory period, so AV dissociation emerges during VT.\nPROTOCOL (an electrophysiology-study programmed stimulation, logged exactly as delivered): S2 = one premature stimulus at the scar border-zone site, given at coupling interval CI after the last sinus ventricular activation at that site (default 290 ms, inside the vulnerable window). This produces unidirectional block → reentry → a spiral. Fallback, logged honestly: if no phase singularity appears within 400 ms, a cross-field S2 (a half-plane stimulus over the refractory tail) is delivered. Defibrillation: a uniform I_stim = shock strength (default 3.0) on every excitable cell for 1 model unit (12.9 ms). If phase singularities survive 150 ms later, the log reports 'shock failed' and a second shock at 1.5× is delivered.\nPSEUDO-ECG: Φ_e = Σ_cells ∇u·∇(1/|r_e−r|)·dA. Each frame the solver writes u and v downsampled to 256² and reads them back (readPixels). Each of the 9 electrodes (RA, LA, LL on an Einthoven triangle around the slice, V1–V6 arranged around the precordial side) gets a precomputed weight field W_e = −div_h(mask·grad_h(1/r_e)), the exact discrete adjoint of the gradient. That makes Φ_e = Σ W_e·u, which is exactly the discrete gradient form, at a cost of 9×65k MACs. The Wilson central terminal is WCT=(RA+LA+LL)/3. I=LA−RA, II=LL−RA, III=LL−LA, aVR=RA−(LA+LL)/2, aVL=LA−(RA+LL)/2, aVF=LL−(RA+LA)/2, Vi=Φ_Vi−WCT. One gain constant is fixed during prewarm so that the sinus R wave in lead II reads 1.2 mV, then it is frozen. A 0.5–40 Hz bandpass (biquads) can be toggled. Paper is drawn at 25 mm/s and 10 mm/mV, about 3.5 px per mm.\nECG MEASUREMENTS (from the signals, not from the script): Pan–Tompkins on lead II (derivative → square → 150 ms moving-window integration → adaptive thresholds) gives R peaks, RR and HR = 60000/RR. QRS onset and offset come from thresholds on the spatial velocity √Σ(dV_lead/dt)². T-end uses the tangent method at the steepest T downslope. QT and QTc use Bazett: QT/√(RR in s). PR runs from P onset to QRS onset. The frontal axis is atan2((2/√3)·net aVF, net I) using net QRS areas. Rhythm classification: sinus if a P precedes each QRS and HR is 50–100; VT if HR >120 with QRS >120 ms and AV dissociation; 'post-shock' otherwise. Cross-check: total ventricular activation time from the LAT map is shown next to the ECG QRS width.\nMAPS (a GPU pass using MRT on the same step): LAT is the sim time of the most recent upward crossing of u=0.5. APD90-like is the time from the upstroke until u falls below 0.1. Diastolic interval DI is the time from that drop to the next upstroke. CV = 1/|∇LAT| in cells/ms (spatial units are model cells, never claimed as cm/s, because the tissue is spatially scaled to hold several spiral wavelengths). Phase θ = atan2(v−v*, u−u*) with (u*,v*)=(0.5,1.0). A phase singularity is any 2×2 plaquette where the sum of wrapped phase differences is ±2π; it is counted, tracked by nearest neighbour, and its chirality is shown. Dominant frequency is 1/mean cycle length at the probes.\nRESTITUTION LAB (Web Worker): a 1D 400-cell cable with the same equations runs a continuous S1–S2 protocol (S1=10 beats at 600 ms, S2 swept from 600 ms down to block). It plots APD(DI) scatter and a fitted exponential APD = A − B·e^(−DI/τ), and reports the slope at the current DI (a slope >1 warns of breakup). Live 2D probe points are overlaid.\nPROBES: 7 sites (SA, RA, AV, His entry, LV endocardium, LV epicardium, border zone) show Vm(t) in mV and v(t). The phase portrait plots u against v at the selected probe.\nWORKSTATION: CPU usage for each of the 16 threads, RAM, GPU, disk, and page FPS and frame time, all measured and supplied by the kit.\nNUMBER COLOURS: HR 60–100 is up/green, 100–150 warn, >150 down/red. QRS >120, QTc >470 and PR >200 are warn. A phase-singularity count >0 is down. Restitution slope >1 is warn. Active stimulus or shock uses the active colour.",
+ "headline_numbers": [
+  {
+   "key": "sinus_hr_bpm",
+   "meaning": "heart rate in sinus rhythm before the arrhythmia, from Pan–Tompkins R-peak detection on the computed lead II"
+  },
+  {
+   "key": "vt_hr_bpm",
+   "meaning": "ventricular tachycardia rate after the premature beat, measured from RR intervals on lead II"
+  },
+  {
+   "key": "qrs_ms",
+   "meaning": "QRS width in sinus rhythm vs during VT, measured on the 12-lead spatial velocity (shows the wide-complex tachycardia)"
+  },
+  {
+   "key": "qtc_ms",
+   "meaning": "Bazett-corrected QT interval of the last sinus beat"
+  },
+  {
+   "key": "phase_singularities_peak",
+   "meaning": "maximum number of spiral-wave tips (topological charge ±1) detected at once during VT"
+  },
+  {
+   "key": "shock_to_sinus_ms",
+   "meaning": "sim time from the defibrillation shock to the first detected sinus QRS"
+  },
+  {
+   "key": "cell_updates_per_s",
+   "meaning": "measured Aliev–Panfilov cell updates per second on the integrated Radeon GPU"
+  },
+  {
+   "key": "pr_ms",
+   "meaning": "PR interval produced by slow AV-node conduction, measured on the ECG"
+  }
+ ],
+ "design": {
+  "layout": "An electrophysiology-lab workstation on the 1920×1080 stage with 8 px margins and gutters. A left rail (300 px) holds controls, the event log and workstation resources. The heart tissue map is the hero (680×700) beside an equally weighted 12-lead ECG printed on pink paper (908×700), because the story is cause and effect: the wave you see on the tissue makes the trace you read on the paper. A bottom band of four instruments (maps, action potentials, restitution, beat table) holds the dense numbers. Every tile is aligned to the 8 px grid, there are no empty corners, and every tile moves at once: the wavefront, the ECG sweep, the AP traces, the scrolling log, the resource charts.",
+  "regions": [
+   {
+    "name": "header",
+    "x": 8,
+    "y": 8,
+    "w": 1904,
+    "h": 36,
+    "contents": "Title 'REENTRY · post-infarct ventricle · Aliev–Panfilov 512²'. Sim clock in ms. Playback 0.5×. Rhythm badge (SINUS / VT / SHOCK / POST-SHOCK) in its state colour. Monitor-style vitals: HR, RR, QRS, QTc, axis, PS count, steps per frame, cell updates per second."
+   },
+   {
+    "name": "controls",
+    "x": 8,
+    "y": 52,
+    "w": 300,
+    "h": 548,
+    "contents": "Grouped sliders and fields: model (k, a, ε0, μ1, μ2, dt, dx), tissue (D myocardium, D border zone, D AV node, epi heterogeneity), conduction (sinus rate, Purkinje CV), protocol (S2 coupling interval, S2 site, shock strength, shock duration), display toggles. Below them, a protocol timeline bar marking warm-up, S2 and shock with a playhead."
+   },
+   {
+    "name": "log",
+    "x": 8,
+    "y": 608,
+    "w": 300,
+    "h": 196,
+    "contents": "Timestamped event log in the mono font: beat detections with RR/QRS, Purkinje entry, S2 delivered, unidirectional block, PS born/annihilated with coordinates, VT detected, shock, sinus restored. Colour-coded by severity."
+   },
+   {
+    "name": "workstation",
+    "x": 8,
+    "y": 812,
+    "w": 300,
+    "h": 260,
+    "contents": "Real PC resources styled as a bedside-monitor bank: a 16-cell grid of per-thread CPU sparklines, RAM, GPU and disk traces with values, page FPS and frame-time histogram, GPU substeps per frame."
+   },
+   {
+    "name": "hero",
+    "x": 316,
+    "y": 52,
+    "w": 680,
+    "h": 700,
+    "contents": "The four-chamber slice coloured by Vm (slate −80 → teal → amber → crimson +20 mV). Overlays: the Purkinje tree with nodes flashing at activation times, scar hatching and the border-zone outline, LAT isochrones every 20 ms, electrode markers (RA, LA, LL, V1–V6) with live potentials, 7 probe markers, spiral-tip markers with chirality and trails. Also a colourbar in mV, a scale in cells, and a corner readout of grid, dt, steps and time."
+   },
+   {
+    "name": "ecg",
+    "x": 1004,
+    "y": 52,
+    "w": 908,
+    "h": 700,
+    "contents": "12-lead ECG on pink millimetre paper: a 4×3 layout (I, II, III | aVR, aVL, aVF | V1–V3 | V4–V6) with 2.5 s per column, plus a 10 s lead II rhythm strip across the bottom. Shown: a sweep cursor, a calibration pulse, a label of 25 mm/s and 10 mm/mV, automatic calipers on the last beat (PR, QRS, QT), R-peak ticks with RR values, and S2 and shock annotations on the strip."
+   },
+   {
+    "name": "maps",
+    "x": 316,
+    "y": 760,
+    "w": 540,
+    "h": 312,
+    "contents": "Three 172 px square maps: LAT activation (with isochrones and TAT), APD (ms), phase map with phase-singularity markers. Under them: a CV histogram in cells/ms, an APD histogram, and PS count vs time."
+   },
+   {
+    "name": "probes",
+    "x": 864,
+    "y": 760,
+    "w": 400,
+    "h": 312,
+    "contents": "7 stacked action-potential traces (SA, RA, AV, His, LV endo, LV epi, border zone) over the last 3 s. Each has Vm in mV, the v gate as a faint line, a current APD/DI readout, and upstroke markers."
+   },
+   {
+    "name": "restitution",
+    "x": 1272,
+    "y": 760,
+    "w": 300,
+    "h": 312,
+    "contents": "Top: APD vs DI scatter from the 1D cable S1–S2 worker, with the exponential fit, slope readout and live 2D probe points. Bottom: the u–v phase portrait at the selected probe, with the (u*,v*) centre marked."
+   },
+   {
+    "name": "measurements",
+    "x": 1580,
+    "y": 760,
+    "w": 332,
+    "h": 312,
+    "contents": "A scrolling beat-by-beat table: beat #, rhythm, RR, HR, PR, QRS, QT, QTc, axis, TAT, each colour-coded against clinical limits. Below it: summary rows for sinus mean, VT mean, and shock-to-sinus time."
+   }
+  ],
+  "mode": "light",
+  "palette": {
+   "background": "#F4F1EC",
+   "surface": "#FFFFFF",
+   "line": "#DDD5CB",
+   "text": "#1C1F26",
+   "muted": "#7A7F8A",
+   "accents": [
+    "#C8102E",
+    "#2F6FB0",
+    "#0E8C7A",
+    "#E8A33D",
+    "#6B4FA3",
+    "#F3C9C9",
+    "#E79A9A",
+    "#24324F"
+   ],
+   "up": "#1E8E5A",
+   "down": "#C62828",
+   "warn": "#E08A00",
+   "active": "#2563EB"
+  },
+  "fonts": "Segoe UI Variable for panel titles and labels (semibold, 11–13 px, small caps). Cascadia Mono for every number, log line and table cell (9–11 px). Bahnschrift (semi-condensed) for the large monitor vitals in the header and the rhythm badge.",
+  "feel": "A modern EP lab: a CARTO/EnSite voltage map beside a crisp 12-lead printed on pink millimetre ECG paper, with bedside-monitor vitals across the top. Light, clinical, precise: warm paper background, white instrument cards with hairline borders, black ECG ink and crimson grid. The only saturated colour is the electrical wave itself and the meaning colours on the numbers. The mood moves from calm sinus rhythm to the alarm of a spiral wave, then back to relief."
+ },
+ "panels": [
+  {
+   "name": "Vitals header",
+   "region": "header",
+   "shows": "Sim clock, rhythm badge changing SINUS→VT→SHOCK→SINUS, HR/RR/QRS/QTc/axis/PS count, GPU cell updates per second"
+  },
+  {
+   "name": "Heart tissue (hero)",
+   "region": "hero",
+   "shows": "Live Vm field on the four-chamber slice, Purkinje tree firing, scar and border zone, isochrones, electrodes with potentials, spiral tips with trails"
+  },
+  {
+   "name": "12-lead ECG",
+   "region": "ecg",
+   "shows": "Pseudo-ECG computed from the tissue in a 4×3 layout plus lead II rhythm strip, with calipers, R ticks, S2 and shock annotations"
+  },
+  {
+   "name": "Electrophysiology maps",
+   "region": "maps",
+   "shows": "LAT isochrone map, APD map, phase map with singularities, CV/APD histograms, PS count history"
+  },
+  {
+   "name": "Action potential probes",
+   "region": "probes",
+   "shows": "7 site traces in mV with v gate, APD and DI readouts, upstroke markers"
+  },
+  {
+   "name": "Restitution and phase portrait",
+   "region": "restitution",
+   "shows": "1D cable S1–S2 APD(DI) scatter with fit and slope, live probe overlay, u–v phase loop"
+  },
+  {
+   "name": "Beat table",
+   "region": "measurements",
+   "shows": "Beat-by-beat RR, HR, PR, QRS, QT, QTc, axis, TAT with clinical colour coding, sinus vs VT summary"
+  },
+  {
+   "name": "Controls and protocol",
+   "region": "controls",
+   "shows": "Every model, tissue, conduction, protocol and display parameter, plus the protocol timeline playhead"
+  },
+  {
+   "name": "Event log",
+   "region": "log",
+   "shows": "Timestamped beats, S2, block, phase-singularity births and deaths, VT detection, shock, restoration"
+  },
+  {
+   "name": "Workstation",
+   "region": "workstation",
+   "shows": "Measured CPU per thread (16), RAM, GPU, disk, FPS and frame time, substeps per frame"
+  }
+ ],
+ "controls": [
+  {
+   "name": "k (excitability)",
+   "kind": "slider",
+   "value": "8.0",
+   "range": "4 – 12"
+  },
+  {
+   "name": "a (threshold)",
+   "kind": "slider",
+   "value": "0.15",
+   "range": "0.05 – 0.30"
+  },
+  {
+   "name": "ε0 (recovery rate)",
+   "kind": "slider",
+   "value": "0.002",
+   "range": "0.0005 – 0.01"
+  },
+  {
+   "name": "μ1",
+   "kind": "slider",
+   "value": "0.20",
+   "range": "0.05 – 0.40"
+  },
+  {
+   "name": "μ2",
+   "kind": "slider",
+   "value": "0.30",
+   "range": "0.10 – 0.60"
+  },
+  {
+   "name": "dt",
+   "kind": "field",
+   "value": "0.02",
+   "range": "0.005 – 0.0225 (stability limit dx²/4D)"
+  },
+  {
+   "name": "dx",
+   "kind": "field",
+   "value": "0.30",
+   "range": "fixed per build"
+  },
+  {
+   "name": "D myocardium",
+   "kind": "slider",
+   "value": "1.00",
+   "range": "0.2 – 1.0"
+  },
+  {
+   "name": "D border zone",
+   "kind": "slider",
+   "value": "0.25",
+   "range": "0.05 – 1.0"
+  },
+  {
+   "name": "D AV node",
+   "kind": "slider",
+   "value": "0.08",
+   "range": "0.02 – 0.5"
+  },
+  {
+   "name": "Epicardial heterogeneity h",
+   "kind": "slider",
+   "value": "1.35",
+   "range": "1.0 – 2.0"
+  },
+  {
+   "name": "Sinus rate",
+   "kind": "knob",
+   "value": "72 bpm",
+   "range": "40 – 180 bpm"
+  },
+  {
+   "name": "Purkinje CV",
+   "kind": "slider",
+   "value": "8 cells/ms",
+   "range": "2 – 20 cells/ms"
+  },
+  {
+   "name": "S2 coupling interval",
+   "kind": "slider",
+   "value": "290 ms",
+   "range": "200 – 500 ms"
+  },
+  {
+   "name": "S2 site",
+   "kind": "select",
+   "value": "Border zone (LV anterolateral)",
+   "range": "Border zone / LV apex / RV outflow / cross-field"
+  },
+  {
+   "name": "Shock strength",
+   "kind": "knob",
+   "value": "3.0",
+   "range": "0 – 6 (dimensionless current)"
+  },
+  {
+   "name": "Shock duration",
+   "kind": "slider",
+   "value": "12.9 ms",
+   "range": "2 – 30 ms"
+  },
+  {
+   "name": "Playback speed",
+   "kind": "slider",
+   "value": "0.5×",
+   "range": "0.1 – 1.0×"
+  },
+  {
+   "name": "ECG bandpass 0.5–40 Hz",
+   "kind": "toggle",
+   "value": "on",
+   "range": "on/off"
+  },
+  {
+   "name": "Overlays: isochrones / Purkinje / electrodes / tips",
+   "kind": "toggles",
+   "value": "on / on / on / on",
+   "range": "on/off each"
+  }
+ ],
+ "mid_work": "Prewarm in code before the first paint: the GPU solver fast-forwards about 6 s of sim sinus rhythm in chunks, which freezes the ECG gain calibration, fills the beat table with roughly 7 measured beats, and seeds the LAT, APD and phase maps, the AP traces and the event log with real beat lines. The Web Worker starts the 1D cable S1–S2 sweep at once, so the restitution scatter already holds a full curve. Then the recorder's 30 s warm-up runs live at 0.5× (about 12 more sim seconds), which fills the whole 10 s ECG sweep and rhythm strip and gives the resource sparklines 30 s of history. The protocol clock is tied to the recorded timeline: S2 fires 11 s into the video, the defibrillation shock 38 s in. Frame 1 therefore opens on a heart that is mid-beat, with full paper, a full log and charts that already have history.",
+ "warmup_seconds": 30,
+ "video_seconds": 55,
+ "camera": [
+  {
+   "t": 0.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.0,
+   "focus": "Whole EP workstation in sinus rhythm: tissue beating, 12-lead sweeping"
+  },
+  {
+   "t": 5.0,
+   "cx": 0.52,
+   "cy": 0.45,
+   "zoom": 1.12,
+   "focus": "Slow push toward the tissue and paper"
+  },
+  {
+   "t": 10.0,
+   "cx": 0.34,
+   "cy": 0.38,
+   "zoom": 1.6,
+   "focus": "Hero tissue: S2 fires at the scar border at t=11, unidirectional block"
+  },
+  {
+   "t": 16.0,
+   "cx": 0.36,
+   "cy": 0.4,
+   "zoom": 1.8,
+   "focus": "Spiral wave forms around the scar, tip markers and trails, Purkinje tree"
+  },
+  {
+   "t": 22.0,
+   "cx": 0.76,
+   "cy": 0.36,
+   "zoom": 1.5,
+   "focus": "12-lead turns into wide-complex VT, calipers and R ticks"
+  },
+  {
+   "t": 27.0,
+   "cx": 0.31,
+   "cy": 0.84,
+   "zoom": 1.8,
+   "focus": "LAT, APD and phase maps with phase singularities counted"
+  },
+  {
+   "t": 32.0,
+   "cx": 0.6,
+   "cy": 0.84,
+   "zoom": 1.65,
+   "focus": "Action potentials at VT rate, restitution slope and phase portrait"
+  },
+  {
+   "t": 37.0,
+   "cx": 0.76,
+   "cy": 0.58,
+   "zoom": 1.6,
+   "focus": "Rhythm strip: defibrillation shock at t=38, flatline then a sinus QRS"
+  },
+  {
+   "t": 42.0,
+   "cx": 0.34,
+   "cy": 0.38,
+   "zoom": 1.45,
+   "focus": "Tissue: spiral gone, clean sinus wave from the Purkinje tree"
+  },
+  {
+   "t": 47.0,
+   "cx": 0.17,
+   "cy": 0.62,
+   "zoom": 1.55,
+   "focus": "Controls, event log (VT detected, shock, sinus restored) and workstation resources"
+  },
+  {
+   "t": 53.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.0,
+   "focus": "Wide again: heart restored, beat table showing sinus vs VT"
+  }
+ ],
+ "uses_api": false,
+ "post_angle": "Day 2: Claude built a heart out of equations, about 260,000 cells of excitable tissue on a laptop GPU. One extra beat at a scar sets off a spiral wave and ventricular tachycardia (sinus_hr_bpm → vt_hr_bpm), and a shock brings sinus rhythm back in shock_to_sinus_ms. Nothing in the 12-lead ECG is a recording: every line is computed from the tissue's own electrical currents, and Claude measures it like a cardiologist would (QRS, QTc, axis). No libraries, one night."
+}

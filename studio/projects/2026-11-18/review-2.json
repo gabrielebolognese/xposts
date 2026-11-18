@@ -1,0 +1,120 @@
+{
+ "score": 8.3,
+ "critic": {
+  "scores": {
+   "subject_fit": 9,
+   "complex_but_clean": 9,
+   "no_defects": 7,
+   "alive": 8,
+   "mid_work": 9,
+   "real_numbers": 8,
+   "wow": 8
+  },
+  "issues": [
+   {
+    "severity": "major",
+    "where": "Restitution card, bottom half (u–v phase portrait, x≈1280–1560, y≈950–1060)",
+    "problem": "The phase portrait is the same in all four frames (2 s sinus, 19 s and 36 s VT, 52 s post-shock): same loop, same shape, and no marker for the current state. In VT the border-zone APD falls from 158 to 117 ms and the DI to 317 ms, so the loop should shrink and stop reaching full recovery in v. It is the only instrument that looks frozen, and a scientist will see that it ignores the rhythm.",
+    "fix": "Plot the selected probe's (u,v) from a ring buffer covering the last 1–2 cycles. Fade older samples, draw a bright dot at the current (u,v), and redraw every frame so the VT loop visibly tightens and the sinus loop comes back after the shock."
+   },
+   {
+    "severity": "major",
+    "where": "Restitution card, the line between the APD–DI scatter and the phase portrait (y≈928–950)",
+    "problem": "The red exponential fit runs past the APD=100 axis at the low-DI end, down through the x tick labels (100, 200…) and into the 'PHASE PORTRAIT · Border zone' title. The 'v' axis label also covers the top tick (2.5) of the portrait.",
+    "fix": "Clip the fit and scatter to the plot rectangle (ctx.save, rect, clip) or start the fit at the DI where APD ≥ axis minimum. Add about 8 px between the scatter's x labels and the portrait title, and move the 'v' label left of the tick column."
+   },
+   {
+    "severity": "major",
+    "where": "GPU SOLVER block in the Workstation card plus the header CELL UPD/S",
+    "problem": "The throughput numbers don't agree with each other. At 2 s: 30 × 23,754 updates in a 1.12 ms GPU pass is 636 M/s, but the panel shows 325.5 M and the header 363.4 M. At 52 s: 1.83 ms means 389 M/s, but the panel shows 331.8 M and the header 374.6 M. At 36 s they match (1.81 ms → 394.3 M). Anyone who divides these numbers will doubt the 'edge' metric.",
+    "fix": "Derive both numbers from one smoothed GPU time. Show the smoothed pass time next to the smoothed rate (e.g. 'GPU pass (avg 1 s) 1.62 ms → 440 M/s'), and use that same value in the header. Or label one 'instant' and the other 'avg', computing each from its own pass time."
+   },
+   {
+    "severity": "minor",
+    "where": "Hero voltage map: V2 electrode label next to the SCAR CIRCUIT inset (x≈500–540, y≈640)",
+    "problem": "The V2 potential label sits on the inset's right border, so the minus sign is hidden behind the frame line ('|1.31 mV', '|0.74 mV'). In a pseudo-ECG the polarity is the information. The inset's top-right corner also covers part of the lower RV free wall.",
+    "fix": "Put the V2 readout on the right of its marker, or shift the inset 8–12 px left/down so it clears the RV wall and the label. Test it against the widest value, '−1.38 mV'."
+   },
+   {
+    "severity": "minor",
+    "where": "Header SIM CLOCK vs the hero's corner readout 't = …'",
+    "problem": "The header clock is always exactly 15.5 ms behind the hero (20,836.1 vs 20,851.6; 44,056.1 vs 44,071.6), which is one frame of 60 steps × 0.258 ms. The countdowns differ the same way ('shock in 16.7 s' in the header, 'in 16.8 s' in the controls).",
+    "fix": "Update the header and protocol readouts after the solver step, from the same t value the hero uses, instead of the previous frame's state."
+   },
+   {
+    "severity": "minor",
+    "where": "Event log, VT detection line (19 s frame)",
+    "problem": "'VT: 3 wide beats, median HR 173 (RR 346), QRS >200, AV dissoc.' wraps onto a second line with no timestamp and a ragged indent. This breaks the one-event-per-row mono column.",
+    "fix": "Shorten it to fit one line (e.g. 'VT detected · 3 wide · RR 346 · AV dissoc') or indent the wrapped line under the message column so it keeps the timestamp gutter."
+   },
+   {
+    "severity": "minor",
+    "where": "Workstation card, DISK readout",
+    "problem": "'DISK R 2.5 W 4.1' has no units, while every other value on the dashboard has them.",
+    "fix": "Add the unit: 'R 2.5 · W 4.1 MB/s'."
+   },
+   {
+    "severity": "minor",
+    "where": "Last-beat panel (lead II, 50 mm/s) during sinus",
+    "problem": "The measured T wave is almost flat or slightly negative between QRS-off and T-end, so QT 279 is hard to believe from the trace. The QRS is drawn as a broad smooth hump. A cardiologist will notice the missing T in lead II.",
+    "fix": "Raise the transmural APD gradient (the epi h is already 1.35) or the lead gain for repolarisation so lead II shows an upright T. Or draw the T-end marker on a visible tangent intercept so the QT caliper visibly sits on a real feature."
+   },
+   {
+    "severity": "minor",
+    "where": "EP maps, phase map (VT frames)",
+    "problem": "The 'q +1' tip label sits on the right border of the phase-map card and is partly clipped.",
+    "fix": "Flip the label to the left of the PS marker when it lands within about 24 px of the card edge."
+   }
+  ],
+  "summary": "I'd post this with fixes. The dashboard is dense, coherent and scientifically consistent: steps = t/0.258 ms exactly, QTc matches Bazett, every probe's APD+DI equals the cycle length (VT 434, sinus 833), and the restitution slope matches the printed fit. The header, ECG, beat table, axis dial and log all follow the SINUS→VT→SINUS story on the 11 s and 38 s schedule. The layout matches the brief on the 8 px grid, and the light EP-lab palette fits. It opens mid-work with full paper, a full log and charts that already have history. What's holding it back: the u–v phase portrait is the same in every frame; the restitution fit spills out of its plot into the next title; the GPU throughput numbers don't divide out consistently; and there are a few small collisions (V2 label hidden under the inset frame, clipped 'q +1', a one-frame clock lag). On wow, the reentry around the scar is clear in the inset, but on the thin ventricular ring it reads as red bands, not a swirling spiral. Fix the major items and it's an 8–9."
+ },
+ "shots": {
+  "shots": [
+   "shots/at-2s.png",
+   "shots/at-2s-view1.png",
+   "shots/at-2s-view2.png",
+   "shots/at-19s.png",
+   "shots/at-19s-view1.png",
+   "shots/at-19s-view2.png",
+   "shots/at-36s.png",
+   "shots/at-36s-view1.png",
+   "shots/at-36s-view2.png",
+   "shots/at-52s.png",
+   "shots/at-52s-view1.png",
+   "shots/at-52s-view2.png"
+  ],
+  "errors": [],
+  "frameMs": {
+   "avg": 3.78,
+   "max": 29
+  },
+  "warmup": 30,
+  "numbers": "preview (made up until the live run)",
+  "report": {
+   "sinus_hr_bpm": 72,
+   "vt_hr_bpm": 138,
+   "qrs_sinus_ms": 101,
+   "qrs_vt_ms": ">200 (no isoelectric baseline in VT)",
+   "qtc_ms": 306,
+   "phase_singularities_peak": 2,
+   "shock_to_sinus_ms": 1038,
+   "cell_updates_per_s": 378110745,
+   "cell_updates_per_s_note": "per second of GPU time (EXT_disjoint_timer_query on the solver pass, incl. ECG reduction)",
+   "cell_updates_delivered_per_s": 42757200,
+   "gpu_solver_ms_per_frame": 1.88,
+   "pr_ms": 190,
+   "vt_cycle_ms": 436,
+   "s2_ci_ms": 320,
+   "excitable_cells": 23754,
+   "grid_cells": 262144,
+   "substeps_per_frame": 30,
+   "qrs_ms": "101 sinus / >200 VT"
+  },
+  "times": [
+   2,
+   19,
+   36,
+   52
+  ]
+ }
+}

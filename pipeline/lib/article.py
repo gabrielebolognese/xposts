@@ -163,8 +163,13 @@ def studio_data() -> str:
                      f"{st.get('review_round', 0)} fix rounds")
     if not lines:
         return "Claude Studio: no finished builds yet."
-    return (f"Claude Studio builds (Claude Code alone overnight, capped at {core.cfg('studio.build_hours', 7)} hours and "
-            f"${core.cfg('studio.build_budget_usd', 160)} per session; an Opus critic scores frames, 8/10 to pass):\n"
+    return (f"Claude Studio builds (Claude Code alone overnight; every Claude Code session is capped at "
+            f"{core.cfg('studio.build_hours', 7)} hours and ${core.cfg('studio.build_budget_usd', 160)} with --max-budget-usd, "
+            "and the build and each fix round are separate sessions, so a project's total can pass the cap by design; "
+            f"an Opus critic scores frames, {core.cfg('studio.min_score', 8)}/10 to pass, at most "
+            f"{core.cfg('studio.review_rounds', 2)} fix rounds; the costs below are the totals of all sessions as Claude Code "
+            "reports them, the value at API prices: the builds run on the owner's Claude subscription, so say \"worth\" or "
+            "\"at API prices\", never that the owner paid it):\n"
             + "\n".join(lines) + f"\nTotal: {len(lines)} builds, ${cost:.2f}, {secs / 3600:.1f} hours of building.")
 
 
@@ -198,6 +203,9 @@ def pipeline_data() -> str:
         f"- tools analyzed: {len(hist)}: {', '.join(f'{v} {k}' for k, v in runs.most_common())}",
         f"- why tools were dropped: {', '.join(f'{v} at {k}' for k, v in reasons.most_common())}; scored 1 of 5 on: "
         + (", ".join(f"{k} {v} times" for k, v in weak.most_common()) or "none"),
+        f"- a thread scoring under {core.cfg('virality.optimize_below', 80)} for virality gets "
+        f"{core.cfg('virality.alternative_hooks', 10)} alternative hooks and the best one replaces its hook; the tool is "
+        f"dropped only when the best version still scores under {core.cfg('virality.min_score', 70)}",
         f"- threads that passed: average virality score {sum(good) / len(good):.1f} of 100" if good else "- no thread passed yet",
         f"- posts that went out on X from this PC: {len(posted)}, of them {len(threads)} threads",
     ])

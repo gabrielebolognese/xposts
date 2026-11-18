@@ -34,7 +34,7 @@ Past articles (do not repeat their topic or angle):
 1. The title is the most important line. Specific and concrete: a number, a real outcome, a named tool, a cost. A curiosity gap the body closes. Plain words, ideally 50 to 80 characters, never over 100. No clickbait the article does not deliver.
 2. The first 3 lines show under the title in the timeline. Start with the payoff or the most surprising fact. Never open with "In this article", a definition, or "AI is changing everything".
 3. Give a reason to bookmark: numbered steps, checklists, exact commands, files or prompts to copy, a ranked list.
-4. First-hand data beats opinion. Use the owner's numbers from the data block. Say what failed too: honest limits make the rest believable.
+4. First-hand data beats opinion. Use the owner's numbers from the data block. Say what failed too: honest limits make the rest believable. Describe the owner's systems only as the data describes them: never invent how they work, a mistake the owner made, a change they made or a plan they have (no "next I'll...").
 5. Make it skimmable: a ## heading every 150 to 300 words, paragraphs of 1 to 3 sentences, one bolded line per section at most, lists where there are several items.
 6. Specific beats general: real tool names, real commands, real numbers, real mistakes. Cut every sentence that would fit any article.
 7. Check every fact you add with WebSearch and WebFetch (official docs, changelogs, repositories, reputable reporting). If you cannot verify it, leave it out. List what you used in sources.

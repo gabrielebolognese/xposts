@@ -2,7 +2,8 @@
 "# Stage: <name>" line and answers like the real CLI with --output-format json, taking structured_output from
 fixtures.json, where {NAME} and {REPO} become the tool the prompt is about. Environment switches: FAKE_LOG (append
 each stage name), FAKE_TOOL (the name a category search finds), FAKE_EDITOR_FAIL, FAKE_VIRAL=<score> (the virality
-evaluation lands near that final score instead of 85), FAKE_FAIL_STAGE=<stage> (that stage fails like a broken call).
+evaluation lands near that final score instead of 85), FAKE_FAIL_STAGE=<stage> (that stage fails like a broken call),
+FAKE_TREND_NONE (nothing on the Trending tab fits the niche).
 """
 import json
 import os
@@ -45,6 +46,8 @@ if stage == "virality" and os.environ.get("FAKE_VIRAL"):  # scale the 85 point f
     for group in ("criteria", "bonuses"):
         out[group] = {k: min(top[k], round(v * want / 85)) for k, v in out[group].items()}
     out["hook_score"] = want
+if stage == "trend_read" and os.environ.get("FAKE_TREND_NONE"):
+    out["candidates"] = []
 if stage == "editor" and os.environ.get("FAKE_EDITOR_FAIL"):  # the same issue every round, still open on re-checks
     out["issues"] = [{"kind": "claims_supported", "quote": "It is MIT licensed", "fix": "cite the license",
                       "blocking": True, "earlier": "This is a re-check" in prompt}]

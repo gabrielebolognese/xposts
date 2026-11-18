@@ -4,8 +4,10 @@
 #   bash pipeline/run.sh          posts what is due every 30 seconds (the X keys come from .env), searches categories
 #                                 for tools, turns the best ones into threads scored for virality, and keeps queue/
 #                                 filled with the highest scored ones (1 a day, 4 days ahead); from 22:30 it also builds
-#                                 tomorrow's Claude Studio project (studio/lib/studio.py) and queues it for 11:00. Runs
-#                                 until you press Ctrl+C, then prints what it did. Nothing posts while it is stopped.
+#                                 tomorrow's Claude Studio project (studio/lib/studio.py) and queues it for 11:00; on
+#                                 Tuesday, Thursday and Saturday it reads X's Trending tab from 06:20 and queues a
+#                                 trending post for 09:00 (pipeline/lib/trend.py). Runs until you press Ctrl+C, then
+#                                 prints what it did. Nothing posts while it is stopped.
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
 #   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches
 #                                 more categories than the daily 5 when it needs them to reach N (the first fill)
@@ -57,14 +59,19 @@ if [ -z "${POSTS_NO_BIP:-}" ]; then   # the daily build-in-public post: a form o
   ( while :; do $PY pipeline/lib/bip.py; sleep 60; done ) &
   bip=$!
 fi
+trend=""
+if [ -z "${POSTS_NO_TREND:-}" ]; then   # the trending post (Tue, Thu, Sat 09:00): reads X's Trending tab from 06:20
+  ( while :; do $PY pipeline/lib/trend.py; sleep 60; done ) &
+  trend=$!
+fi
 
 napper=""
 nap() { sleep "$1" & napper=$!; wait "$napper"; }   # wait returns at once when Ctrl+C arrives
 
 stop() {
   trap - INT TERM
-  kill "$poster" $studio $bip $napper 2>/dev/null
-  wait "$poster" $studio $bip 2>/dev/null
+  kill "$poster" $studio $bip $trend $napper 2>/dev/null
+  wait "$poster" $studio $bip $trend 2>/dev/null
   echo
   $PY pipeline/lib/summary.py stop
   rm -f "$LOCK"

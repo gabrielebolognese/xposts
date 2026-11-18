@@ -61,9 +61,11 @@ def schema_errors(schema: dict, data) -> list[str]:
 
 
 def call(role: str, stage_dir: Path, name: str, prompt: str, schema: str | Path | None = None,
-         tools: list[str] | None = None, timeout: int | None = None, add_dirs: list[str] | None = None):
+         tools: list[str] | None = None, timeout: int | None = None, add_dirs: list[str] | None = None,
+         chrome: bool = False):
     """Run one model call. Returns the structured output (schema given) or the result text. Raises AIError.
-    schema is a name in pipeline/schemas or a path; add_dirs are folders the model may read (with the Read tool)."""
+    schema is a name in pipeline/schemas or a path; add_dirs are folders the model may read (with the Read tool);
+    chrome turns on Claude in Chrome (the owner's logged-in Chrome) and allows its tools."""
     calls = Path(stage_dir) / "calls"
     calls.mkdir(parents=True, exist_ok=True)
     model = core.cfg(f"models.{role}.model")
@@ -85,8 +87,11 @@ def call(role: str, stage_dir: Path, name: str, prompt: str, schema: str | Path 
         cmd = claude_cmd() + ["-p", "--model", model, "--effort", effort, "--output-format", "json",
                               "--permission-mode", "auto", "--permission-prompts", "none",
                               "--tools", ",".join(tools)]
-        if tools:
-            cmd += ["--allowedTools", *tools]
+        allowed = tools + (["mcp__claude-in-chrome"] if chrome else [])
+        if allowed:
+            cmd += ["--allowedTools", *allowed]
+        if chrome:
+            cmd += ["--chrome"]
         cmd += ["--disallowedTools", "Bash", "Edit", "Write", "Read(.env)", "Read(.env.*)"]
         for d in add_dirs or []:
             cmd += ["--add-dir", d]

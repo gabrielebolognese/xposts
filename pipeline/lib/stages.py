@@ -327,6 +327,13 @@ def code_problems(run: Path, draft: dict, rnd: int) -> tuple[list[str], str]:
             problems.append(f"snippet listed but not in the thread verbatim: {s['text'][:60]}")
         elif src not in quotes or squash(s["text"]) not in quotes[src]:
             problems.append(f"command or code that no fact quotes ({src}): {s['text'][:60]}")
+    found, detector = ai_tells(plain_file)
+    return problems + found, detector
+
+
+def ai_tells(plain_file: Path) -> tuple[list[str], str]:
+    """The AI-tells checks (vendor detect.py and humanize.py) on a plain text file: the problems and the detector line."""
+    problems = []
     det = json.loads(subprocess.run([sys.executable, "-I", "-X", "utf8", str(DETECT), str(plain_file), "--json"],
                                     capture_output=True, timeout=60).stdout.decode("utf-8"))["checks"]
     hum = json.loads(subprocess.run([sys.executable, "-I", "-X", "utf8", str(HUMANIZE), str(plain_file), "--json"],

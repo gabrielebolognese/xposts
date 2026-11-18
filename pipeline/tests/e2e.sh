@@ -11,7 +11,7 @@ ok() { pass=$((pass + 1)); echo "ok $pass $1"; }
 fail() { echo "FAIL: $1"; echo "--- output:"; printf '%s\n' "${2:-}" | tail -30; exit 1; }
 
 mkdir -p "$W/.claude/skills" "$W/pipeline"
-cp "$SRC/scheduler.js" "$SRC/post.js" "$SRC/post-now.js" "$SRC/package.json" "$W/"
+cp "$SRC/scheduler.js" "$SRC/post.js" "$SRC/post-now.js" "$SRC/package.json" "$SRC/x_long_form_post_writing_rules.txt" "$W/"
 cp -r "$SRC/.claude/skills/x-threads" "$W/.claude/skills/"
 for d in lib prompts schemas vendor tests; do cp -r "$SRC/pipeline/$d" "$W/pipeline/"; done
 cp "$SRC/pipeline/run.sh" "$SRC/pipeline/categories.json" "$W/pipeline/"
@@ -23,6 +23,7 @@ c["runner"].update(idle_minutes=1, error_pause_minutes=0)
 c["retries"]["transient_backoff_seconds"] = []
 c["discovery"]["searches_per_day"] = 1
 c["virality"]["max_per_day"] = 20  # the scenarios make many threads in one day
+c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699)  # no xAutoReply in the test copy
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
 EOF
 printf 'pipeline/data/\npipeline/runs/\npipeline/review/\npipeline/logs/\npipeline/.lock\n__pycache__/\n' > "$W/.gitignore"
@@ -34,7 +35,7 @@ git -C "$W" config core.autocrlf false
 git -C "$W" add -A && git -C "$W" commit -qm init
 git -C "$W" remote add origin "$T/remote.git" && git -C "$W" push -q -u origin main 2>/dev/null
 
-export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1
+export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1
 cd "$W" || exit 1
 
 seed() {  # seed <tool name>: a pending discovery, as a category search would leave it
@@ -274,6 +275,33 @@ POSTS_DAY_TARGET=20 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 13 ] || fail "with a target of 20 the runner should search, exit $rc"
 c="$(calls)"; [ "$c" = "discover " ] || fail "target search order" "calls: $c"
 ok "first fill: with --posts 20 it searches beyond the daily searches; without it waits"
+
+# R: the trending post. Tuesday 06:20 (2030-01-01): the fake reader finds a fitting trend, the fake writer's post
+#    passes the checks, and queue/2030-01-01_0900 gets post.txt and the screenshot; it runs once a day
+export POSTS_TREND_FAKE=1
+: > "$FAKE_LOG"
+POSTS_TREND_NOW=2030-01-01T06:19 python pipeline/lib/trend.py
+[ ! -f pipeline/data/trend/2030-01-01.json ] || fail "trend ran before read_at"
+POSTS_TREND_NOW=2030-01-01T06:20 python pipeline/lib/trend.py
+c="$(calls)"; [ "$c" = "trend_read trend_write " ] || fail "trend call order" "calls: $c"
+[ -f queue/2030-01-01_0900/post.txt ] && [ -f queue/2030-01-01_0900/1.png ] || fail "no trending post queued" "$(tail -5 pipeline/logs/runner.log)"
+node pipeline/lib/longform-check.mjs queue/2030-01-01_0900/post.txt >/dev/null || fail "queued trending post breaks the long-form rules"
+grep -q 'POST .*trending post about "Claude Code 3": queued 2030-01-01_0900' pipeline/logs/runner.log || fail "no POST line for the trend"
+POSTS_TREND_NOW=2030-01-01T06:30 python pipeline/lib/trend.py
+c="$(calls)"; [ -z "$c" ] || fail "trend ran twice in one day" "calls: $c"
+ok "trending post: Tuesday 06:20 read, wrote and queued 2030-01-01_0900 with the screenshot; once a day"
+
+# R2: Monday does nothing; on Thursday nothing fits the niche: skipped, no post; past 10:30 the day is given up
+POSTS_TREND_NOW=2029-12-31T07:00 python pipeline/lib/trend.py
+[ ! -f pipeline/data/trend/2029-12-31.json ] && [ -z "$(calls)" ] || fail "trend ran on a Monday"
+FAKE_TREND_NONE=1 POSTS_TREND_NOW=2030-01-03T06:25 python pipeline/lib/trend.py
+c="$(calls)"; [ "$c" = "trend_read " ] || fail "nothing fits: calls" "calls: $c"
+[ ! -d queue/2030-01-03_0900 ] || fail "a post was queued although nothing fits"
+grep -q '"status": "skipped"' pipeline/data/trend/2030-01-03.json || fail "nothing fits: not skipped"
+POSTS_TREND_NOW=2030-01-05T10:31 python pipeline/lib/trend.py
+grep -q '"status": "gave_up"' pipeline/data/trend/2030-01-05.json && [ -z "$(calls)" ] || fail "late Saturday not given up"
+unset POSTS_TREND_FAKE
+ok "trending post: Monday nothing; nothing fits: skipped without a post; after 10:30: given up"
 
 echo "all $pass passed"
 rm -rf "$T"

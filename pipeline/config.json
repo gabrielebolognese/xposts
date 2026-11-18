@@ -81,6 +81,14 @@
    "model": "opus",
    "effort": "high"
   },
+  "trend_read": {
+   "model": "sonnet",
+   "effort": "medium"
+  },
+  "trend_write": {
+   "model": "opus",
+   "effort": "high"
+  },
   "limit_fallback": {
    "model": "opus",
    "effort": "medium"
@@ -162,5 +170,28 @@
   "port": 3003,
   "jarvis_api": "http://127.0.0.1:4317",
   "jarvis_web": "http://127.0.0.1:5173"
+ },
+ "trend": {
+  "days": [
+   "tue",
+   "thu",
+   "sat"
+  ],
+  "time": "09:00",
+  "read_at": "06:20",
+  "give_up": "10:30",
+  "avoid_days": 14,
+  "fix_rounds": 2,
+  "read_minutes": 25,
+  "chrome_device": "676adee9-c849-42dc-91c6-be3ac5fdcf33",
+  "chrome_wait_minutes": 45,
+  "chrome_warmup_seconds": 60,
+  "chrome_ports": [
+   47614,
+   47615
+  ],
+  "session_margin_minutes": 20,
+  "xautoreply": "../xAutoReply",
+  "lock_port": 47616
  }
 }

@@ -452,5 +452,58 @@
     "note": "curiosity"
    }
   ]
+ },
+ "trend_read": {
+  "status": "ok",
+  "trends": [
+   {
+    "name": "Claude Code 3",
+    "context": "Technology · Trending",
+    "posts": "18.2K posts"
+   },
+   {
+    "name": "Derby",
+    "context": "Sports · Trending",
+    "posts": "52K posts"
+   }
+  ],
+  "candidates": [
+   {
+    "trend": "Claude Code 3",
+    "context": "Technology · Trending",
+    "posts_count": "18.2K posts",
+    "why_it_fits": "A new version of a coding agent the account covers.",
+    "summary": "A new Claude Code release adds a review step before changes are accepted.",
+    "posts": [
+     {
+      "id": "1900000000000000001",
+      "author": "@devone",
+      "time": "2030-01-01T05:10:00.000Z",
+      "likes": "1200 Likes. Like",
+      "views": "90000 views",
+      "text": "The new review mode runs the tests after every edit."
+     },
+     {
+      "id": "1900000000000000002",
+      "author": "@devtwo",
+      "time": "2030-01-01T04:40:00.000Z",
+      "likes": "640 Likes. Like",
+      "views": "41000 views",
+      "text": "It stops when a change leaves the task."
+     }
+    ]
+   }
+  ]
+ },
+ "trend_write": {
+  "trend": "Claude Code 3",
+  "why": "The review step changes how agent work gets checked.",
+  "post": "people building with coding agents\nthe new review mode changes how you ship.\n\nClaude Code 3 is trending this morning, and most of the posts are about one feature: the agent now reviews its own diff before it asks you to accept it.\n\nThat sounds small. It is not, because the slowest part of agent work was never the writing. It was you reading 400 lines of changes to find the one that breaks the build.\n\nWhat the review step does, according to the release notes:\n\n1. It runs your test command after every edit.\n2. It reads the diff again and lists the risky lines first.\n3. It stops and asks when a change touches files outside the task.\n\nThe third point matters most. Agents drift. You ask for a fix in one component and get a refactor of three. A hard stop on scope keeps the diff small enough to read.\n\nWhat to do with it today:\n\n- Put your real test command in the project instructions, or the review has nothing to run.\n- Keep tasks narrow. One bug, one change, one review.\n- Read the risky lines it lists before anything else.\n\nThe cost: every review round takes time and tokens. On a tiny change it is slower than reading the diff yourself.\n\nSo turn it on for anything that touches more than one file, and leave it off for one-line fixes.",
+  "shot_post_ids": [
+   "1900000000000000001"
+  ],
+  "sources": [
+   "https://example.com/release-notes"
+  ]
  }
 }

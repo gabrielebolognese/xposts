@@ -5,7 +5,7 @@ import sys
 import tempfile
 import unittest
 import unittest.mock
-from datetime import timedelta
+from datetime import timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
@@ -299,6 +299,65 @@ class BuildInPublic(unittest.TestCase):
         from datetime import date
         self.assertEqual(bip.day_number(date(2026, 11, 17)), 5)
         self.assertEqual(bip.day_number(date(2026, 11, 20)), 8)
+
+
+class Trend(unittest.TestCase):
+    def at(self, iso):
+        return datetime.fromisoformat(iso).replace(tzinfo=core.ROME)
+
+    def test_when_it_runs(self):
+        import trend
+        tue = "2030-01-01"
+        self.assertFalse(trend.due(self.at(f"{tue}T06:19"), {}))
+        self.assertTrue(trend.due(self.at(f"{tue}T06:20"), {}))
+        self.assertTrue(trend.due(self.at(f"{tue}T09:40"), {"status": "working"}))  # cut short by a restart
+        self.assertFalse(trend.due(self.at(f"{tue}T10:30"), {}))
+        self.assertFalse(trend.due(self.at("2029-12-31T07:00"), {}))  # Monday
+        for done in trend.DONE:
+            self.assertFalse(trend.due(self.at(f"{tue}T07:00"), {"status": done}))
+        failed = self.at(f"{tue}T07:00").timestamp()
+        self.assertFalse(trend.due(self.at(f"{tue}T07:05"), {"status": "error", "failed_at": failed}))
+        self.assertTrue(trend.due(self.at(f"{tue}T07:10"), {"status": "error", "failed_at": failed}))
+
+    def test_longform_checker(self):
+        import trend
+        good = ("people building with coding agents\nthe new review mode changes how you ship.\n\n"
+                + "\n\n".join(["A paragraph that explains one idea clearly, with a number like 400 lines in it."] * 12))
+        bad = "People Building\nTHIS SECOND HOOK LINE IS FAR TOO LONG FOR THE RULEBOOK LIMIT\n\n**bold** " + "x" * 300
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "p.txt"
+            f.write_text(good, encoding="utf-8")
+            res = json.loads(subprocess.run(["node", str(trend.CHECKER), str(f), "--json"], capture_output=True).stdout)
+            self.assertEqual(res["problems"], [])
+            f.write_text(bad, encoding="utf-8")
+            probs = " | ".join(json.loads(subprocess.run(["node", str(trend.CHECKER), str(f), "--json"],
+                                                         capture_output=True).stdout)["problems"])
+        for want in ("needs 800 to 3,000", "hook line 1 must be lowercase", "uppercase hook line 2", "paragraph of",
+                     "markdown"):
+            self.assertIn(want, probs)
+
+    def test_chrome_busy(self):
+        import trend
+        with tempfile.TemporaryDirectory() as tmp:
+            peer = Path(tmp)
+            (peer / "jarvis-status").mkdir()
+            conf = {**core.cfg("trend"), "chrome_ports": [], "xautoreply": str(peer)}
+            with unittest.mock.patch.object(core, "cfg", lambda k, d=None: conf.get(k[6:], d) if k.startswith("trend.") else d):
+                self.assertEqual(trend.chrome_busy(), "")
+                fresh = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                core.save_json(peer / "jarvis-status" / "session.json", {"state": "running", "updatedAt": fresh})
+                self.assertIn("reply session is running", trend.chrome_busy())
+                core.save_json(peer / "jarvis-status" / "session.json", {"state": "idle", "updatedAt": fresh})
+                soon = (datetime.now() + timedelta(minutes=10)).strftime("%H:%M")
+                core.save_json(peer / "data" / "plan.json", {"date": datetime.now().date().isoformat(),
+                                                             "sessions": [{"start": soon, "status": "pending"}]})
+                self.assertIn(f"starts at {soon}", trend.chrome_busy())
+                import socket
+                held = socket.socket()
+                held.bind(("127.0.0.1", 0))
+                conf["chrome_ports"] = [held.getsockname()[1]]
+                self.assertIn("holds port", trend.chrome_busy())
+                held.close()
 
 
 if __name__ == "__main__":

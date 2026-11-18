@@ -120,3 +120,14 @@ Every day at 14:00 the runner opens a small form in the browser (http://127.0.0.
 4. **Posting.** The post and both screenshots go into `queue/<now>` and the posting loop sends them within 30 seconds. The form shows each step, then the post and its link.
 
 The form stays open until the post is out or midnight; a failed step shows why, and Submit tries again. Day 5 was 2026-11-17, one more each day. Settings: the `bip` block in `pipeline/config.json`.
+
+## Trending posts
+
+On Tuesday, Thursday and Saturday the runner posts one long-form post about something on X's Explore > Trending tab at 09:00. `bash pipeline/run.sh` runs it, nothing else to start:
+
+1. **Read.** From 06:20 (before xAutoReply's first reply session, and it waits while xAutoReply is using Chrome) a Claude in Chrome session reads the Trending tab in your logged-in Chrome, picks up to 3 trends that fit the account (AI, coding agents, software, building; never politics, sports or gossip) and reads their top posts (`pipeline/prompts/trend_read.md`). It only reads: no likes, no clicks that change anything, no X API calls. When Chrome was closed it opens it and closes it again afterwards.
+2. **Write.** Opus picks the trend with the best angle for builders, checks the facts on the web and writes the post by the long-form rulebook (`x_long_form_post_writing_rules.txt`, `pipeline/prompts/trend_write.md`). The code checks it (`pipeline/lib/longform-check.mjs`: 800 to 3,000 characters, the two-line hook, paragraphs up to 250 characters, no emojis, dashes or markdown; no links or hashtags; the same AI-tells check as the threads) and asks for up to 2 fixes. A post that still fails goes to `pipeline/review/trend-<date>.txt` and is not posted.
+3. **Screenshot.** One of the trend's top posts, rendered from X's public embed (`pipeline/lib/trend-shot.mjs`, no login).
+4. **Posting.** The post and the screenshot go into `queue/<date>_0900` (or the next minute when it is ready later) and the posting loop sends them.
+
+When nothing on the tab fits the account there is no post that day, and the runner says so. A failed try runs once more 10 minutes later; after 10:30 the day is skipped, since the trends are stale by then. The Trending tab follows the location in X's Explore settings (Settings, then Explore settings): set it to where your audience is for English trends. See one without posting: `python pipeline/lib/trend.py --now --dry` (the post and the screenshot land in `pipeline/data/trend/<date>-dry/`). Settings: the `trend` block and the `trend_*` models in `pipeline/config.json`.

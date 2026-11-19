@@ -1,0 +1,30 @@
+Today Claude Opus 5.5 graded ITSELF against a published reference answer and passed, in 183 minutes for $77.47.
+
+This is day 7 of building Claude Studio in public.
+
+Today's Claude Studio project: a full 3411 MWt nuclear reactor core simulated live in the browser, through a night of load-follow and a rod drop.
+
+On X today: 443 replies written and 27,500 views.
+
+Most of my day went into the social posting bot, and the update shipped.
+
+- A Friday teaser post that points to the full article
+- Quote posts, fed from a simple queue file
+- All end-to-end checks passing, saved and uploaded
+
+The video tool's timeline got a vertical zoom, tested in a browser. The full check suite passes, including the fit view showing every track and the top track staying put. It still needs to be saved.
+
+I also brought back a rule in the video tool that a backup change had wiped, and wrote it down in its notes.
+
+I shared the carousel-maker as a public project, with a clear guide, an icon and a one-step install.
+
+- A fitness move animation, clean at just under 11 seconds
+- Eight full-size stills from that animation
+- Two new short videos lined up, scripts spoken as written
+
+On the social side, I drafted over 160 replies, each checked against past posts so none repeat. None of them are posted yet.
+
+See you on day 8
+
+1000 followers ❌
+monetization ❌

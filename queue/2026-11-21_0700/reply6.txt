@@ -1,12 +1,1 @@
-6. Setup for Claude Code:
-Go to GitHub and search for: mksglu/context-mode
-Or search the web for: Context Mode plugin mksglu
-
-1. Install Node 24.15.0 or later. On Windows, also install Git for Windows.
-2. Add the marketplace:
-claude plugin marketplace add mksglu/context-mode
-3. Install the plugin:
-claude plugin install context-mode@context-mode
-4. Start a session and work as usual. Large tool output now stays out of the context and goes into the local index.
-
-Using Codex, Gemini CLI, Copilot CLI or another agent? Open the README and pick your agent for its own install steps.
+6. Useful flags: --dry-run previews the changes. --auto selects Tier 1 only, which fits scripts. Interactive runs ask before changing anything. Limits: it needs Node.js 20+ and officially supports only macOS and Linux. Treat the counts as close estimates of Claude's real token count. MCP tool schemas (~8 tokens per tool) are estimated. It never updates itself, so update it through your package manager.

@@ -1,1 +1,2 @@
-6. Limits the README admits: for trivial edits, graph context can be bigger than a plain file read. Impact analysis is conservative, so expect false positives in large dependency graphs. Flow detection is strongest for Python and PHP/Laravel; JS and Go need work.
+6. It's MIT licensed. Go to GitHub and search for: toon-format/toon
+Or search for TOON Token-Oriented Object Notation and open the official website.

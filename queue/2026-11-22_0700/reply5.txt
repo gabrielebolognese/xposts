@@ -1,1 +1,1 @@
-5. When not to use it: deeply nested or non-uniform data, where compact JSON often wins. Purely flat tables, where CSV is smaller (TOON adds about 5–10% for its guardrails). If latency matters, measure: some local or quantized models process compact JSON faster.
+5. Is it legit? 34K GitHub stars, 840K npm downloads, and v2.2.0 shipped on 2026-11-14. One real caveat: the sandbox is not isolation. Code from ctx_execute runs on your host as your user, with your files, your network and your environment. So keep your agent's permission prompts on.

@@ -1,1 +1,3 @@
-4. Setup needs Python 3.10+. Run uv tool install code-review-graph, then code-review-graph install, then code-review-graph build. Install detects and configures tools like Claude Code, Codex, Cursor, Windsurf, Zed, GitHub Copilot and Gemini CLI.
+4. Try it on your own data with no install: cat data.json | npx @toon-format/cli --stats
+It prints token estimates for JSON vs TOON. In code: npm install @toon-format/toon
+Official ports exist for Python, Go, Rust, .NET, Java, Swift, Dart and Julia.

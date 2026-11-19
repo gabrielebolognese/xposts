@@ -1,0 +1,10 @@
+7. How to get it: search GitHub for iops-leo/claude-slim, or do a web search for claude-slim Claude Code.
+
+1. Make sure you have Node.js 20+, macOS or Linux, and the Claude Code CLI.
+2. See your numbers first, no install needed:
+npx claude-slim scan
+3. Install the plugin:
+claude plugin marketplace add iops-leo/claude-slim
+claude plugin install claude-slim
+4. Type /claude-slim in any session, review the proposal and approve only what you want gone.
+5. Changed your mind? Run /claude-slim restore to bring back moved skills, project memory and removed MCP servers.

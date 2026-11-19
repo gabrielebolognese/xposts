@@ -1,0 +1,13 @@
+7. Mini setup guide.
+Go to GitHub and search for: headroomlabs-ai/headroom
+Or web search: Headroom headroom-ai context compression
+
+1. Check you have Python 3.11 or newer.
+2. Install the CLI:
+uv tool install --python 3.13 "headroom-ai[all]"
+3. Wrap your agent:
+headroom wrap claude
+(or swap claude for codex)
+4. Optional: set HEADROOM_BEACON=off to turn telemetry off.
+5. Use your agent as usual. Log-heavy and JSON-heavy tasks are where the 90%+ cases show up.
+6. To remove it: headroom unwrap <tool>

@@ -1,1 +1,1 @@
-2. Providers can be an API key (DeepSeek, Kimi, GLM and more), a local model, or any OpenAI- or Anthropic-compatible URL. You can use one provider across all your agents instead of setting keys and base URLs in each tool.
+2. For any change it shows what can break: the callers, dependents and tests it can reach, with a risk score. It stays on your machine as one SQLite file with no cloud service, and cloud embeddings are opt-in. It exposes 30 MCP tools by default.

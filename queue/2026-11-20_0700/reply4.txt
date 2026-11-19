@@ -1,1 +1,6 @@
-4. Pricing, exactly: the plugin is free forever, at home and at work, under the Elastic License 2.0. That is source-available, not OSI open source, and you may not offer it to others as a hosted service. The vendor also sells Context Mode Gateway, a separate hosted service with its own account and subscription. Their plans page lists Free at $0 with 1,000 requests a month, Pro at $20 a month and Team at $100 a month. The plugin is complete without it.
+4. Building your own app instead? The Python library runs in-process, with no API key and no model download:
+
+from headroom import compress
+result = compress(messages, model="gpt-4o")
+
+It takes OpenAI or Anthropic message dicts. The README claims 60-95% fewer tokens on JSON. Compression is reversible: originals stay cached locally, and the MCP tool headroom_retrieve lets the model pull the full text back. headroom_compress and headroom_stats work in any MCP client.

@@ -1,12 +1,1 @@
-6. Setup for Claude Code:
-Go to GitHub and search for: mksglu/context-mode
-Or search the web for: Context Mode plugin mksglu
-
-1. Install Node 24.15.0 or later. On Windows, also install Git for Windows.
-2. Add the marketplace:
-claude plugin marketplace add mksglu/context-mode
-3. Install the plugin:
-claude plugin install context-mode@context-mode
-4. Start a session and work as usual. Large tool output now stays out of the context and goes into the local index.
-
-Using Codex, Gemini CLI, Copilot CLI or another agent? Open the README and pick your agent for its own install steps.
+6. Caveats before you install. The savings are not from a published, repeatable benchmark, so your traffic will vary. Images are not compressed, and code in the last 4 messages is never compressed. An anonymous telemetry beacon is on by default (no prompts or code). Turn it off with HEADROOM_BEACON=off or DO_NOT_TRACK=1. The repo is open source under Apache 2.0, but a contact-only Enterprise edition exists and the README says the bigger savings are being built there.

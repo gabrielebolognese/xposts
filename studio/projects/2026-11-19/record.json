@@ -1,0 +1,28 @@
+{
+ "project": "2026-11-19",
+ "fps": 60,
+ "seconds": 53,
+ "scale": 2,
+ "warmup": 35,
+ "live": 98,
+ "errors": [],
+ "render_seconds": 996,
+ "frame_ms": {
+  "avg": 3.07,
+  "max": 16
+ },
+ "report": {
+  "keff_benchmark": "1.02943 (ref 1.02959, Δ -15.3 pcm)",
+  "xenon_worth_pcm": -3292,
+  "xenon_peak_pcm": "-5407 pcm at D4 00:00",
+  "qptr_max": 1.5111,
+  "fxy_max": 1.893,
+  "keff_mc": "0.99955 ± 184 pcm (Δ MC−diffusion -55 pcm, 32 active gens)",
+  "neutrons_tracked": 52640000,
+  "boron_ppm": 537.3,
+  "sim_clock": "D4 08:41",
+  "mc_generations": 2632
+ },
+ "video": "video.mp4",
+ "mb": 117.5
+}

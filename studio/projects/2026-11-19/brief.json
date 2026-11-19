@@ -1,0 +1,414 @@
+{
+ "title": "Xenon Night: A PWR Core, Neutron by Neutron",
+ "slug": "xenon-night-pwr-core",
+ "subject": "A full 3411 MWt pressurized-water reactor core is simulated live: two-group neutron diffusion on 18,496 cells, iodine-xenon poisoning, fuel and moderator temperature feedback, and automatic rods and boron. It runs through a night of grid load-follow and a dropped control rod, and a 6-worker Monte Carlo neutron transport run checks the eigenvalue independently.",
+ "why_hard": "Three coupled timescales in one screen: neutron generations (microseconds, in the Monte Carlo), point kinetics after each rod step (seconds, inhour equation) and xenon poisoning (hours), all driven by one eigenvalue solver. That solver has to be correct, not just plausible: at boot it is checked against the published IAEA 2D PWR benchmark (k_eff = 1.02959). On top of that: a hand-written red-black SOR power iteration on a 136×136 two-group mesh with harmonic-mean coupling and vacuum boundaries; per-cell exact-exponential I/Xe integration; calibrated Doppler and moderator feedback; a quasi-static rod and boron controller; delta-tracking Monte Carlo spread over 6 Web Workers with Shannon-entropy source convergence. Then a 60 fps dark cockpit with a 17×17 assembly map carrying two tiny numbers per assembly, neutron tracks drawn over it, 4 field maps and 12 live charts, with no libraries.",
+ "angle": "Opus 5.5 at maximum effort, no libraries, one night: hand-written WebGL for the field heatmaps, canvas 2D for everything else, a diffusion Web Worker plus 6 Monte Carlo Web Workers, Float64Array numerics",
+ "science": "CORE MODEL: the IAEA 2D PWR benchmark (ANL-7416 Supplement 2, Problem 11), mirrored to a full core so asymmetric tilts can develop. 17×17 assemblies at a 20 cm pitch (340 cm across). Transcribe the published quarter-core region map exactly: it is diagonally symmetric, and the 'fuel 2 + rod' assemblies sit at quarter positions (1,1), (1,5), (5,1), (5,5), giving 9 rodded assemblies in the full core, which become Bank D. Corners outside the staircase boundary are void. Mesh: 2.5 cm (8×8 cells per assembly), 136×136 = 18,496 cells.\nTwo-group constants [D1, D2, Σ1→2, Σa1, Σa2, νΣf2] (cm, cm⁻¹; νΣf1 = 0, χ1 = 1): Fuel1 = 1.5, 0.4, 0.02, 0.01, 0.080, 0.135. Fuel2 = 1.5, 0.4, 0.02, 0.01, 0.085, 0.135. Fuel2+rod = 1.5, 0.4, 0.02, 0.01, 0.130, 0.135. Reflector = 2.0, 0.3, 0.04, 0.0, 0.010, 0. Axial buckling B² = 0.8e-4 cm⁻² in both groups.\nEquations: −∇·D1∇φ1 + (Σa1 + Σ12 + D1B²)φ1 = (1/k)·νΣf2·φ2 and −∇·D2∇φ2 + (Σa2 + D2B²)φ2 = Σ12·φ1. 5-point mesh-centred finite differences. Interior face coupling = 2·Di·Dj/(Di + Dj)/h². Outer boundary from the benchmark condition −D·∂φ/∂n = 0.4692·φ, so the boundary-face leakage term is 1/(h·(h/(2D) + 1/0.4692)).\nSolver: power iteration with source S = νΣf2·φ2 and k ← k·ΣS_new/ΣS_old. Inner solve per group by red-black SOR (ω = 1.60 by default, 3 sweeps per group per outer). Converged when |Δk| < 1e-6 and max|ΔS|/S < 1e-5. Each solve is warm-started from the previous flux. Dominance ratio estimate = ‖S_n − S_{n−1}‖ / ‖S_{n−1} − S_{n−2}‖. Residual and k are kept for every outer iteration.\nBOOT VALIDATION: solve the clean benchmark (all 9 rods in, no xenon, no boron, no feedback). The result must land within about ±30 pcm of the reference 1.02959. Display it and log it: 'IAEA-2D k = 1.0296x, ref 1.02959, Δ = n pcm'.\nOPERATING STATE: Bank D insertion f = (228 − steps)/228 blends the 9 rodded assemblies: Σa2 = 0.085 + f·(0.130 − 0.085).\nBoron: Σa2 += 6.8e-6·ppm in fuel cells. The measured worth (about −8 pcm/ppm) is shown.\nXenon: Σa2 += σX·X with σX = 2.65e-18 cm².\nFeedback per cell, from relative power density q:\n- Tm = 565 K + 18 K·P_core_frac.\n- Tf = Tm + 600 K·q.\n- Doppler: Σa1 = 0.010·[1 + aD·(√Tf − √Tf_ref)].\n- Moderator: Σa2 += aM·(Tm − Tm_ref).\nCalibrate aD and aM so the core Doppler coefficient is about −2.5 pcm/K and the total power defect from 0 to 100% is about −1600 pcm. Measure both with the solver and display the measured values.\nPower normalisation: P = H·Σ_cells κ·Σf2·φ2·h², with Σf2 = νΣf2/2.43, κ = 3.204e-11 J, H = 366 cm, P_rated = 3411 MWt. This gives the absolute flux used for xenon burnout.\nI-135/Xe-135, per cell, with F = Σf2·φ2:\n- dI/dt = γI·F − λI·I\n- dX/dt = γX·F + λI·I − (λX + σX·φ2)·X\nConstants: γI = 0.0639, γX = 0.00237, λI = 2.87e-5 s⁻¹, λX = 2.09e-5 s⁻¹. Integrate exactly (analytic exponentials, φ held constant) over each 5-minute macro step. Xenon worth: every 30 sim-minutes run one extra warm-started solve with X = 0, then ρXe = (1/k_noXe − 1/k)·1e5 pcm. At equilibrium full power this comes out near −2800 to −3000 pcm.\nCONTROL (quasi-static): power follows the demand schedule, which the automatic controller holds. Each macro step, compute the solve and ρ = (k − 1)/k. If |ρ| > 10 pcm, move Bank D by n = ρ/(differential worth) steps; the worth is a finite difference from the last move. Boron dilutes or borates at no more than the dilution limit (ppm/min) to drive Bank D back toward 210 steps.\nSchedule: daily load-follow at 1%/min, 100% → 50% at 20:00 and back to 100% at 02:00. Dropped rod: at Day 3 23:00 the SW diagonal Bank D rod (assembly column 4, row 12, 0-based from top-left) falls fully in and stays in.\nPOINT KINETICS for each rod step: 6-group Keepin U-235 data, βi = [0.000215, 0.001424, 0.001274, 0.002568, 0.000748, 0.000273] (β = 0.0065), λi = [0.0124, 0.0305, 0.111, 0.301, 1.14, 3.01] s⁻¹, Λ = 2.0e-5 s. Take the residual reactivity ρ of the step.\n- Solve the inhour equation ρ = ωΛ + Σ βi·ω/(ω + λi) for the dominant root by bisection. Stable period T = 1/ω.\n- Prompt jump = β/(β − ρ).\n- Integrate the 7 ODEs with backward Euler (dt = 1 ms) over 0–120 s for the response trace.\nPrecursor concentrations Ci are integrated over the real power history.\nINDICES:\n- QPTR = max quadrant power / mean quadrant power. Quadrants split on the core axes; centre-line cells count half to each side. Tech-spec warning at 1.02.\n- F_xy = max assembly power / mean fuel-assembly power.\n- F_cell = max cell power / mean cell power.\n- Assembly power is shown to 3 decimals, with its change versus 1 sim-hour ago.\nMONTE CARLO cross-check: 2D transport on the same mesh and a material snapshot (rods, boron, Xe, feedback), refreshed every 2 sim-hours.\n- Σt,g = 1/(3·D_g).\n- At each collision: absorption probability (Σa_g + D_g·B²)/Σt (buckling leakage treated as absorption); downscatter probability Σ12/Σt in group 1; otherwise isotropic scattering. Directions are sampled in 3D and the flight is projected onto x-y (dxy = s·sinθ).\n- Woodcock delta-tracking with a mesh majorant. Neutrons crossing the outer boundary are lost.\n- Collision estimator k_gen = Σ w·νΣf2/Σt / N. Fission sites are banked and resampled to N per generation.\n- Shannon entropy over a 17×17 assembly-binned source: H = −Σ p·log2 p.\n- 50 inactive generations, then active mean k_MC ± σ (σ = std/√n). Show Δ(MC − diffusion) in pcm, which is expected to be within a few hundred pcm because it is transport versus diffusion.\n- 20,000 neutrons per generation split over 6 workers. Report histories/s and the running total. The last ~300 histories are kept as polylines for drawing (fast group violet-white, thermal group Cherenkov blue).",
+ "headline_numbers": [
+  {
+   "key": "keff_benchmark",
+   "meaning": "k_eff computed for the clean IAEA 2D PWR benchmark at boot, compared with the reference 1.02959 (difference in pcm)"
+  },
+  {
+   "key": "xenon_worth_pcm",
+   "meaning": "Current core xenon reactivity in pcm, from paired eigenvalue solves with and without Xe (about −2900 at equilibrium full power)"
+  },
+  {
+   "key": "xenon_peak_pcm",
+   "meaning": "Most negative xenon worth reached after the 100→50% load-follow ramp (the xenon 'pit'), with the sim time of the peak"
+  },
+  {
+   "key": "qptr_max",
+   "meaning": "Maximum quadrant power tilt ratio reached after the SW Bank D rod drops (tech-spec limit 1.02)"
+  },
+  {
+   "key": "fxy_max",
+   "meaning": "Peak radial assembly power peaking factor F_xy over the recorded run"
+  },
+  {
+   "key": "keff_mc",
+   "meaning": "Monte Carlo k_eff ± σ (pcm) over the active generations, and its difference from the diffusion k"
+  },
+  {
+   "key": "neutrons_tracked",
+   "meaning": "Total Monte Carlo neutron histories followed by the 6 workers since the page started"
+  },
+  {
+   "key": "boron_ppm",
+   "meaning": "Critical soluble boron concentration found by the controller at full power with equilibrium xenon"
+  }
+ ],
+ "design": {
+  "layout": "A night-shift reactor-physics cockpit on the 1920×1080 stage, 8 px margins and gutters, three columns. Left rail (352 px): operator controls, the rod-step kinetics instrument and the event log, like a control-room operator desk. Centre hero (760×760): the full 17×17 core map, the subject itself, with a 680 px heatmap at 2.5 cm resolution, assembly grid lines, two tiny numbers in every assembly, Bank D rod markers, Monte Carlo neutron tracks over the top, and x/y flux-profile traces along the two outer edges. Below the hero, two strips show how the numbers are made: the diffusion solver's convergence and the Monte Carlo tallies. Right column (776 px): the time story as stacked strip charts sharing one 48 h sim-time axis (xenon/iodine, load-follow and control, tilt and peaking), then 4 small-multiple field maps, then the PC resources drawn as a 'compute plant' panel in the same instrument language (16 CPU threads as rod-position-indicator columns). The core sits at the centre because everything else is derived from it: the left side acts on it, the right side records its history.",
+  "regions": [
+   {
+    "name": "status",
+    "x": 8,
+    "y": 8,
+    "w": 1904,
+    "h": 40,
+    "contents": "Title 'XENON NIGHT · PWR CORE 3411 MWt', sim clock 'DAY 3 23:14', time acceleration, core power % and MWt, k_eff (6 dp), ρ pcm, Bank D steps, boron ppm, ρXe pcm, QPTR chip (amber above 1.02), F_xy, MC k ± σ, status chips AUTO ROD / LOAD-FOLLOW / ROD DROPPED"
+   },
+   {
+    "name": "controls",
+    "x": 8,
+    "y": 56,
+    "w": 352,
+    "h": 452,
+    "contents": "Every simulation parameter as sliders, knobs, toggles and fields, grouped OPERATION / CONTROL / FEEDBACK / SOLVER / MONTE CARLO, each with its live value and unit; Bank D shown as a vertical bar 0–228 steps; map-layer segmented switch"
+   },
+   {
+    "name": "kinetics",
+    "x": 8,
+    "y": 516,
+    "w": 352,
+    "h": 236,
+    "contents": "Latest rod-step response: ρ step, prompt jump, stable period from the inhour equation, P(t)/P0 trace over 0–120 s, inhour curve ρ(ω) with the root marked, 6 delayed-group precursor bars with βi and λi"
+   },
+   {
+    "name": "log",
+    "x": 8,
+    "y": 760,
+    "w": 352,
+    "h": 312,
+    "contents": "Scrolling timestamped event log: rod moves 'D 212→206 −6 st −23 pcm', boron dilutions, solver convergence lines 'outer 7 k=1.000012 res 8.1e-6', xenon checkpoints, MC generation summaries, the boot benchmark validation line, ROD DROP alarm in red"
+   },
+   {
+    "name": "core",
+    "x": 368,
+    "y": 56,
+    "w": 760,
+    "h": 760,
+    "contents": "17×17 assembly core map at 680 px: heatmap of the selected layer (power by default), assembly grid, relative assembly power to 3 decimals plus its 1 h change (green/red) in each assembly, rodded assemblies ringed and labelled with insertion %, dropped rod flashing red, ~300 fading MC neutron tracks, quadrant power readouts in the four corners, x and y centre-line flux profiles (φ1, φ2) drawn along the bottom and right edges, colour bar with min/max"
+   },
+   {
+    "name": "solver",
+    "x": 368,
+    "y": 824,
+    "w": 376,
+    "h": 248,
+    "contents": "Power-iteration convergence for the latest solve: log10 residual per outer, k per outer, dominance-ratio estimate, inner sweeps, ms per solve, solves per second; a mini sparkline of outers per solve over time; boot benchmark k vs 1.02959"
+   },
+   {
+    "name": "montecarlo",
+    "x": 752,
+    "y": 824,
+    "w": 376,
+    "h": 248,
+    "contents": "k_gen per generation (inactive in grey, active in blue) with running mean ± σ band and the diffusion k as a reference line, Shannon entropy per generation, histories/s, total histories, active/inactive generation counts, Δ(MC − diffusion) pcm"
+   },
+   {
+    "name": "xenon",
+    "x": 1136,
+    "y": 56,
+    "w": 776,
+    "h": 226,
+    "contents": "48 h strip chart: core-average I-135 and Xe-135 (atoms/cm³), xenon worth ρXe pcm on a second axis, peak marker labelled with value and time, load-follow ramps shaded"
+   },
+   {
+    "name": "loadfollow",
+    "x": 1136,
+    "y": 290,
+    "w": 776,
+    "h": 190,
+    "contents": "48 h strip chart: power demand vs actual %, Bank D steps, boron ppm, measured Doppler and power-defect values, Tavg and mean/max Tf readouts"
+   },
+   {
+    "name": "tilt",
+    "x": 1136,
+    "y": 488,
+    "w": 776,
+    "h": 170,
+    "contents": "QPTR with the 1.02 limit line, the four quadrant powers as separate traces, F_xy and F_cell traces, the dropped-rod event marker"
+   },
+   {
+    "name": "fields",
+    "x": 1136,
+    "y": 666,
+    "w": 776,
+    "h": 196,
+    "contents": "Four small-multiple maps (fast flux φ1, thermal flux φ2, Xe-135, I-135), each with its own colour bar, min/max/mean in absolute units"
+   },
+   {
+    "name": "compute",
+    "x": 1136,
+    "y": 870,
+    "w": 776,
+    "h": 202,
+    "contents": "Compute plant: 16 CPU threads as rod-position-indicator columns with 30 s sparklines, RAM used/total, GPU %, disk read/write MB/s, page FPS and frame-time trace with a 16.7 ms line, worker labels (DIFF, MC1–MC6)"
+   }
+  ],
+  "mode": "dark",
+  "palette": {
+   "background": "#05090F",
+   "surface": "#0B1320",
+   "line": "#1A2A3D",
+   "text": "#D6E4F0",
+   "muted": "#5F7790",
+   "accents": [
+    "#3FB8FF",
+    "#6FE3FF",
+    "#9B8CFF",
+    "#FFB547",
+    "#F2F7FF"
+   ],
+   "up": "#47E0A0",
+   "down": "#FF5D5D",
+   "warn": "#FFB547",
+   "active": "#3FB8FF"
+  },
+  "fonts": "Bahnschrift (semi-condensed) for panel titles, status chips and labels, styled like control-room mimic boards; Cascadia Mono for every number, axis tick, log line and per-assembly value (9–11 px); Segoe UI Variable Small for the tiny unit captions",
+  "feel": "A PWR control room at 3 a.m. crossed with core-physics code output and the Cherenkov blue of a spent-fuel pool. Near-black navy panels with hairline grid rules. Power heatmap ramp: deep navy → Cherenkov blue → cyan → white → amber → red. Iodine in violet, xenon in amber. Rod positions drawn like DRPI columns. Calm and dense, with the slow menace of xenon building while everything ticks."
+ },
+ "panels": [
+  {
+   "name": "Status bar",
+   "region": "status",
+   "shows": "Sim clock, power, k_eff, reactivity, rods, boron, xenon worth, QPTR, F_xy, MC k, mode chips"
+  },
+  {
+   "name": "Operator controls",
+   "region": "controls",
+   "shows": "All simulation parameters with live values: demand, ramp, time acceleration, Bank D, boron, feedback coefficients, B², SOR ω, tolerances, MC neutrons per generation, map layer"
+  },
+  {
+   "name": "Rod-step kinetics",
+   "region": "kinetics",
+   "shows": "Inhour-equation period, prompt jump, 120 s P(t) response, inhour curve with root, 6 precursor-group bars"
+  },
+  {
+   "name": "Event log",
+   "region": "log",
+   "shows": "Timestamped rod moves, boron changes, solver lines, xenon checkpoints, MC summaries, benchmark validation, alarms"
+  },
+  {
+   "name": "Core map",
+   "region": "core",
+   "shows": "Full-core heatmap with per-assembly relative power and 1 h change, rods, dropped rod, MC neutron tracks, quadrant powers, centre-line flux profiles"
+  },
+  {
+   "name": "Diffusion solver",
+   "region": "solver",
+   "shows": "Residual and k per outer iteration, dominance ratio, sweeps, timing, benchmark k vs reference"
+  },
+  {
+   "name": "Monte Carlo",
+   "region": "montecarlo",
+   "shows": "k per generation with running mean ± σ against the diffusion k, Shannon entropy, histories/s, totals, MC−diffusion Δ"
+  },
+  {
+   "name": "Iodine and xenon",
+   "region": "xenon",
+   "shows": "48 h I-135, Xe-135 and xenon worth, with peak marker and shaded ramps"
+  },
+  {
+   "name": "Load follow",
+   "region": "loadfollow",
+   "shows": "Demand vs power, Bank D, boron, temperatures, measured Doppler and power defect"
+  },
+  {
+   "name": "Tilt and peaking",
+   "region": "tilt",
+   "shows": "QPTR against the 1.02 limit, four quadrant powers, F_xy, F_cell, rod-drop marker"
+  },
+  {
+   "name": "Field maps",
+   "region": "fields",
+   "shows": "Fast flux, thermal flux, Xe-135 and I-135 maps with colour bars and statistics"
+  },
+  {
+   "name": "Compute plant",
+   "region": "compute",
+   "shows": "16 CPU threads as rod-position columns, RAM, GPU, disk, FPS and frame time, worker assignment"
+  }
+ ],
+ "controls": [
+  {
+   "name": "Power demand",
+   "kind": "slider (schedule-driven)",
+   "value": "100 %",
+   "range": "30–100 %"
+  },
+  {
+   "name": "Ramp rate",
+   "kind": "slider",
+   "value": "1.0 %/min",
+   "range": "0.2–5.0 %/min"
+  },
+  {
+   "name": "Time acceleration",
+   "kind": "slider",
+   "value": "15 sim-min/s",
+   "range": "1–60 sim-min/s"
+  },
+  {
+   "name": "Bank D position",
+   "kind": "vertical slider (moves under AUTO)",
+   "value": "210 steps",
+   "range": "0–228 steps"
+  },
+  {
+   "name": "Rod control",
+   "kind": "toggle",
+   "value": "AUTO",
+   "range": "AUTO / MANUAL"
+  },
+  {
+   "name": "Boron concentration",
+   "kind": "field (auto-dilute)",
+   "value": "critical search, ppm",
+   "range": "0–2000 ppm"
+  },
+  {
+   "name": "Boron dilution limit",
+   "kind": "slider",
+   "value": "2.0 ppm/min",
+   "range": "0.5–10 ppm/min"
+  },
+  {
+   "name": "Dropped rod",
+   "kind": "select",
+   "value": "SW diagonal D rod @ Day 3 23:00",
+   "range": "none / any of 9 Bank D rods"
+  },
+  {
+   "name": "Xenon/iodine",
+   "kind": "toggle",
+   "value": "ON",
+   "range": "ON / OFF"
+  },
+  {
+   "name": "Doppler coefficient",
+   "kind": "knob",
+   "value": "−2.5 pcm/K",
+   "range": "−1.0 to −5.0 pcm/K"
+  },
+  {
+   "name": "Moderator feedback",
+   "kind": "toggle + knob",
+   "value": "ON, −15 pcm/K",
+   "range": "0 to −40 pcm/K"
+  },
+  {
+   "name": "Axial buckling B²",
+   "kind": "field",
+   "value": "0.8e-4 cm⁻²",
+   "range": "0–2e-4 cm⁻²"
+  },
+  {
+   "name": "SOR ω",
+   "kind": "slider",
+   "value": "1.60",
+   "range": "1.00–1.95"
+  },
+  {
+   "name": "Outer tolerance",
+   "kind": "field",
+   "value": "Δk 1e-6 / source 1e-5",
+   "range": "1e-4 to 1e-8"
+  },
+  {
+   "name": "MC neutrons/generation",
+   "kind": "slider",
+   "value": "20000",
+   "range": "1000–100000"
+  },
+  {
+   "name": "MC inactive generations",
+   "kind": "field",
+   "value": "50",
+   "range": "10–200"
+  },
+  {
+   "name": "Map layer",
+   "kind": "segmented switch",
+   "value": "POWER",
+   "range": "POWER / φ1 / φ2 / Xe / I"
+  }
+ ],
+ "mid_work": "When the first frame is recorded it is Day 3 about 19:30 sim time, 30 minutes before the evening ramp-down. Every 48 h chart already holds two full days of load-follow cycles (two xenon dips and two xenon pits with their peak markers). Bank D and boron traces show the controller's history. The log is full: the boot benchmark line, hundreds of rod moves and boron dilutions, solver lines and MC summaries. The Monte Carlo is several hundred generations into its active cycles with a tight σ band and a flat Shannon entropy. The kinetics panel shows the latest rod step, and the compute plant has 35 s of thread history.\nHow: at page load the diffusion worker does four things in under 3 s. (1) It solves the clean IAEA benchmark and logs the validation. (2) It switches to the operating state and iterates equilibrium xenon at 100% with a critical boron search. (3) It fast-forwards with 15-minute macro steps from Day 1 00:00 to Day 3 10:45, through both earlier load-follow nights, filling every history buffer and the log. (4) It hands off to real time at 15 sim-min/s. The 6 MC workers start immediately. Then the recorder's 35 s warm-up carries the clock to about 19:30.\nDuring the video (about 13 sim-hours), all of these happen on camera: the ramp to 50% at 20:00, xenon building, the SW rod drop at 23:00 (red flash, QPTR climbing past 1.02, the core map visibly tilting while the camera is on that quadrant), the 02:00 ramp back up into a deep xenon pit with Bank D withdrawing, and xenon peaking near 03:00–05:00.",
+ "warmup_seconds": 35,
+ "video_seconds": 53,
+ "camera": [
+  {
+   "t": 0.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.0,
+   "focus": "Whole cockpit, everything moving"
+  },
+  {
+   "t": 5.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.08,
+   "focus": "Slow push-in as the 20:00 ramp-down begins"
+  },
+  {
+   "t": 11.0,
+   "cx": 0.39,
+   "cy": 0.41,
+   "zoom": 1.75,
+   "focus": "Core map: per-assembly powers, neutron tracks, rods"
+  },
+  {
+   "t": 16.0,
+   "cx": 0.31,
+   "cy": 0.55,
+   "zoom": 1.95,
+   "focus": "SW quadrant around the Bank D rod that drops at 23:00: local power collapse and tilt"
+  },
+  {
+   "t": 22.0,
+   "cx": 0.4,
+   "cy": 0.72,
+   "zoom": 1.8,
+   "focus": "Solver convergence and Monte Carlo k ± σ, entropy, histories/s"
+  },
+  {
+   "t": 28.0,
+   "cx": 0.722,
+   "cy": 0.278,
+   "zoom": 1.8,
+   "focus": "Iodine/xenon chart with peak marker, load-follow and control traces"
+  },
+  {
+   "t": 33.0,
+   "cx": 0.722,
+   "cy": 0.55,
+   "zoom": 1.8,
+   "focus": "QPTR crossing 1.02, quadrant powers, the four field maps"
+  },
+  {
+   "t": 38.0,
+   "cx": 0.722,
+   "cy": 0.722,
+   "zoom": 1.8,
+   "focus": "Field maps and compute plant: 16 thread columns, FPS, RAM, GPU"
+  },
+  {
+   "t": 43.0,
+   "cx": 0.278,
+   "cy": 0.55,
+   "zoom": 1.8,
+   "focus": "Left rail: rod-step kinetics with inhour root, controls, scrolling log"
+  },
+  {
+   "t": 48.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.0,
+   "focus": "Back to the whole stage, xenon pit deepening"
+  },
+  {
+   "t": 53.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.0,
+   "focus": "Hold wide"
+  }
+ ],
+ "uses_api": false,
+ "post_angle": "Day 3 of pushing Claude to the edge. Opus built a nuclear reactor core simulator overnight with no libraries. A 3411 MW PWR is solved as two-group neutron diffusion on 18,496 cells. It reproduces the IAEA benchmark to within {keff_benchmark} and runs a night of grid load-follow. Xenon-135 sinks the core into a {xenon_peak_pcm} pcm pit, a control rod drops and tilts the power to QPTR {qptr_max}, and {neutrons_tracked} Monte Carlo neutrons across 6 threads check the answer independently: k = {keff_mc}. Every number on screen comes from the physics."
+}

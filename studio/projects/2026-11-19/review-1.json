@@ -1,0 +1,106 @@
+{
+ "score": 8.7,
+ "critic": {
+  "scores": {
+   "subject_fit": 9,
+   "complex_but_clean": 9,
+   "no_defects": 8,
+   "alive": 9,
+   "mid_work": 9,
+   "real_numbers": 9,
+   "wow": 8
+  },
+  "issues": [
+   {
+    "severity": "major",
+    "where": "Core map (centre hero), all 177 assemblies",
+    "problem": "Every assembly has a dark, mostly opaque number plate that covers about 80% of its area. The 2.5 cm heatmap, the subject of the piece, only shows as a soft glow between the plates. The tilt after the rod drop reads mainly from the red/green digits, not from the field. The amber hot spot at 34 s is the only time the colour ramp really comes through.",
+    "fix": "Make the plates much more transparent (about 25–35% alpha, or a thin text shadow and no box), or shrink them to a strip about 14 px tall at the top of each cell. That leaves the lower 60% of each assembly as pure heatmap. Then the NE/SW tilt and the cold corner around E13 show as colour."
+   },
+   {
+    "severity": "minor",
+    "where": "Core map, x-profile strip along the bottom edge (y≈800) and the y-profile label on the right edge",
+    "problem": "The 'x-PROFILE · E-W AXIS', 'φ1 FAST' and 'φ2 THERMAL' chips sit right on the traces. At 34 s the lowered left reflector peak runs through the text, and stray tick fragments show between the chips. The legend colours also don't match the traces: the φ1 chip is blue but its curve is violet.",
+    "fix": "Move the legend and caption chips into a reserved 12 px band above or below the plot. Colour each chip exactly like its curve: φ1 in the violet it is drawn in (or redraw φ1 in #3FB8FF), and φ2 in cyan."
+   },
+   {
+    "severity": "minor",
+    "where": "Diffusion solver, 'OUTERS PER MACRO STEP (ALL SOLVES)' sparkline",
+    "problem": "From 19 s on, one 1988-outer spike from the rod-drop solve sets the y scale. All the other bars squash into a 1–2 px line, so the sparkline carries no information for the rest of the video.",
+    "fix": "Use a log y axis, or clip the scale at about the 98th percentile and draw the spike as a capped red bar labelled '1988'."
+   },
+   {
+    "severity": "minor",
+    "where": "Status bar 'MONTE CARLO k' vs the Monte Carlo panel",
+    "problem": "The two places disagree. At 2 s the status bar shows 0.99971 ±70 while the panel shows k MC 0.99963, σ 70. At 34 s it is ±71 vs σ 72, and at 50 s 0.99880 vs 0.99878. Neither place says whether σ is the per-generation spread or the σ of the mean.",
+    "fix": "Feed both from the same tally snapshot in the same frame, and label it 'σ(mean)'. With about 190 active generations a value near 70 pcm is the σ of the mean, so also show the per-generation σ next to it."
+   },
+   {
+    "severity": "minor",
+    "where": "Quadrant tilt panel and event log, 34 s frame (QPTR 1.5084)",
+    "problem": "A −96 pcm single-rod drop leading to QPTR 1.51 five hours later is far beyond what a real 4-loop PWR shows (about 1.05–1.15). The cause is the weakly coupled IAEA core (DR about 0.98) plus uncontrolled xenon redistribution. Expert viewers will question the number unless the screen explains it.",
+    "fix": "When QPTR passes 1.2, add a log/annotation line such as 'XE AZIMUTHAL REDISTRIBUTION · DR 0.986 · uncontrolled'. Add a small 'xenon-driven' tag next to the QPTR trace in the tilt panel."
+   },
+   {
+    "severity": "minor",
+    "where": "Status bar, ROD DROPPED chip (top right)",
+    "problem": "The second line 'TS QPTR>1.02: REDUCE PWR' is about 6 px tall and squeezed under the chip label. It is barely readable even in the zoomed views.",
+    "fix": "Put the alarm text on a single line at 9–10 px (e.g. 'ROD DROPPED · QPTR>1.02'), or widen the chip by taking width from the status-chip gutter."
+   },
+   {
+    "severity": "minor",
+    "where": "Iodine/xenon panel, xenon-worth subplot (top left, 'eq 100% −3781' label)",
+    "problem": "The equilibrium label sits where the worth curve starts at the left edge, and the line crosses the text.",
+    "fix": "Right-align the label at the end of the dashed equilibrium line (just left of NOW) on a background box, or put it in the readout column."
+   },
+   {
+    "severity": "minor",
+    "where": "Field maps, φ1 FAST and I-135",
+    "problem": "φ1 and I-135 both use the same violet ramp. The brief reserves violet for iodine, so the two maps look like duplicates at a glance.",
+    "fix": "Draw φ1 with the blue ramp (navy → #3FB8FF → white). Keep violet only for I-135 and amber only for Xe-135."
+   }
+  ],
+  "summary": "I would post this nearly as is. The layout follows the brief: the 1920×1080 grid is exact, the panels are dense, and the core is the clear centre with the controls on the left and the history on the right.\n\n**The numbers hold up when cross-checked:**\n- ρ = (k−1)/k matches k_eff in every frame.\n- Prompt jump β/(β−ρ) and period 1/ω agree with the six βi.\n- ρXe = (1/k_noXe − 1/k)·10⁵ checks exactly from the k values in the log (−3606 pcm, −5382 pcm).\n- Cell updates per solve equal outers × 6 × 15,424.\n- The Monte Carlo totals grow at the stated 0.6 M histories/s (about 10 M per 16 s), and the worker busy and wait times add up to 33.3 ms per generation.\n- The quadrant powers sum to 4.000, and the two quadrants either side of the dropped rod's diagonal stay equal.\n- The boron moves match the power defect and xenon swings, and the Tavg/Tf readouts follow the stated feedback formulas.\n\n**Every region changes between frames:** the ramp down, the rod drop with red callout and QPTR alarm, the visible NE/SW tilt and amber hot spot, the ramp back up, the xenon pit, the Monte Carlo restarts and the compute columns. The first frame is already full.\n\n**What holds it back:**\n- The hero heatmap is hidden under opaque per-assembly number plates.\n- A few labels overlap curves, and legend colours don't match their traces.\n- The solver sparkline is flattened by one spike.\n- Small status-bar vs panel mismatches in the Monte Carlo k and σ.\n- QPTR reaches 1.51 with nothing on screen explaining why.\n\nFixing the plate transparency alone would raise the wow score."
+ },
+ "shots": {
+  "shots": [
+   "shots/at-2s.png",
+   "shots/at-2s-view1.png",
+   "shots/at-2s-view2.png",
+   "shots/at-19s.png",
+   "shots/at-19s-view1.png",
+   "shots/at-19s-view2.png",
+   "shots/at-34s.png",
+   "shots/at-34s-view1.png",
+   "shots/at-34s-view2.png",
+   "shots/at-50s.png",
+   "shots/at-50s-view1.png",
+   "shots/at-50s-view2.png"
+  ],
+  "errors": [],
+  "frameMs": {
+   "avg": 2.97,
+   "max": 159
+  },
+  "warmup": 35,
+  "numbers": "preview (made up until the live run)",
+  "report": {
+   "keff_benchmark": "1.02943 (ref 1.02959, Δ -15.3 pcm)",
+   "xenon_worth_pcm": -3274,
+   "xenon_peak_pcm": "-5407 pcm at D4 00:00",
+   "qptr_max": 1.5111,
+   "fxy_max": 1.893,
+   "keff_mc": "0.99885 ± 72 pcm (Δ MC−diffusion -120 pcm, 181 active gens)",
+   "neutrons_tracked": 50840000,
+   "boron_ppm": 537.3,
+   "sim_clock": "D4 07:56",
+   "mc_generations": 2542
+  },
+  "times": [
+   2,
+   19,
+   34,
+   50
+  ]
+ }
+}

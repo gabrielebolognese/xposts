@@ -1,0 +1,121 @@
+{
+ "score": 8.6,
+ "critic": {
+  "scores": {
+   "subject_fit": 9,
+   "complex_but_clean": 9,
+   "no_defects": 8,
+   "alive": 8,
+   "mid_work": 9,
+   "real_numbers": 9,
+   "wow": 8
+  },
+  "issues": [
+   {
+    "severity": "major",
+    "where": "Whole page (performance note)",
+    "problem": "The longest JS frame took 131 ms, against a 5.55 ms average. A spike that size shows up as a visible hitch in the recorded video, where the waveform scroll, die flicker and FPS trace all stall together. It probably lines up with frame completion (thumbnail plus checksum) or a burst of fault-worker messages.",
+    "fix": "Profile the 131 ms frame. Spread thumbnail rendering, history-buffer copies and worker result merges across several rAF ticks, and reuse typed arrays so garbage collection doesn't pause. Target max under 33 ms before recording."
+   },
+   {
+    "severity": "major",
+    "where": "Pipeline panel, instruction list to the left of the occupancy diagram (x≈1440–1530, y≈305–440)",
+    "problem": "The 24 mnemonics are set at about 7 px with about 7 px line pitch. That is well under the brief's 10–11 px minimum, and lines nearly touch even in the zoomed view. After X's 1080p compression it will turn to grey mush, unlike the rest of the panel.",
+    "fix": "Show 16 cycles instead of 24, or give the list its own rows at 9–10 px Cascadia Mono with ≥10 px pitch. Narrow the occupancy columns to make room. That diagram has a large empty upper-left triangle anyway."
+   },
+   {
+    "severity": "minor",
+    "where": "Stuck-at campaign, worker lanes W1–W6",
+    "problem": "In the 2 s, 18 s and 34 s frames the per-worker progress is identical (4032, 3392, 2688, 1984, 1280, 3776 of 4096) while the batch IDs advance. The workers are phase-locked to a fixed 64 cycles per frame, so this lane looks animated by a timer rather than by real compute. A careful viewer comparing frames will notice.",
+    "fix": "Let the fault workers run free (or pace them by measured time with natural jitter) and report the real cycles completed. Show measured faults/s next to the batch count."
+   },
+   {
+    "severity": "minor",
+    "where": "Top bar SIM CLOCK / GATE EVALS/S and the Clock target 'measured' readout",
+    "problem": "The 24.00 kHz, 'measured 24.00' and 298.6 M/s values never change by a single digit across 47 s. 298.6 M is exactly 12,440 × 24,000, so it reads as derived from the target, not measured.",
+    "fix": "Compute these from wall-clock time over a sliding 1 s window (cycles done / elapsed), so they jitter realistically, e.g. 23.97–24.02 kHz. Add a 'headroom' or 'unthrottled' figure from the free-run rate."
+   },
+   {
+    "severity": "minor",
+    "where": "This PC panel, 4×4 thread grid",
+    "problem": "The brief says to label each thread sparkline by the worker running on it. The tiles say only T00–T15. Worker attribution appears only in a separate ms/frame row underneath, so the grid doesn't connect the 6 fault workers to the machine load.",
+    "fix": "Add a small tag to each tile (sim, W1…W6, main, or idle/OS) based on the worker-to-thread assignment or the busiest-thread heuristic, coloured like the worker lanes in the fault panel."
+   },
+   {
+    "severity": "minor",
+    "where": "Framebuffer & UART, 'FINISHED FRAMES' strip",
+    "problem": "The in-progress frame (f2 at 53% in the first frame, f3 at 22% in the third) sits under the heading 'FINISHED FRAMES'. The heading is wrong for the live tile.",
+    "fix": "Rename the strip to 'FRAMES', or put a 'painting' tag on the live tile and keep 'finished' for completed frames only."
+   },
+   {
+    "severity": "minor",
+    "where": "Framebuffer canvas lower half",
+    "problem": "'not painted yet' is drawn in the unpainted area. Early in a frame (34 s) it is the main content of the hero visual, which reads like an empty-state placeholder.",
+    "fix": "Remove the text. Show the unpainted rows as a faint dotted grid only, or fade in the previous frame at 10% opacity underneath so the area never looks empty."
+   },
+   {
+    "severity": "minor",
+    "where": "Design & sim controls, Process row",
+    "problem": "The capacitance unit renders as 'FF' (uppercase styling), which reads as an error for femtofarads (fF).",
+    "fix": "Exclude unit glyphs from the uppercase transform and render 'fF'."
+   },
+   {
+    "severity": "minor",
+    "where": "Register file panel, right column heading 'PERF COUNTERS · FROM PIPELINE NETS'",
+    "problem": "The heading runs to the panel's right border with no padding and is close to clipping.",
+    "fix": "Shorten it to 'PERF COUNTERS · NETS', or give the column the same 8 px right padding as the other rows."
+   },
+   {
+    "severity": "minor",
+    "where": "Netlist hierarchy, CELLS column",
+    "problem": "The child modules (ifu 272 … wbu 32) add up to 12,439 cells, but the core row says 12,440, so one cell isn't attributed to any module.",
+    "fix": "List the stray top-level cell (e.g. a 'glue' row), or attribute it to its module so the children sum exactly to the core."
+   }
+  ],
+  "summary": "This is very strong and I would post it after the two major fixes. It reads as a real EDA tool: the bit-sliced die, with its Dadda-tree triangle and gold critical path, a GTKWave-style analyzer, and dense tables that sit on an exact 8 px grid. I checked the numbers against each other and they hold up to scrutiny:\n- IPC equals instret/cycles.\n- The cycle deltas between frames give exactly 24 kHz.\n- px = row×48+col.\n- The UART checksum matches the thumbnail label.\n- The Wilson ±1.0/±0.6 bands and det/sampled ratios are correct.\n- The power figure is ½·α·C·V²·f.\n- The critical path sums to 49 levels.\n- The register values match the retire trace.\n- The Dadda gate counts match 900 FA + 30 HA.\n\nEvery region changes between frames, and the video opens mid-frame-2 with full history, so it starts in the middle of the work. Major fixes:\n- The 131 ms frame spike will hitch the recording.\n- The pipeline mnemonic list is about 7 px and will blur on X.\n\nMinor fixes:\n- Fault-worker progress is phase-locked, and sim Hz / gate evals never change, so they read as derived from the target rather than measured.\n- Thread tiles aren't labelled by worker.\n- The live frame is filed under 'FINISHED FRAMES'.\n- The empty framebuffer area shows a 'not painted yet' placeholder.\n- The capacitance unit reads 'FF' instead of fF.\n- The PERF COUNTERS heading touches the panel edge.\n- The hierarchy CELLS column is off by one cell.\n\nThe Mandelbrot, the payoff of the piece, is quite small in the composition. That limits wow a little, but it's a matter of taste."
+ },
+ "shots": {
+  "shots": [
+   "shots/at-2s.png",
+   "shots/at-2s-view1.png",
+   "shots/at-2s-view2.png",
+   "shots/at-18s.png",
+   "shots/at-18s-view1.png",
+   "shots/at-18s-view2.png",
+   "shots/at-34s.png",
+   "shots/at-34s-view1.png",
+   "shots/at-34s-view2.png",
+   "shots/at-49s.png",
+   "shots/at-49s-view1.png",
+   "shots/at-49s-view2.png"
+  ],
+  "errors": [],
+  "frameMs": {
+   "avg": 5.55,
+   "max": 131
+  },
+  "warmup": 30,
+  "numbers": "preview (made up until the live run)",
+  "report": {
+   "gate_count": "12,440 logic cells + 1,560 DFFs (29,812 NAND2-eq)",
+   "sim_hz": 24000,
+   "gate_evals_per_s": 298560000,
+   "instret": 2077189,
+   "lockstep_divergences": 0,
+   "lockstep_checked": 2077189,
+   "ipc": 0.955,
+   "branch_accuracy": "98.5% (315014/319774)",
+   "fault_coverage": "82.2% (95% Wilson 81.5-82.8%, 13578 of 28000 faults)",
+   "crit_path_levels": 49,
+   "isa_selftest": "16/16 random programs, 20367 instructions, 0 divergences",
+   "cycles": 2175200,
+   "mandelbrot_frames_done": 2
+  },
+  "times": [
+   2,
+   18,
+   34,
+   49
+  ]
+ }
+}

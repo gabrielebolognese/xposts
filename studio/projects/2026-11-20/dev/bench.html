@@ -1,0 +1,4 @@
+<!doctype html><html><body><pre id="o"></pre><script>
+const run = (sz) => new Promise((res) => { const w = new Worker('bench-worker.js'); w.onmessage = (e) => { res('chunk ' + sz + '\n' + e.data); w.terminate(); }; w.postMessage({ sz }); });
+(async () => { const r = []; for (const sz of [0]) r.push(await run(sz)); document.getElementById('o').textContent = r.join('\n\n'); window.DONE = true; })();
+</script></body></html>

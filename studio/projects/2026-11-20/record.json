@@ -1,0 +1,31 @@
+{
+ "project": "2026-11-20",
+ "fps": 60,
+ "seconds": 52,
+ "scale": 2,
+ "warmup": 30,
+ "live": 92,
+ "errors": [],
+ "render_seconds": 780,
+ "frame_ms": {
+  "avg": 4.78,
+  "max": 13
+ },
+ "report": {
+  "gate_count": "12,440 logic cells + 1,560 DFFs (29,812 NAND2-eq)",
+  "sim_hz": 24000,
+  "gate_evals_per_s": 298560000,
+  "instret": 2146340,
+  "lockstep_divergences": 0,
+  "lockstep_checked": 2146340,
+  "ipc": 0.955,
+  "branch_accuracy": "98.5% (325525/330379)",
+  "fault_coverage": "82.2% (95% Wilson 81.5-82.8%, 14012 of 28000 faults)",
+  "crit_path_levels": 49,
+  "isa_selftest": "16/16 random programs, 20367 instructions, 0 divergences",
+  "cycles": 2247200,
+  "mandelbrot_frames_done": 2
+ },
+ "video": "video.mp4",
+ "mb": 169.9
+}

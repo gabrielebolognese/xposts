@@ -1,0 +1,10 @@
+import path from 'node:path';
+import { launch, openLive } from '../../../tools/capture.mjs';
+import { startServer } from '../../../tools/server.mjs';
+const project = path.basename(path.resolve(import.meta.dirname, '..'));
+const server = await startServer();
+const browser = await launch();
+const { page } = await openLive(browser, server.url(project));
+await new Promise((r) => setTimeout(r, 25000));
+console.log(await page.evaluate(() => Object.entries(window.PANEL_T).map(([k, e]) => `${k.padEnd(6)} avg ${(e.sum / e.n).toFixed(2)} max ${e.max.toFixed(1)} n ${e.n}`).join('\n')));
+await browser.close(); server.close(); process.exit(0);

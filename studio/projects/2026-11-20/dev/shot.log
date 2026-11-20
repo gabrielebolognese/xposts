@@ -1,0 +1,35 @@
+{
+ "shots": [
+  "shots/at-2s.png",
+  "shots/at-2s-view1.png",
+  "shots/at-2s-view2.png",
+  "shots/at-15s.png",
+  "shots/at-15s-view1.png",
+  "shots/at-15s-view2.png",
+  "shots/at-35s.png",
+  "shots/at-35s-view1.png",
+  "shots/at-35s-view2.png"
+ ],
+ "errors": [],
+ "frameMs": {
+  "avg": 5.21,
+  "max": 24
+ },
+ "warmup": 30,
+ "numbers": "preview (made up until the live run)",
+ "report": {
+  "gate_count": "12,440 logic cells + 1,560 DFFs (29,812 NAND2-eq)",
+  "sim_hz": 24000,
+  "gate_evals_per_s": 298560000,
+  "instret": 1754397,
+  "lockstep_divergences": 0,
+  "lockstep_checked": 1754397,
+  "ipc": 0.954,
+  "branch_accuracy": "98.4% (265940/270198)",
+  "fault_coverage": "82.0% (95% Wilson 81.2-82.7%, 11098 of 28000 faults)",
+  "crit_path_levels": 49,
+  "isa_selftest": "16/16 random programs, 20367 instructions, 0 divergences",
+  "cycles": 1838800,
+  "mandelbrot_frames_done": 2
+ }
+}

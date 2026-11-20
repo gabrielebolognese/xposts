@@ -1,0 +1,27 @@
+Today Claude Opus 5.5 hit a speed wall in plain JS and got past it ALONE by hand-assembling WebAssembly, all inside 126 minutes.
+
+This is day 8 of building Claude Studio in public.
+
+Today's Claude Studio project: a RISC-V CPU built from 14,000 logic gates, every one simulated each cycle while it paints a Mandelbrot.
+
+On X today: 391 replies written and 12,456 views.
+
+The sixth channel's first video is finished: 6 minutes 16 seconds in HD, with its thumbnail and captions file.
+
+- Gameplay clips get their zooms again
+- Facecam zoom now stops at 80% of the frame
+- No more black bars in the cutscene thumbnail
+- One narration re-voiced, all 8 lines placed, no warnings
+
+The job search rules were too strict: only 17 matches out of 187 jobs. I loosened them to aim for 10 to 15 applications a day, but the daily goal can never lower the bar for a good fit.
+
+- A new shortcut runs a job review right away
+- The job search now starts at 8:29 every day
+- The comment run follows at 9:40
+
+On X I drafted 107 thoughtful and 55 casual replies and built a sheet to review them. Nothing was posted, liked or clicked yet.
+
+See you on day 9
+
+1000 followers ❌
+monetization ❌

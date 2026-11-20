@@ -1,1 +1,9 @@
-6. Useful flags: --dry-run previews the changes. --auto selects Tier 1 only, which fits scripts. Interactive runs ask before changing anything. Limits: it needs Node.js 20+ and officially supports only macOS and Linux. Treat the counts as close estimates of Claude's real token count. MCP tool schemas (~8 tokens per tool) are estimated. It never updates itself, so update it through your package manager.
+6. Mini setup guide:
+Go to GitHub and search for: akitaonrails/ai-memory
+Or search the web for: ai-memory Fabio Akita
+1. On Linux or macOS (or Windows via WSL2), copy the curl install one-liner from the README. It pipes install.sh into sh, so read the script first if you prefer.
+2. Run: ai-memory setup
+3. Start your agents through it instead of directly, for example: ai-memory run codex
+4. Work as usual. When you quit one agent and launch another with ai-memory run, the new one picks up the shared workstream and the open handoff.
+5. Open the wiki folder in Obsidian or grep it to see what was saved. Check it for secrets before you share a server.
+No API key needed: the default path makes 0 LLM calls.

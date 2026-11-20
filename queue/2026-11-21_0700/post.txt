@@ -1,3 +1,3 @@
-Unused Claude Code skills are paid for every session. One cleanup cut startup tokens by 64.3%.
+Hit your Claude Code limit mid-task? Switch to Codex and keep going without re-explaining.
 
-How to measure yours and cut it, reversibly.
+One memory shared by more than twenty coding agents:

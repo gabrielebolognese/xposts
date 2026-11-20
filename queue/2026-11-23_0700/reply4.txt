@@ -1,3 +1,1 @@
-4. Try it on your own data with no install: cat data.json | npx @toon-format/cli --stats
-It prints token estimates for JSON vs TOON. In code: npm install @toon-format/toon
-Official ports exist for Python, Go, Rust, .NET, Java, Swift, Dart and Julia.
+4. Pricing, exactly: the plugin is free forever, at home and at work, under the Elastic License 2.0. That is source-available, not OSI open source, and you may not offer it to others as a hosted service. The vendor also sells Context Mode Gateway, a separate hosted service with its own account and subscription. Their plans page lists Free at $0 with 1,000 requests a month, Pro at $20 a month and Team at $100 a month. The plugin is complete without it.

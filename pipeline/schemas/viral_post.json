@@ -1,0 +1,10 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["post", "hook", "quote_article"],
+ "properties": {
+  "post": {"type": "string"},
+  "hook": {"type": "string"},
+  "quote_article": {"type": "string"}
+ }
+}

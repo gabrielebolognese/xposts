@@ -538,5 +538,77 @@
  },
  "teaser_write": {
   "post": "people running claude code overnight\none number predicted my whole bill.\n\nTwo nights ago Claude Code built a project on my PC while I slept. In the morning the cost was higher than the cap I had set for it.\n\nNothing had gone wrong. The cap did exactly what I told it to do. That was the part that bothered me.\n\nSo I went through both overnight builds line by line. Every session, every fix round, every turn.\n\nOne of them cost 53% more than the other. It was not the harder model or the longer prompt that explained it.\n\nThe answer was sitting in a number I had never looked at. Once I saw it, I could predict what the next build would cost before it started.\n\nI also found the gate in my tool pipeline that throws away more good tools than any other. I built it myself and never noticed.\n\nIf you let an agent work while nobody watches, you are making the same bet I was.\n\nI wrote down everything I found, with the real numbers, in the article below."
+ },
+ "viral_read": {
+  "status": "ok",
+  "scanned": 84,
+  "note": "a normal timeline",
+  "posts": [
+   {
+    "id": "1900000000000000901",
+    "author": "smallbuilder",
+    "followers": 412,
+    "views": 48200,
+    "likes": "1,204 Likes. Like",
+    "time": "2030-01-01T06:10:00.000Z",
+    "media": "none",
+    "is_article": false,
+    "article_title": "",
+    "article_body": "",
+    "niche": true,
+    "why": "automating X posting with Claude Code",
+    "text": "i automated my whole x account with claude code and now it takes me 10 minutes a day. the setup is embarrassingly simple and nobody talks about it"
+   },
+   {
+    "id": "1900000000000000902",
+    "author": "bigaccount",
+    "followers": 250000,
+    "views": 900000,
+    "likes": "20K Likes. Like",
+    "time": "2030-01-01T05:00:00.000Z",
+    "media": "video",
+    "is_article": false,
+    "article_title": "",
+    "article_body": "",
+    "niche": true,
+    "why": "AI news",
+    "text": "the new model is out and it is wild"
+   },
+   {
+    "id": "1900000000000000903",
+    "author": "footballfan",
+    "followers": 300,
+    "views": 20000,
+    "likes": "900 Likes. Like",
+    "time": "2030-01-01T04:00:00.000Z",
+    "media": "image",
+    "is_article": false,
+    "article_title": "",
+    "article_body": "",
+    "niche": false,
+    "why": "sports",
+    "text": "what a goal last night"
+   },
+   {
+    "id": "1900000000000000904",
+    "author": "animatorai",
+    "followers": 650,
+    "views": 12000,
+    "likes": "430 Likes. Like",
+    "time": "2030-01-01T03:00:00.000Z",
+    "media": "image",
+    "is_article": true,
+    "article_title": "How I make Instagram animations with Claude that get millions of views",
+    "article_body": "I post one animation a day. Claude writes the scene, a free renderer draws it, and the whole loop takes an hour. Here are the steps, the prompts and what made the difference.",
+    "niche": true,
+    "why": "AI animation for Instagram",
+    "text": "How I make Instagram animations with Claude that get millions of views"
+   }
+  ]
+ },
+ "viral_write": {
+  "post": "claude code runs my x account now. ten minutes a day from me, the rest is a script i set up once. it is a lot simpler than people make it sound",
+  "hook": "the claim that one simple automation replaced daily posting work, kept as the opening",
+  "quote_article": ""
  }
 }

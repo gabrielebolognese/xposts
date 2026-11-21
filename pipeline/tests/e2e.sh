@@ -24,8 +24,9 @@ c["retries"]["transient_backoff_seconds"] = []
 c["discovery"]["searches_per_day"] = 1
 c["virality"]["max_per_day"] = 20  # the scenarios make many threads in one day
 c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699)  # no xAutoReply in the test copy
-c["article"].update(min_words=150, lock_port=47698)  # the fixture article is short
-c["teaser"].update(lock_port=47697)
+c["article"].update(min_words=150, lock_port=47698, days=["mon", "wed", "sun"])  # the fixture article is short; the
+c["teaser"].update(lock_port=47697, day="fri")  # scheduled articles and the Friday post are off, their tests still run
+c["viral"].update(lock_port=47696)
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
 EOF
 printf 'pipeline/data/\npipeline/runs/\npipeline/review/\npipeline/logs/\npipeline/.lock\n__pycache__/\n' > "$W/.gitignore"
@@ -37,7 +38,7 @@ git -C "$W" config core.autocrlf false
 git -C "$W" add -A && git -C "$W" commit -qm init
 git -C "$W" remote add origin "$T/remote.git" && git -C "$W" push -q -u origin main 2>/dev/null
 
-export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1 POSTS_NO_ARTICLE=1 POSTS_NO_TEASER=1
+export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1 POSTS_NO_ARTICLE=1 POSTS_NO_TEASER=1 POSTS_NO_VIRAL=1
 cd "$W" || exit 1
 
 seed() {  # seed <tool name>: a pending discovery, as a category search would leave it
@@ -360,6 +361,34 @@ FAKE_TEASER_NONE=1 POSTS_TEASER_NOW=2030-01-18T06:20 python pipeline/lib/teaser.
 c="$(calls)"; [ "$c" = "teaser_find " ] && [ ! -d queue/2030-01-18_0900 ] || fail "article not on the profile" "calls: $c"
 unset POSTS_TREND_FAKE
 ok "Friday post: found the week's articles, queued 2030-01-04_0900 quoting the most viewed (post.js sends quote_tweet_id); no article or not posted: no post"
+
+# V: viral posts (Monday 2030-02-04). A check finds a viral post (412 followers, 48,200 views): repurposed and queued
+#    at the next free minute. The next check skips it (used) and takes the viral X Article: with this week's budget
+#    left an article is written and opened, the post waits and goes out quoting it once it is on the profile. With
+#    the week's 3 articles used, a new viral article gets a post quoting an existing article; nothing viral: no post
+export POSTS_VIRAL_FAKE=1 POSTS_ARTICLE_FAKE=1
+: > "$FAKE_LOG"
+POSTS_VIRAL_NOW=2030-02-04T07:00 python pipeline/lib/viral.py --now
+c="$(calls)"; [ "$c" = "viral_read viral_write " ] || fail "viral post call order" "calls: $c"
+q="$(ls -d queue/2030-02-04_* 2>/dev/null | head -1)"
+[ -n "$q" ] && grep -q "claude code runs my x account" "$q/post.txt" && [ ! -f "$q/quote.txt" ] || fail "viral post not queued" "$(tail -5 pipeline/logs/runner.log)"
+grep -q '"id": "1900000000000000901"' pipeline/data/viral/2030-02-04.json || fail "the wrong viral post was picked"
+POSTS_VIRAL_NOW=2030-02-04T07:01 python pipeline/lib/viral.py --now
+c="$(calls)"; [ "$c" = "viral_read article_write article_cover viral_write " ] || fail "viral article call order" "calls: $c"
+[ -f articles/2030-02-04/article.html ] && grep -q '"status": "opened"' pipeline/data/article/2030-02-04.json || fail "viral article page not made and opened"
+grep -q '"status": "waiting"' pipeline/data/viral/2030-02-04.json || fail "the post did not wait for the article"
+POSTS_VIRAL_NOW=2030-02-04T07:05 python pipeline/lib/viral.py
+c="$(calls)"; [ "$c" = "teaser_find " ] || fail "article not looked up on the profile" "calls: $c"
+[ "$(cat queue/2030-02-04_*/quote.txt 2>/dev/null)" = 1900000000000000777 ] || fail "the post does not quote the article"
+grep -q '"post_id": "1900000000000000777"' pipeline/data/article/2030-02-04.json || fail "the article post id was not kept"
+for k in 2030-02-05 2030-02-06; do cp pipeline/data/article/2030-02-04.json "pipeline/data/article/$k.json"; done
+FAKE_VIRAL_ARTICLE=1 POSTS_VIRAL_NOW=2030-02-06T07:00 python pipeline/lib/viral.py --now
+c="$(calls)"; [ "$c" = "viral_read viral_write " ] || fail "budget used: an article was written anyway" "calls: $c"
+grep -q '"article": "2029-12-31"' pipeline/data/viral/2030-02-06.json || fail "budget used: no existing article to quote"
+FAKE_VIRAL_NONE=1 POSTS_VIRAL_NOW=2030-02-07T07:00 python pipeline/lib/viral.py --now
+c="$(calls)"; [ "$c" = "viral_read " ] && grep -q '"status": "none"' pipeline/data/viral/2030-02-07.json || fail "nothing viral: not a clean no-post" "calls: $c"
+unset POSTS_VIRAL_FAKE POSTS_ARTICLE_FAKE
+ok "viral posts: repurposed and queued; a viral article written, opened, then quoted once on the profile; budget used: quotes an existing article; nothing viral: no post"
 
 echo "all $pass passed"
 rm -rf "$T"

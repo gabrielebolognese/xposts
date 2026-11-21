@@ -17,8 +17,8 @@ The articles (the date each was written, then its title; the owner may have chan
 1. Load every browser tool in ONE ToolSearch call: `select:mcp__claude-in-chrome__list_connected_browsers,mcp__claude-in-chrome__select_browser,mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__javascript_tool,mcp__claude-in-chrome__computer,mcp__claude-in-chrome__tabs_close_mcp`
 2. Call `list_connected_browsers`, then `select_browser` with deviceId `{{DEVICE}}` (the owner's Google Chrome). If it is not listed, answer at once with status "no_browser".
 3. Call `tabs_context_mcp` with `createIfEmpty: true` and use that one tab for everything.
-4. Navigate to https://x.com/home and wait about 3 seconds. If X shows a login page, answer with status "logged_out". Read the owner's handle: `document.querySelector('a[data-testid="AppTabBar_Profile_Link"]')?.getAttribute('href')`.
-5. Navigate to https://x.com/<handle> (the Posts tab) and wait about 3 seconds. If it shows "Something went wrong" or a rate limit message, answer with status "limited". Read the posts with javascript_tool, 5 at a time:
+4. The owner's posting account is @{{HANDLE}}. Chrome may be logged in to a different account: that is fine, the profile is public. Navigate to https://x.com/{{HANDLE}} (the Posts tab) and wait about 3 seconds. If X shows a login page, answer with status "logged_out".
+5. Read the profile. If it shows "Something went wrong" or a rate limit message, answer with status "limited". Read the posts with javascript_tool, 5 at a time:
 
 ```js
 (() => {
@@ -42,7 +42,7 @@ The articles (the date each was written, then its title; the owner may have chan
 ```
 
    Scroll down (`window.scrollBy(0, 1500)`, wait 1.5 seconds) and run it again, until you have found every article or have read about 40 posts or see "NO MORE POSTS" twice. A pinned post may come first: it counts too.
-6. An article is the owner's own post (not a repost) marked ARTICLE, or whose text shows that article's title, published on or after the date it was written. If several posts match one article, take the newest. The views come from the views column (for example "1,234 views. View post analytics"); when it shows "views ?", open that post (https://x.com/<handle>/status/<id>), read the views number on the page, and go back.
+6. An article is the owner's own post (not a repost) marked ARTICLE, or whose text shows that article's title, published on or after the date it was written. If several posts match one article, take the newest. The views come from the views column (for example "1,234 views. View post analytics"); when it shows "views ?", open that post (https://x.com/{{HANDLE}}/status/<id>), read the views number on the page, and go back.
 7. Close the tab with `tabs_close_mcp` (call `tabs_context_mcp` again first: the tab id can change).
 
 ## Answer

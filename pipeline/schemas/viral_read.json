@@ -1,0 +1,33 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": ["status", "scanned", "posts", "note"],
+ "properties": {
+  "status": {"type": "string", "enum": ["ok", "no_browser", "logged_out", "limited"]},
+  "scanned": {"type": "integer", "minimum": 0},
+  "posts": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "author", "followers", "views", "likes", "time", "text", "media", "is_article", "article_title", "article_body", "niche", "why"],
+    "properties": {
+     "id": {"type": "string", "pattern": "^[0-9]{1,25}$"},
+     "author": {"type": "string"},
+     "followers": {"type": "integer", "minimum": -1, "description": "-1 when the profile was not opened"},
+     "views": {"type": "integer", "minimum": 0},
+     "likes": {"type": "string"},
+     "time": {"type": "string"},
+     "text": {"type": "string"},
+     "media": {"type": "string"},
+     "is_article": {"type": "boolean"},
+     "article_title": {"type": "string"},
+     "article_body": {"type": "string"},
+     "niche": {"type": "boolean"},
+     "why": {"type": "string"}
+    }
+   }
+  },
+  "note": {"type": "string"}
+ }
+}

@@ -18,6 +18,15 @@ from datetime import datetime  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "studio" / "lib"))
 import studio  # noqa: E402
 
+
+def with_cfg(over: dict):
+    """core.cfg with some keys replaced, for mechanisms the live config switches off."""
+    real = core.cfg
+    return unittest.mock.patch.object(core, "cfg", lambda key, default=None: over[key] if key in over else real(key, default))
+
+
+OLD_SCHEDULE = {"article.days": ["mon", "wed", "sun"], "teaser.day": "fri"}  # switched off since 2026-11-21
+
 CHECKER = core.ROOT / ".claude" / "skills" / "x-threads" / "check.mjs"
 CATS = [{"id": i, "name": f"cat {i}"} for i in (1, 2, 3)]
 
@@ -424,6 +433,7 @@ class Article(unittest.TestCase):
     def test_three_a_week_pillars_take_turns(self):
         import article
         from datetime import date
+        self.enterContext(with_cfg(OLD_SCHEDULE))
         days = [date(2026, 11, 22) + timedelta(days=i) for i in range(9)]  # Sunday 22 to Monday 30
         self.assertEqual([d.day for d in days if article.article_day(d)], [22, 23, 25, 29, 30])
         keys = [article.pillar_for(d)["key"] for d in days if article.article_day(d)]
@@ -433,6 +443,7 @@ class Article(unittest.TestCase):
 class Teaser(unittest.TestCase):
     def test_when_it_runs(self):
         import teaser
+        self.enterContext(with_cfg(OLD_SCHEDULE))
         at = lambda iso: datetime.fromisoformat(iso).replace(tzinfo=core.ROME)  # noqa: E731
         fri = "2030-01-04"
         self.assertFalse(teaser.due(at(f"{fri}T06:19"), {}))
@@ -447,6 +458,7 @@ class Teaser(unittest.TestCase):
         import article
         import teaser
         from datetime import date
+        self.enterContext(with_cfg(OLD_SCHEDULE))
         with tempfile.TemporaryDirectory() as tmp:
             with unittest.mock.patch.object(article, "DIR", Path(tmp)):
                 self.assertEqual(teaser.week_articles(date(2030, 1, 4)), [])
@@ -471,6 +483,79 @@ class Teaser(unittest.TestCase):
         found["articles"][0]["views"] = 4200  # a tie: the newest wins
         self.assertEqual(teaser.most_viewed(found, week)[2]["post_id"], "22")
         self.assertIsNone(teaser.most_viewed({"articles": []}, week))
+
+
+class Viral(unittest.TestCase):
+    POST = {"id": "1", "author": "a", "followers": 400, "views": 9000, "niche": True, "is_article": False,
+            "text": "i automated my whole x account with claude code and now it takes 10 minutes a day"}
+
+    def test_three_random_times_two_hours_apart(self):
+        import random
+        import viral
+        for seed in range(40):
+            ts = viral.pick_times(random.Random(seed))
+            mins = [viral.minutes(t) for t in ts]
+            self.assertEqual(len(ts), 3)
+            self.assertEqual(mins, sorted(mins))
+            self.assertTrue(all(8 * 60 <= m <= 21 * 60 + 30 for m in mins), ts)
+            self.assertTrue(all(b - a >= 120 for a, b in zip(mins, mins[1:])), ts)
+
+    def test_outliers(self):
+        import viral
+        p = self.POST
+        posts = [p, {**p, "id": "2", "followers": 900},  # too many followers
+                 {**p, "id": "3", "views": 4000},  # too few views
+                 {**p, "id": "4", "niche": False},  # off topic
+                 {**p, "id": "5", "followers": -1},  # profile not checked
+                 {**p, "id": "6", "followers": 100, "views": 6000},  # the best views per follower
+                 {**p, "id": "7"}]  # used before
+        self.assertEqual([x["id"] for x in viral.viral(posts, {"7"})], ["6", "1"])
+
+    def test_due_runs_and_late_ones_skipped(self):
+        import viral
+        at = lambda iso: datetime.fromisoformat(iso).replace(tzinfo=core.ROME)  # noqa: E731
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(viral, "DIR", Path(tmp)), \
+                unittest.mock.patch.object(core, "LOGS", Path(tmp) / "logs"):
+            core.save_json(Path(tmp) / "2030-01-01.json", {"times": ["10:00", "13:00", "18:00"]})
+            self.assertIsNone(viral.due_run(at("2030-01-01T09:59")))
+            self.assertEqual(viral.due_run(at("2030-01-01T10:00")), 0)
+            viral.put(date(2030, 1, 1), 0, status="queued")
+            self.assertIsNone(viral.due_run(at("2030-01-01T12:59")))
+            self.assertIsNone(viral.due_run(at("2030-01-01T15:00")))  # 13:00 blocked for 2 hours: skipped
+            self.assertEqual(viral.load(date(2030, 1, 1))["runs"]["1"]["status"], "skipped")
+            self.assertEqual(viral.due_run(at("2030-01-01T18:30")), 2)
+
+    def test_post_rules(self):
+        import viral
+        good = {"post": "claude code runs my x account now. ten minutes a day from me, the rest is a script i set up "
+                        "once. it is a lot simpler than people make it sound", "hook": "h", "quote_article": ""}
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(viral.problems(good, self.POST, Path(tmp), 0, []), [])
+            bad = {**good, "post": self.POST["text"] + " https://x.com #ai @someone " + chr(0x2014)}
+            probs = " | ".join(viral.problems(bad, self.POST, Path(tmp), 1, []))
+            for want in ("no links", "no hashtags", "no @mentions", "dashes", "too close to the original"):
+                self.assertIn(want, probs)
+            self.assertIn("quote_article must be one of", " | ".join(viral.problems(good, self.POST, Path(tmp), 2, ["2030-01-01"])))
+
+    def test_queue_keeps_a_gap_from_other_posts(self):
+        import viral
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(core, "ROOT", Path(tmp)), \
+                unittest.mock.patch.object(viral, "now", lambda: datetime(2030, 1, 1, 10, 0, tzinfo=core.ROME)):
+            (Path(tmp) / "queue" / "2030-01-01_1010").mkdir(parents=True)
+            self.assertEqual(viral.queue_post("text", "123"), "2030-01-01_1040")
+            self.assertEqual((Path(tmp) / "queue" / "2030-01-01_1040" / "quote.txt").read_text(), "123")
+
+    def test_three_articles_a_week(self):
+        import article
+        import viral
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(article, "DIR", Path(tmp)):
+            for key, status in (("2030-01-06", "opened"), ("2030-01-07", "opened"), ("2030-01-08", "review"),
+                                ("2030-01-09-2", "ready"), ("2030-01-14", "opened")):  # Sun before, Mon, Tue, Wed, next Mon
+                core.save_json(Path(tmp) / f"{key}.json", {"status": status, "title": f"T {key}"})
+            self.assertEqual(viral.week_articles(date(2030, 1, 10)), ["2030-01-07", "2030-01-09-2"])
+            self.assertEqual(viral.budget_left(date(2030, 1, 10)), 1)
+            self.assertEqual(viral.article_key(date(2030, 1, 9)), "2030-01-09")
+            self.assertEqual(viral.article_key(date(2030, 1, 7)), "2030-01-07-2")
 
 
 if __name__ == "__main__":

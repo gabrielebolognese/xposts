@@ -98,7 +98,7 @@ def find(work: Path, week: list[tuple[date, dict]]) -> dict:
                           "on your profile")
         listed = "\n".join(f"- {day} ({day:%A}): \"{art['title'].strip()}\"" for day, art in week)
         out = ai.call("teaser_find", work, "find", core.render(
-            "teaser_find", DEVICE=core.cfg("trend.chrome_device"), ARTICLES=listed),
+            "teaser_find", DEVICE=core.cfg("trend.chrome_device"), HANDLE=core.cfg("x_handle"), ARTICLES=listed),
             schema="teaser_find", tools=["ToolSearch"], chrome=True, timeout=core.cfg("teaser.read_minutes", 20) * 60)
     finally:
         if started:

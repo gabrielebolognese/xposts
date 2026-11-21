@@ -3,7 +3,8 @@
 fixtures.json, where {NAME} and {REPO} become the tool the prompt is about. Environment switches: FAKE_LOG (append
 each stage name), FAKE_TOOL (the name a category search finds), FAKE_EDITOR_FAIL, FAKE_VIRAL=<score> (the virality
 evaluation lands near that final score instead of 85), FAKE_FAIL_STAGE=<stage> (that stage fails like a broken call),
-FAKE_TREND_NONE (nothing on the Trending tab fits the niche), FAKE_TEASER_NONE (none of the week's articles is on the profile).
+FAKE_TREND_NONE (nothing on the Trending tab fits the niche), FAKE_TEASER_NONE (none of the week's articles is on the profile),
+FAKE_VIRAL_NONE (no post over the views threshold in the timeline), FAKE_VIRAL_ARTICLE (only a new viral X Article).
 """
 import json
 import os
@@ -50,6 +51,13 @@ if stage == "trend_read" and os.environ.get("FAKE_TREND_NONE"):
     out["candidates"] = []
 if stage == "teaser_find" and os.environ.get("FAKE_TEASER_NONE"):
     out.update(status="not_found", articles=[])
+if stage == "viral_read" and os.environ.get("FAKE_VIRAL_NONE"):
+    out["posts"] = []
+if stage == "viral_read" and os.environ.get("FAKE_VIRAL_ARTICLE"):  # only a new X Article post
+    out["posts"] = [dict(p, id="1900000000000000905") for p in out["posts"] if p["is_article"]]
+if stage == "viral_write":  # in quote mode, quote the first article the prompt lists
+    keys = re.findall(r"^- (20\d\d-\d\d-\d\d(?:-\d+)?): ", prompt, re.M) if "in quote_article. Write" in prompt else []
+    out["quote_article"] = keys[0] if keys else ""
 if stage == "editor" and os.environ.get("FAKE_EDITOR_FAIL"):  # the same issue every round, still open on re-checks
     out["issues"] = [{"kind": "claims_supported", "quote": "It is MIT licensed", "fix": "cite the license",
                       "blocking": True, "earlier": "This is a re-check" in prompt}]

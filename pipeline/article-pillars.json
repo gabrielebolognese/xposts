@@ -1,54 +1,54 @@
 [
  {
-  "key": "field_report",
-  "name": "Field report",
-  "goal": "Original data nobody else has: what the owner's own AI systems actually did this week and overall, with the real costs, times, scores and failures. First-hand numbers are the most shared and most quoted kind of article in this niche.",
-  "angle": "I let Claude Code run part of my work on its own. Here is exactly what it built, what it cost, what broke and what I would change. Pick ONE sharp angle from the data (the cost of autonomy, what fails when nobody watches, how quality was enforced, the funnel from 195 tools to a handful of posts), not a diary.",
+  "key": "automation",
+  "name": "Automation playbook",
+  "goal": "The complete how-to for automating one real piece of work with AI, so the reader gets hours back every week. The most bookmarked kind of article: readers save it to set it up later.",
+  "angle": "Pick ONE task people still do by hand and could hand to AI (posting on X, writing threads, research, replies, reports, video edits, publishing on Instagram) and show the full setup from zero to running on its own: the tools (Claude Code, skills, scripts, schedulers), the exact steps, files, commands and prompts, what it costs, what breaks and how to keep quality up. The owner's own systems are the proof it works: use their real numbers from the data. Verify every command against current official docs.",
   "titles": [
-   "I let Claude Code build a project every night for a week. Here's the bill.",
-   "195 tools found, 140 rejected: what my AI pipeline learned about Claude Code tools",
-   "What $288 of autonomous Claude Code actually buys you"
+   "How to automate X posting to reach maximum productivity",
+   "I automated my whole posting week with Claude Code. Here is the exact setup.",
+   "Stop posting by hand: the AI setup that runs my account while I sleep"
   ],
-  "structure": "Open with the most surprising number. Then: the setup in 3 to 5 lines; the numbers (a list or a ranked breakdown); what worked; what broke and why; the rules that fixed it (copyable); what it means for the reader's own setup; recap.",
-  "sources": ["studio", "pipeline", "bip"]
+  "structure": "Open with the payoff (what runs by itself at the end and what it saves). Then: why doing it by hand caps you; the setup in numbered steps with the exact tools, files, commands and prompts; the owner's real numbers as proof; what breaks and the fixes; what it costs; a checklist recap.",
+  "sources": ["pipeline", "studio", "bip"]
  },
  {
-  "key": "playbook",
-  "name": "Playbook",
-  "goal": "The definitive, step-by-step guide to one thing people want to do with Claude Code or Codex. The most bookmarked kind of article: readers save it to follow later.",
-  "angle": "Pick ONE capability that many builders use badly (project instructions, skills, hooks, subagents, plugins, MCP servers, token savings, review loops, running agents unattended) and write the complete setup from zero to working, with the exact files, commands and prompts, the mistakes to avoid and the tools from the data that make it easier. Verify every command against current official docs.",
+  "key": "free_alternative",
+  "name": "Free alternative",
+  "goal": "One AI skill or open-source tool that does what people pay a subscription for. People share money-savers and bookmark the setup.",
+  "angle": "Find ONE real Claude skill, Claude Code plugin, MCP server or open-source AI tool (from the data or your own research) that replaces a paid product: clipping long videos into shorts, captions, thumbnails, editing, transcription, scheduling, research, design. Name the paid product it replaces and what that costs (verified on its pricing page), then show exactly how to install and use the free one, what it does as well, what it does worse, and who should still pay. Only tools you verified exist and work as described: check the repository, its docs and its license.",
   "titles": [
-   "The complete guide to Claude Code hooks (with 7 you can copy today)",
-   "How to set up Claude Code so it stops wasting your tokens",
-   "Claude Code skills, explained from zero: the setup I use every day"
+   "This Claude skill can clip GTA6 without paying for a product",
+   "This free Claude Code skill replaces a $29/month video tool",
+   "Stop paying for AI captions: this open-source tool does it locally"
   ],
-  "structure": "Open with the payoff (what the reader will have at the end). Then: why most setups fail; numbered steps with the exact commands, files and prompts; a section of ready-to-copy examples; the common mistakes; the best tools for it from the data; a checklist recap.",
+  "structure": "Open with the swap in one line (what you stop paying for, what you use instead). Then: what the paid tool does and costs; the free one and why it works; install and first run in numbered steps with the exact commands; a real example from start to finish; where it falls short; who should switch and who should not; recap.",
   "sources": ["tools"]
  },
  {
-  "key": "ranked_list",
-  "name": "Ranked list",
-  "goal": "A ranked roundup readers share and argue about: the best Claude Code and Codex tools, skills and plugins the owner's pipeline found and checked recently, ranked with reasons.",
-  "angle": "Rank 10 to 15 tools from the data (best first), one short section each: what it does in one line, the problem it solves, who should install it, the catch. Group them if a grouping helps (by use: tokens, reviews, automation, UI). Say how the list was made: the pipeline searched and scored N tools and rejected most.",
+  "key": "viral_breakdown",
+  "name": "Viral breakdown",
+  "goal": "Reverse engineer a real piece of content that went massively viral and show how to make that kind of content with AI tools. Readers share it because it turns someone else's result into a recipe.",
+  "angle": "Find ONE real format or account that got huge numbers recently on Instagram, TikTok, YouTube Shorts or X (animations, AI videos, edits, carousels, explainers) and verify the numbers from the post itself or reputable reporting. Break down why it spread (hook, format, pacing, emotion, loop) and then how to make it yourself with AI tools (Claude, Claude Code, Remotion, image and video models), step by step, with the exact prompts and settings. The results are the creator's, never the owner's.",
   "titles": [
-   "The 12 best Claude Code tools I found this month (out of 195 I checked)",
-   "I tested every new Claude Code plugin this month. These 10 are worth installing.",
-   "Claude Code and Codex add-ons ranked: the 15 that actually save time"
+   "How to make animations for Instagram to get 55M views",
+   "This AI video format got 120M views. Here is how to make it in an afternoon.",
+   "I reverse engineered the most viral AI reels this month. They all do one thing."
   ],
-  "structure": "Open with how many tools were checked and how few made it. Then: how they were picked (2 to 4 lines); the ranked list, one ## section or numbered block each with the same mini format; the honorable mentions in a short list; how to choose for your own setup; recap of the top 3.",
-  "sources": ["tools", "pipeline"]
+  "structure": "Open with the result and who got it (verified number, named account or format). Then: what the content is; why it spread, point by point; how to make it with AI in numbered steps, with prompts and settings; the mistakes that make copies flop; recap as a checklist.",
+  "sources": ["trends"]
  },
  {
-  "key": "breakdown",
-  "name": "Contrarian breakdown",
-  "goal": "A strong, defensible opinion on the biggest AI-building story of the week, the take people quote and reply to. Shares come from disagreement backed by evidence.",
-  "angle": "Take the biggest story of the week for people who build with AI (from this week's trends and the news), state what most people are getting wrong in one line, then prove the better reading with facts, first-hand experience from the owner's systems and concrete consequences for builders. Be fair to the other side, never rage bait.",
+  "key": "growth_myth",
+  "name": "Growth myth",
+  "goal": "A strong, defensible take on growing an audience with AI that goes against what most people believe. Shares and replies come from disagreement backed by evidence.",
+  "angle": "Take ONE belief most creators hold about growth on Instagram, X, TikTok or YouTube (you need a big following to go viral, posting more is the answer, AI content gets buried, the algorithm hates links...) and show why it is wrong with evidence: what the platforms themselves have said, real accounts and their verified results, and how AI makes the better approach cheap to run. Be fair to the other side, never rage bait, never promise results.",
   "titles": [
-   "Everyone is reading the new Claude release wrong",
-   "The AI coding agent story this week is not about the model",
-   "Stop panicking about AI agents writing code. Start worrying about this."
+   "Going viral on Instagram is WAY easier than you think",
+   "You don't need followers to go viral. You need this.",
+   "Everyone is wrong about AI content and the algorithm"
   ],
-  "structure": "Open with the common take and why it is wrong, in 2 lines. Then: what actually happened (facts, verified); the evidence for the better reading; what it changes for people who build, with examples; what to do this week; recap.",
-  "sources": ["trends", "tools", "studio"]
+  "structure": "Open with the common belief and why it is wrong, in 2 lines. Then: what the platform actually rewards (verified); real examples with their numbers; the method in numbered steps, with how AI does the heavy lifting; what still does not work; recap.",
+  "sources": ["trends"]
  }
 ]

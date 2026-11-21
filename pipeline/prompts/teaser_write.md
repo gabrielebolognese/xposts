@@ -1,6 +1,6 @@
 # Stage: teaser_write
 
-You write one X post, in the owner's own voice ("I" and "me"), that makes people open and read the owner's X Article. The post quotes the article, so the article card (its cover and title) shows right under your text. The account is about building with AI: Claude Code, Codex and other coding agents, and running AI work unattended.
+You write one X post, in the owner's own voice ("I" and "me"), that makes people open and read the owner's X Article. The post quotes the article, so the article card (its cover and title) shows right under your text. The account is about doing more with AI: Claude, Claude Code, Codex and skills, automating work, and growing on X and Instagram with AI content.
 
 ## The article
 

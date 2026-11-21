@@ -1,6 +1,7 @@
-"""The weekly X Article, every article.day (Wednesday). run.sh runs this every minute. From article.start (05:00), once:
-  1. the pillar of the week (pipeline/article-pillars.json, in turn from article.first_date): field report, playbook,
-     ranked list, contrarian breakdown
+"""The X Articles, 3 a week on article.days (Monday, Wednesday, Sunday). run.sh runs this every minute. On those days,
+from article.start (05:00), once:
+  1. the pillar of the article (pipeline/article-pillars.json, one per article in turn from article.first_date):
+     automation playbook, free alternative, viral breakdown, growth myth
   2. the data for it from this PC: Claude Studio builds (cost, hours, turns, scores), the thread pipeline's funnel,
      the tools it found and scored, this week's trends
   3. Opus writes the article (prompts/article_write.md, with web research), checked in code: words, headings,
@@ -11,9 +12,9 @@
   5. articles/<date>/article.html: the cover, the article, and a Post button that downloads the cover and copies the
      article (formatted) to the clipboard; Copy title copies the title
 At article.time (09:00), or when it is ready later, the page opens in the browser. Posting is by hand: X has no API
-for Articles. A failed try runs once more after 10 minutes; not ready by article.give_up (18:00): skipped this week.
+for Articles. A failed try runs once more after 10 minutes; not ready by article.give_up (18:00): skipped that day.
 State: pipeline/data/article/<date>.json; model calls: pipeline/data/article/<date>/.
-  python pipeline/lib/article.py --now     make this week's article now, whatever the day (the runner opens it)
+  python pipeline/lib/article.py --now     make today's article now, whatever the day (the runner opens it)
 """
 from __future__ import annotations
 
@@ -63,7 +64,7 @@ def at(d: date, hhmm: str) -> datetime:
 
 
 def article_day(d: date) -> bool:
-    return DAYS[d.weekday()] == core.cfg("article.day", "wed")
+    return DAYS[d.weekday()] in core.cfg("article.days", ["mon", "wed", "sun"])
 
 
 def load(d: date) -> dict:
@@ -77,10 +78,11 @@ def save(d: date, **values) -> dict:
 
 
 def pillar_for(d: date) -> dict:
-    """The pillars in turn, one a week, starting with the first on article.first_date."""
+    """The pillars in turn, one per article, starting with the first on article.first_date."""
     pillars = core.load_json(PILLARS)
-    weeks = (d - date.fromisoformat(core.cfg("article.first_date", "2026-11-18"))).days // 7
-    return pillars[weeks % len(pillars)]
+    first = date.fromisoformat(core.cfg("article.first_date", "2026-11-22"))
+    n = sum(article_day(first + timedelta(days=i)) for i in range((d - first).days))
+    return pillars[n % len(pillars)]
 
 
 # The markdown subset -----------------------------------------------------------------------------------------------------
@@ -229,7 +231,7 @@ def trends_data(d: date) -> str:
         read = core.load_json(core.DATA / "trend" / str(day) / "read.json", {}) or {}
         lines += [f"- {day}: {c['trend']}: {c.get('summary', '')}" for c in read.get("candidates", [])]
     return "This week's fitting trends on X (from the Trending tab):\n" + "\n".join(lines) if lines else \
-        "No trend reads this week: find the week's biggest story for people who build with AI on the web."
+        "No trend reads this week: research what is spreading right now on the web."
 
 
 def gather(pillar: dict, d: date) -> str:
@@ -287,7 +289,7 @@ def problems(art: dict, work: Path, rnd: int) -> list[str]:
 
 def write(d: date, pillar: dict, work: Path) -> dict | None:
     """The article, checked; None when it still breaks the rules after the fix rounds (then it waits in review/)."""
-    core.say("ARTICLE", f"X article: writing this week's {pillar['name'].lower()}")
+    core.say("ARTICLE", f"X article: writing today's {pillar['name'].lower()}")
     prompt = core.render(
         "article_write", DATE=f"{d:%A %d %B %Y}", BIP_DAY=str(bip.day_number(d)), PILLAR_NAME=pillar["name"],
         PILLAR_GOAL=pillar["goal"], PILLAR_ANGLE=pillar["angle"], PILLAR_STRUCTURE=pillar["structure"],
@@ -383,7 +385,7 @@ def make(d: date) -> None:
         tries = load(d).get("tries", 0) + 1
         last = tries >= 2
         save(d, status="gave_up" if last else "error", tries=tries, failed_at=now().timestamp(), error=msg)
-        core.say("ERROR", f"X article: {msg}" + (", skipped this week" if last else ", trying again in 10 minutes"))
+        core.say("ERROR", f"X article: {msg}" + (", skipped today" if last else ", trying again in 10 minutes"))
     finally:
         lock.close()
 
@@ -402,7 +404,7 @@ def main() -> None:
     st = load(d)
     if "--now" in sys.argv:
         if st.get("status") in ("ready", "opened"):
-            print(f"This week's article is already made: {st['page']}")
+            print(f"Today's article is already made: {st['page']}")
             return
         make(d)
         return
@@ -412,7 +414,7 @@ def main() -> None:
     if st.get("status") != "ready":
         if t >= give_up:
             save(d, status="gave_up", error=st.get("error") or f"not ready by {give_up:%H:%M}")
-            core.say("WARN", f"X article: skipped this week, not ready by {give_up:%H:%M}")
+            core.say("WARN", f"X article: skipped today, not ready by {give_up:%H:%M}")
             return
         if t < at(d, core.cfg("article.start", "05:00")):
             return

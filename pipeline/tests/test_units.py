@@ -421,12 +421,13 @@ class Article(unittest.TestCase):
                      "body: no hashtags"):
             self.assertIn(want, probs)
 
-    def test_pillars_take_turns_weekly(self):
+    def test_three_a_week_pillars_take_turns(self):
         import article
         from datetime import date
-        keys = [article.pillar_for(date(2026, 11, 18) + timedelta(days=7 * i))["key"] for i in range(5)]
-        self.assertEqual(keys, ["field_report", "playbook", "ranked_list", "breakdown", "field_report"])
-        self.assertEqual(article.pillar_for(date(2026, 11, 20))["key"], "field_report")  # same week
+        days = [date(2026, 11, 22) + timedelta(days=i) for i in range(9)]  # Sunday 22 to Monday 30
+        self.assertEqual([d.day for d in days if article.article_day(d)], [22, 23, 25, 29, 30])
+        keys = [article.pillar_for(d)["key"] for d in days if article.article_day(d)]
+        self.assertEqual(keys, ["automation", "free_alternative", "viral_breakdown", "growth_myth", "automation"])
 
 
 class Teaser(unittest.TestCase):
@@ -442,19 +443,34 @@ class Teaser(unittest.TestCase):
         for done in teaser.DONE:
             self.assertFalse(teaser.due(at(f"{fri}T07:00"), {"status": done}))
 
-    def test_week_article_is_the_wednesday_before(self):
+    def test_week_articles_are_the_sunday_monday_wednesday_before(self):
         import article
         import teaser
         from datetime import date
         with tempfile.TemporaryDirectory() as tmp:
             with unittest.mock.patch.object(article, "DIR", Path(tmp)):
-                self.assertIsNone(teaser.week_article(date(2030, 1, 4)))
-                core.save_json(Path(tmp) / "2030-01-02.json", {"status": "opened"})
-                core.save_json(Path(tmp) / "2030-01-02" / "article.json", {"title": "T", "body": "B"})
-                self.assertEqual(teaser.week_article(date(2030, 1, 4)), (date(2030, 1, 2), {"title": "T", "body": "B"}))
-                self.assertIsNone(teaser.week_article(date(2030, 1, 11)))  # the next week has no article
-                core.save_json(Path(tmp) / "2030-01-02.json", {"status": "review"})
-                self.assertIsNone(teaser.week_article(date(2030, 1, 4)))
+                self.assertEqual(teaser.week_articles(date(2030, 1, 4)), [])
+                for day, status in (("2029-12-30", "opened"), ("2029-12-31", "ready"), ("2030-01-02", "review"),
+                                    ("2030-01-03", "opened"), ("2029-12-29", "opened")):  # Sun Mon Wed Thu Sat
+                    core.save_json(Path(tmp) / f"{day}.json", {"status": status})
+                    core.save_json(Path(tmp) / day / "article.json", {"title": f"T {day}", "body": "B"})
+                self.assertEqual([str(d) for d, _ in teaser.week_articles(date(2030, 1, 4))], ["2029-12-30", "2029-12-31"])
+                self.assertEqual(teaser.week_articles(date(2030, 1, 11)), [])  # the next week has none
+
+    def test_most_viewed(self):
+        import teaser
+        from datetime import date
+        week = [(date(2029, 12, 30), {"title": "Sun"}), (date(2029, 12, 31), {"title": "Mon"}),
+                (date(2030, 1, 2), {"title": "Wed"})]
+        found = {"articles": [{"date": "2029-12-30", "post_id": "11", "views": 300},
+                              {"date": "2029-12-31", "post_id": "22", "views": 4200},
+                              {"date": "2029-12-27", "post_id": "33", "views": 90000},  # not this week's
+                              {"date": "2030-01-02", "post_id": "", "views": 99000}]}  # no post id
+        day, art, hit = teaser.most_viewed(found, week)
+        self.assertEqual((str(day), art["title"], hit["post_id"]), ("2029-12-31", "Mon", "22"))
+        found["articles"][0]["views"] = 4200  # a tie: the newest wins
+        self.assertEqual(teaser.most_viewed(found, week)[2]["post_id"], "22")
+        self.assertIsNone(teaser.most_viewed({"articles": []}, week))
 
 
 if __name__ == "__main__":

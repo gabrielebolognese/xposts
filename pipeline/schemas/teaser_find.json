@@ -1,11 +1,24 @@
 {
  "type": "object",
  "additionalProperties": false,
- "required": ["status", "post_id", "title_seen", "note"],
+ "required": ["status", "articles", "note"],
  "properties": {
   "status": {"type": "string", "enum": ["ok", "not_found", "no_browser", "logged_out", "limited"]},
-  "post_id": {"type": "string", "pattern": "^[0-9]{0,25}$", "description": "The article post's id, or empty"},
-  "title_seen": {"type": "string"},
+  "articles": {
+   "type": "array",
+   "description": "The week's articles found on the profile, one entry each; empty when none is there",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["date", "post_id", "title_seen", "views"],
+    "properties": {
+     "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$", "description": "The written date given for that article"},
+     "post_id": {"type": "string", "pattern": "^[0-9]{1,25}$", "description": "The article post's id"},
+     "title_seen": {"type": "string"},
+     "views": {"type": "integer", "minimum": 0, "description": "The post's views as a whole number (1.2K is 1200)"}
+    }
+   }
+  },
   "note": {"type": "string"}
  }
 }

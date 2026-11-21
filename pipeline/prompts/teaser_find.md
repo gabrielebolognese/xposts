@@ -1,8 +1,9 @@
 # Stage: teaser_find
 
-You find one post on the owner's X profile in the owner's Chrome: the X Article they published this week. This is an unattended run: do not ask questions, do not stop to confirm anything.
+You find posts on the owner's X profile in the owner's Chrome: the X Articles they published this week, with their views. This is an unattended run: do not ask questions, do not stop to confirm anything.
 
-The article: "{{TITLE}}", written on {{DATE}}. The owner may have changed the title slightly when publishing it.
+The articles (the date each was written, then its title; the owner may have changed a title slightly when publishing it):
+{{ARTICLES}}
 
 ## Hard rules
 
@@ -31,22 +32,22 @@ The article: "{{TITLE}}", written on {{DATE}}. The owner may have changed the ti
     const repost = /reposted/i.test(a.querySelector('[data-testid="socialContext"]')?.innerText || '');
     const articleLink = !!a.querySelector('a[href*="/article/"]');
     const time = a.querySelector('time')?.getAttribute('datetime') || '';
+    const views = a.querySelector('a[href*="/analytics"]')?.getAttribute('aria-label') || 'views ?';
     const text = a.innerText.replace(/\s+/g, ' ').slice(0, 220);
-    out.push([id, time, repost ? 'REPOST' : 'OWN', articleLink ? 'ARTICLE' : '-', text].join(' | '));
+    out.push([id, time, repost ? 'REPOST' : 'OWN', articleLink ? 'ARTICLE' : '-', views, text].join(' | '));
     if (out.length >= 5) break;
   }
   return out.join('\n') || 'NO MORE POSTS';
 })()
 ```
 
-   Scroll down (`window.scrollBy(0, 1500)`, wait 1.5 seconds) and run it again, until you find the article or have read about 40 posts or see "NO MORE POSTS" twice. A pinned post may come first: it counts too.
-6. The article is the owner's own post (not a repost) marked ARTICLE, or whose text shows the article title, published on or after {{DATE}}. If several match, take the newest.
+   Scroll down (`window.scrollBy(0, 1500)`, wait 1.5 seconds) and run it again, until you have found every article or have read about 40 posts or see "NO MORE POSTS" twice. A pinned post may come first: it counts too.
+6. An article is the owner's own post (not a repost) marked ARTICLE, or whose text shows that article's title, published on or after the date it was written. If several posts match one article, take the newest. The views come from the views column (for example "1,234 views. View post analytics"); when it shows "views ?", open that post (https://x.com/<handle>/status/<id>), read the views number on the page, and go back.
 7. Close the tab with `tabs_close_mcp` (call `tabs_context_mcp` again first: the tab id can change).
 
 ## Answer
 
 Only the JSON object of the schema:
-- status: "ok" (found), "not_found" (read the profile but the article is not there), or "no_browser", "logged_out", "limited"
-- post_id: the article post's id (digits only), or "" when not found
-- title_seen: the title as it shows on the profile, or ""
+- status: "ok" (at least one article found), "not_found" (read the profile but none of the articles is there), or "no_browser", "logged_out", "limited"
+- articles: one entry per article found: date (the written date from the list above, YYYY-MM-DD), post_id (digits only), title_seen (the title as it shows on the profile), views (a whole number: 1.2K is 1200, 3.4M is 3400000); empty when none is found
 - note: one short line on what you saw

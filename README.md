@@ -16,7 +16,7 @@ queue/
 ```
 
 - Images are posted in alphabetical order (name them 1.png, 2.png if order matters).
-- A `quote.txt` holding a post id makes the post quote that post (the Friday post quotes the week's X Article).
+- A `quote.txt` holding a post id makes the post quote that post (the Friday post quotes the week's most viewed X Article).
 - A post more than 3 hours late goes to `missed/` instead of being posted.
 - No links in post.txt: a post with a URL costs $0.20 instead of $0.015.
 
@@ -133,23 +133,23 @@ On Tuesday, Thursday and Saturday the runner posts one long-form post about some
 
 When nothing on the tab fits the account there is no post that day, and the runner says so. A failed try runs once more 10 minutes later; after 10:30 the day is skipped, since the trends are stale by then. The Trending tab follows the location in X's Explore settings (Settings, then Explore settings): set it to where your audience is for English trends. See one without posting: `python pipeline/lib/trend.py --now --dry` (the post and the screenshot land in `pipeline/data/trend/<date>-dry/`). Settings: the `trend` block and the `trend_*` models in `pipeline/config.json`.
 
-## X Article (Wednesday)
+## X Articles (Monday, Wednesday, Sunday)
 
-Every Wednesday the runner writes one X Article. X has no API for Articles, so you post it by hand from a page the runner makes:
+Three times a week, on Monday, Wednesday and Sunday, the runner writes one X Article about doing more with AI. X has no API for Articles, so you post it by hand from a page the runner makes:
 
-1. **Pillar.** The articles take turns, one a week (`pipeline/article-pillars.json`): a **field report** (what this PC's AI systems actually did, with the real costs, times, scores and failures), a **playbook** (the complete step-by-step guide to one Claude Code or Codex capability), a **ranked list** (the best tools the thread pipeline found and checked recently) and a **contrarian breakdown** (the week's biggest AI-building story and what most people get wrong).
-2. **Write.** From 05:00 Opus writes it from this PC's real numbers (Claude Studio builds, the thread pipeline's funnel, the tools it scored, the week's trends) plus web research (`pipeline/prompts/article_write.md`). The code checks it: 1,000 to 3,500 words, at least 3 sections, paragraphs up to 400 characters, headings, lists, quotes, bold and italic only, no emojis, dashes or hashtags, and the AI-tells check; up to 2 fixes, else it waits in `pipeline/review/article-<date>.txt`.
+1. **Pillar.** The articles take turns, one pillar each (`pipeline/article-pillars.json`): an **automation playbook** (how to hand one real task to AI, like "how to automate X posting to reach maximum productivity", with this PC's own systems as proof), a **free alternative** (one Claude skill or open-source AI tool that replaces a paid product, like "this Claude skill can clip GTA6 without paying for a product"), a **viral breakdown** (a real piece of content that went massively viral and how to make that kind with AI, like "how to make animations for Instagram to get 55M views") and a **growth myth** (a belief about growing an audience that the evidence says is wrong, like "going viral on Instagram is WAY easier than you think").
+2. **Write.** From 05:00 Opus writes it with web research, checking every tool, price and view count it uses, plus this PC's real numbers where they fit (Claude Studio builds, the thread pipeline's funnel, the tools it scored, the week's trends) (`pipeline/prompts/article_write.md`). The code checks it: 1,000 to 3,500 words, at least 3 sections, paragraphs up to 400 characters, headings, lists, quotes, bold and italic only, no emojis, dashes or hashtags, and the AI-tells check; up to 2 fixes, else it waits in `pipeline/review/article-<date>.txt`.
 3. **Cover.** Opus designs the cover as an HTML file for this article (`pipeline/prompts/article_cover.md`) and `pipeline/lib/article-shot.mjs` exports it as a 1500x600 PNG at 2x (5:2, the Article cover shape). Text that spills out of the frame gets one fix round.
 4. **Page.** `articles/<date>/article.html` shows the cover and the article. At 09:00 (or when it is ready later) it opens in the browser. Press **Post**: the cover downloads and the article is copied with its formatting. On X: Articles, Write, add the cover, paste the title (**Copy title**) and the article, publish.
 
-Not ready by 18:00: skipped that week. Make this week's now, whatever the day: `python pipeline/lib/article.py --now` (the runner opens it). The pages stay on this PC (`articles/` is not committed). Settings: the `article` block and the `article_*` models in `pipeline/config.json`.
+Not ready by 18:00: skipped that day. Make today's now, whatever the day: `python pipeline/lib/article.py --now` (the runner opens it). The pages stay on this PC (`articles/` is not committed). Settings: the `article` block and the `article_*` models in `pipeline/config.json`.
 
 ## Friday post about the article
 
-Every Friday at 09:00 the runner posts about 1,000 characters about that week's X Article, quoting it so the article card shows right under the text. It is not a summary: it opens a question the article answers, teases one surprising detail and holds back the answer, so people open the article to get it (`pipeline/prompts/teaser_write.md`).
+Every Friday at 09:00 the runner posts about 1,000 characters about the week's most viewed X Article, quoting it so the article card shows right under the text. It is not a summary: it opens a question the article answers, teases one surprising detail and holds back the answer, so people open the article to get it (`pipeline/prompts/teaser_write.md`).
 
-1. **Find.** From 06:20 (waiting while xAutoReply uses Chrome, like the trending post) a Claude in Chrome session finds Wednesday's article on your profile and takes its post id (`pipeline/prompts/teaser_find.md`, read only).
+1. **Find.** From 06:20 (waiting while xAutoReply uses Chrome, like the trending post) a Claude in Chrome session finds the week's articles (the Sunday, Monday and Wednesday before) on your profile with their views and takes the post id of the most viewed one (`pipeline/prompts/teaser_find.md`, read only).
 2. **Write.** Opus writes the post from the article. The code checks it: 800 to 1,300 characters, the two-line hook, paragraphs up to 250 characters, no links, hashtags, emojis, dashes or markdown, and the AI-tells check; up to 2 fixes, else `pipeline/review/teaser-<date>.txt`.
 3. **Posting.** `queue/<date>_0900` gets `post.txt` and `quote.txt` (the article's post id); the posting loop sends it as a quote.
 
-No article that week, or it is not on your profile (not posted): no Friday post, and the runner says so. Not made by 16:00: skipped. See one without posting: `python pipeline/lib/teaser.py --now --dry`. Settings: the `teaser` block and the `teaser_*` models in `pipeline/config.json`.
+No article that week, or none of them is on your profile (not posted): no Friday post, and the runner says so. Not made by 16:00: skipped. See one without posting: `python pipeline/lib/teaser.py --now --dry`. Settings: the `teaser` block and the `teaser_*` models in `pipeline/config.json`.

@@ -1,10 +1,10 @@
-"""The Friday post about the week's X Article: about 1,000 characters that make people open and read the article,
-not a summary of it. It quotes the article, so the article card shows right under the text. run.sh runs this every
-minute. On teaser.day (Friday), from teaser.read_at (06:20) until teaser.give_up (16:00), once:
-  1. this week's article (written on Wednesday by lib/article.py); none: no Friday post
-  2. find it on the owner's profile: a Claude in Chrome session (prompts/teaser_find.md) reads the profile and returns
-     the article's post id, when xAutoReply is not using Chrome (the same waiting as lib/trend.py). Read only, no X API.
-     Not on the profile (not posted): no Friday post.
+"""The Friday post about the week's most viewed X Article: about 1,000 characters that make people open and read
+the article, not a summary of it. It quotes the article, so the article card shows right under the text. run.sh runs
+this every minute. On teaser.day (Friday), from teaser.read_at (06:20) until teaser.give_up (16:00), once:
+  1. this week's articles (made by lib/article.py in the 6 days before: Sunday, Monday, Wednesday); none: no post
+  2. find them on the owner's profile: a Claude in Chrome session (prompts/teaser_find.md) reads the profile and
+     returns each article's post id and views, when xAutoReply is not using Chrome (the same waiting as lib/trend.py).
+     Read only, no X API. The most viewed one is quoted; none on the profile (not posted): no Friday post.
   3. Opus writes the post (prompts/teaser_write.md), checked in code: lib/longform-check.mjs (the hook, paragraphs, no
      emojis, dashes or markdown), teaser.min_chars to teaser.max_chars, no links or hashtags, the AI-tells detector;
      up to teaser.fix_rounds fixes, else review/teaser-<date>.txt
@@ -55,14 +55,26 @@ def teaser_day(d: date) -> bool:
     return article.DAYS[d.weekday()] == core.cfg("teaser.day", "fri")
 
 
-def week_article(d: date) -> tuple[date, dict] | None:
-    """This week's X Article: the one from the latest article day on or before d, when it was made."""
-    back = (d.weekday() - article.DAYS.index(core.cfg("article.day", "wed"))) % 7
-    wed = d - timedelta(days=back)
-    st, art = article.load(wed), core.load_json(article.DIR / str(wed) / "article.json", {})
-    if st.get("status") in ("ready", "opened") and art.get("title"):
-        return wed, art
-    return None
+def week_articles(d: date) -> list[tuple[date, dict]]:
+    """This week's X Articles: the ones made on the article days of the 6 days before d, oldest first."""
+    out = []
+    for back in range(6, 0, -1):
+        day = d - timedelta(days=back)
+        st, art = article.load(day), core.load_json(article.DIR / str(day) / "article.json", {})
+        if article.article_day(day) and st.get("status") in ("ready", "opened") and art.get("title"):
+            out.append((day, art))
+    return out
+
+
+def most_viewed(found: dict, week: list[tuple[date, dict]]) -> tuple[date, dict, dict] | None:
+    """The article with the most views among the week's articles found on the profile (the newest on a tie)."""
+    arts = {str(day): (day, art) for day, art in week}
+    hits = [a for a in found.get("articles", [])
+            if a.get("date") in arts and re.fullmatch(r"\d{1,25}", a.get("post_id", ""))]
+    if not hits:
+        return None
+    best = max(hits, key=lambda a: (a.get("views", 0), a["date"]))
+    return (*arts[best["date"]], best)
 
 
 def due(t: datetime, st: dict) -> bool:
@@ -76,15 +88,17 @@ def due(t: datetime, st: dict) -> bool:
     return True
 
 
-def find(work: Path, wed: date, art: dict) -> dict:
-    """The article's post on the owner's profile, read with Claude in Chrome."""
+def find(work: Path, week: list[tuple[date, dict]]) -> dict:
+    """The week's articles on the owner's profile with their views, read with Claude in Chrome."""
     if not trend.wait_for_chrome():
         raise RuntimeError(f"Chrome stayed busy with xAutoReply for {core.cfg('trend.chrome_wait_minutes', 45)} minutes")
     started = trend.start_chrome()
     try:
-        core.say("TREND", "Friday post: looking for this week's X Article on your profile")
+        core.say("TREND", f"Friday post: looking for this week's {len(week)} X Article{'' if len(week) == 1 else 's'} "
+                          "on your profile")
+        listed = "\n".join(f"- {day} ({day:%A}): \"{art['title'].strip()}\"" for day, art in week)
         out = ai.call("teaser_find", work, "find", core.render(
-            "teaser_find", DEVICE=core.cfg("trend.chrome_device"), TITLE=art["title"].strip(), DATE=f"{wed:%A %d %B %Y}"),
+            "teaser_find", DEVICE=core.cfg("trend.chrome_device"), ARTICLES=listed),
             schema="teaser_find", tools=["ToolSearch"], chrome=True, timeout=core.cfg("teaser.read_minutes", 20) * 60)
     finally:
         if started:
@@ -159,33 +173,34 @@ def make(d: date, dry: bool = False) -> None:
     put = (lambda **v: None) if dry else (lambda **v: save(d, **v))
     try:
         put(status="working", started_at=time.time(), error=None)
-        week = week_article(d)
+        week = week_articles(d)
         if not week:
             put(status="skipped", reason="no X Article this week")
             core.say("WARN", "Friday post: no X Article was made this week, no post")
             return
-        wed, art = week
-        found = find(work, wed, art)
-        if found["status"] != "ok" or not re.fullmatch(r"\d{1,25}", found.get("post_id", "")):
-            put(status="skipped", reason="the article is not on the profile")
-            core.say("WARN", f"Friday post: \"{art['title'].strip()}\" is not on your profile (not posted yet?), no post")
+        best = most_viewed(find(work, week), week)
+        if not best:
+            put(status="skipped", reason="no article of this week is on the profile")
+            core.say("WARN", "Friday post: none of this week's X Articles is on your profile (not posted yet?), no post")
             return
-        put(article=str(wed), title=art["title"].strip(), quote=found["post_id"])
+        day, art, hit = best
+        put(article=str(day), title=art["title"].strip(), quote=hit["post_id"], views=hit.get("views", 0))
         text = write_post(d, art, work)
         if text is None:
             put(status="review")
             return
         if dry:
-            core.say("TREND", f"Friday post (dry run), quoting post {found['post_id']}: {work / 'post.txt'}")
+            core.say("TREND", f"Friday post (dry run), quoting post {hit['post_id']}: {work / 'post.txt'}")
             print(text)
             return
         if now() >= trend.at(d, core.cfg("teaser.give_up", "16:00")):
             put(status="gave_up", error="ready after the give-up time")
             core.say("WARN", "Friday post: ready after the give-up time, not posted")
             return
-        slot = queue_post(d, text, found["post_id"])
+        slot = queue_post(d, text, hit["post_id"])
         put(status="queued", slot=slot, text=text)
-        core.say("POST", f"Friday post about the X Article \"{art['title'].strip()}\": queued {slot}")
+        core.say("POST", f"Friday post about the X Article \"{art['title'].strip()}\" ({hit.get('views', 0)} views, "
+                         f"the most viewed this week): queued {slot}")
     except Exception as exc:  # noqa: BLE001  every failure is logged; the next minute's run decides on a retry
         msg = core.undash(str(exc))[:300]
         if dry:

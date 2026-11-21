@@ -7,9 +7,10 @@
 #                                 Studio project every 3 days, for as long as it takes (studio/lib/studio.py), and
 #                                 queues it for 11:00; on
 #                                 Tuesday, Thursday and Saturday it reads X's Trending tab from 06:20 and queues a
-#                                 trending post for 09:00 (pipeline/lib/trend.py); on Wednesday it writes the week's
-#                                 X Article and opens its page at 09:00 (pipeline/lib/article.py, posted by hand);
-#                                 on Friday a post quoting that article goes out at 09:00 (pipeline/lib/teaser.py).
+#                                 trending post for 09:00 (pipeline/lib/trend.py); on Monday, Wednesday and Sunday it
+#                                 writes an X Article and opens its page at 09:00 (pipeline/lib/article.py, posted by
+#                                 hand); on Friday a post quoting the week's most viewed article goes out at 09:00
+#                                 (pipeline/lib/teaser.py).
 #                                 Runs until you press Ctrl+C, then prints what it did. Nothing posts while it is stopped.
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
 #   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches

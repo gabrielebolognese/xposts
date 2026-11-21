@@ -212,11 +212,11 @@
   "lock_port": 47616
  },
  "article": {
-  "day": "wed",
+  "days": ["mon", "wed", "sun"],
   "start": "05:00",
   "time": "09:00",
   "give_up": "18:00",
-  "first_date": "2026-11-18",
+  "first_date": "2026-11-22",
   "min_words": 1000,
   "max_words": 3500,
   "fix_rounds": 2,

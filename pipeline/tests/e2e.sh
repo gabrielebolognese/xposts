@@ -331,15 +331,19 @@ POSTS_ARTICLE_NOW=2030-01-02T09:30 python pipeline/lib/article.py
 POSTS_ARTICLE_NOW=2030-01-03T06:00 python pipeline/lib/article.py
 [ -z "$(calls)" ] && [ ! -f pipeline/data/article/2030-01-03.json ] || fail "article ran again or on a Thursday"
 unset POSTS_ARTICLE_FAKE
-ok "X article: Wednesday 05:00 written with its cover and page (Post button), opened at 09:00, once a week"
+ok "X article: Wednesday 05:00 written with its cover and page (Post button), opened at 09:00, once; not on a Thursday"
 
-# F: the Friday post. Friday 2030-01-04 06:20: it finds Wednesday's article on the profile (fake reader), writes
-#    the post and queues queue/2030-01-04_0900 with post.txt and quote.txt; post.js quotes the article
+# F: the Friday post. Friday 2030-01-04 06:20: it finds the week's articles (Monday's and Wednesday's) on the profile
+#    with their views (fake reader), writes the post about the most viewed (Monday's) and queues
+#    queue/2030-01-04_0900 with post.txt and quote.txt; post.js quotes the article
 export POSTS_TREND_FAKE=1
 : > "$FAKE_LOG"
+cp pipeline/data/article/2030-01-02.json pipeline/data/article/2029-12-31.json
+mkdir -p pipeline/data/article/2029-12-31 && cp pipeline/data/article/2030-01-02/article.json pipeline/data/article/2029-12-31/
 POSTS_TEASER_NOW=2030-01-04T06:20 python pipeline/lib/teaser.py
 c="$(calls)"; [ "$c" = "teaser_find teaser_write " ] || fail "Friday post call order" "calls: $c"
 [ -f queue/2030-01-04_0900/post.txt ] && [ "$(cat queue/2030-01-04_0900/quote.txt)" = 1900000000000000777 ]   || fail "no Friday post queued with the quote" "$(tail -5 pipeline/logs/runner.log)"
+grep -q '"article": "2029-12-31"' pipeline/data/teaser/2030-01-04.json && grep -q '"views": 5400' pipeline/data/teaser/2030-01-04.json || fail "Friday post did not pick the most viewed article"
 POSTS_TEASER_NOW=2030-01-04T07:00 python pipeline/lib/teaser.py
 [ -z "$(calls)" ] || fail "Friday post ran twice"
 due="$(python -c 'import sys; sys.path.insert(0, "pipeline/lib"); import core; print(core.slot_name(core.now_rome()))')"
@@ -355,7 +359,7 @@ mkdir -p pipeline/data/article/2030-01-16 && cp pipeline/data/article/2030-01-02
 FAKE_TEASER_NONE=1 POSTS_TEASER_NOW=2030-01-18T06:20 python pipeline/lib/teaser.py
 c="$(calls)"; [ "$c" = "teaser_find " ] && [ ! -d queue/2030-01-18_0900 ] || fail "article not on the profile" "calls: $c"
 unset POSTS_TREND_FAKE
-ok "Friday post: found the article, queued 2030-01-04_0900 quoting it (post.js sends quote_tweet_id); no article or not posted: no post"
+ok "Friday post: found the week's articles, queued 2030-01-04_0900 quoting the most viewed (post.js sends quote_tweet_id); no article or not posted: no post"
 
 echo "all $pass passed"
 rm -rf "$T"

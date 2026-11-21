@@ -167,15 +167,16 @@
   "min_fingerprint_score": 100
  },
  "studio": {
-  "start": "22:30",
+  "every_days": 3,
   "post_time": "11:00",
-  "build_hours": 7,
-  "build_budget_usd": 160,
-  "review_rounds": 2,
-  "min_score": 8,
+  "build_hours": 24,
+  "review_rounds": 8,
+  "min_review_rounds": 3,
+  "min_score": 9,
   "fps": 60,
   "scale": 2,
-  "check_minutes": 5
+  "check_minutes": 5,
+  "lock_port": 47619
  },
  "bip": {
   "time": "14:00",

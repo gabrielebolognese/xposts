@@ -18,8 +18,11 @@
 //   STUDIO.wait(promise)        registers this frame's asynchronous work (a Web Worker's reply): the recorder waits
 //                               for it before capturing the frame, so the video shows what a live run shows
 //   STUDIO.warmup               seconds the recorder runs the page before the first recorded frame
-// The page puts everything inside <div id="stage"> sized 1920x1080; the kit scales it to the window (live) or moves
-// the camera over it (render).
+//   STUDIO.heroView(fn)         registers the hero's own zoom and pan: fn(zoom, cx, cy) shows the hero zoomed (1 = the
+//                               whole hero) and centred on (cx, cy), 0 to 1 across the hero, re-rendered at full detail;
+//                               the screenshot tool calls it to check the hero up close
+// The page puts everything inside <div id="stage"> sized 1920x1080; the kit scales it to the window (live) and shows
+// the whole stage in the video (render).
 (() => {
   const R = window.__STUDIO_RENDER__ || null;
   const W = 1920, H = 1080;
@@ -65,6 +68,9 @@
       const tracked = p.finally(() => pending.delete(tracked));
       pending.add(tracked);
       return p;
+    },
+    heroView(fn) {
+      window.__STUDIO_HERO__ = fn;
     },
     ready: null,
   };

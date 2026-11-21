@@ -2,7 +2,7 @@
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "type": "object",
  "additionalProperties": false,
- "required": ["title", "slug", "subject", "why_hard", "angle", "science", "headline_numbers", "design", "panels", "controls", "mid_work", "warmup_seconds", "video_seconds", "camera", "uses_api", "post_angle"],
+ "required": ["title", "slug", "subject", "why_hard", "angle", "science", "headline_numbers", "design", "hero", "panels", "controls", "mid_work", "warmup_seconds", "video_seconds", "uses_api", "post_angle"],
  "properties": {
   "title": {"type": "string", "description": "short project name, under 50 characters"},
   "slug": {"type": "string", "pattern": "^[a-z0-9-]{3,40}$"},
@@ -20,12 +20,12 @@
     "fonts": {"type": "string"},
     "feel": {"type": "string", "description": "the visual references and the mood"}
    }},
+  "hero": {"type": "object", "additionalProperties": false, "required": ["x", "y", "w", "h", "detail_cx", "detail_cy", "shows"], "description": "the hero animation's rectangle on the stage, at least 55% of it, and the point with the finest detail (0 to 1 across the hero)", "properties": {"x": {"type": "integer"}, "y": {"type": "integer"}, "w": {"type": "integer"}, "h": {"type": "integer"}, "detail_cx": {"type": "number"}, "detail_cy": {"type": "number"}, "shows": {"type": "string"}}},
   "panels": {"type": "array", "minItems": 6, "items": {"type": "object", "additionalProperties": false, "required": ["name", "region", "shows"], "properties": {"name": {"type": "string"}, "region": {"type": "string"}, "shows": {"type": "string"}}}},
   "controls": {"type": "array", "minItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["name", "kind", "value", "range"], "properties": {"name": {"type": "string"}, "kind": {"type": "string"}, "value": {"type": "string"}, "range": {"type": "string"}}}},
   "mid_work": {"type": "string"},
   "warmup_seconds": {"type": "integer", "minimum": 10, "maximum": 45},
   "video_seconds": {"type": "integer", "minimum": 35, "maximum": 60},
-  "camera": {"type": "array", "minItems": 4, "items": {"type": "object", "additionalProperties": false, "required": ["t", "cx", "cy", "zoom", "focus"], "properties": {"t": {"type": "number"}, "cx": {"type": "number"}, "cy": {"type": "number"}, "zoom": {"type": "number", "minimum": 1, "maximum": 2}, "focus": {"type": "string"}}}},
   "uses_api": {"type": "boolean"},
   "post_angle": {"type": "string"}
  }

@@ -163,11 +163,13 @@ def studio_data() -> str:
                      f"{st.get('review_round', 0)} fix rounds")
     if not lines:
         return "Claude Studio: no finished builds yet."
-    return (f"Claude Studio builds (Claude Code alone overnight; every Claude Code session is capped at "
-            f"{core.cfg('studio.build_hours', 7)} hours and ${core.cfg('studio.build_budget_usd', 160)} with --max-budget-usd, "
-            "and the build and each fix round are separate sessions, so a project's total can pass the cap by design; "
-            f"an Opus critic scores frames, {core.cfg('studio.min_score', 8)}/10 to pass, at most "
-            f"{core.cfg('studio.review_rounds', 2)} fix rounds; the costs below are the totals of all sessions as Claude Code "
+    return ("Claude Studio builds (Claude Code alone; the builds up to 2026-11-21 ran overnight, every Claude Code session "
+            "capped at 7 hours and $160 with --max-budget-usd, the build and each fix round separate sessions, so a "
+            "project's total could pass the cap by design, and an Opus critic scored frames, 8/10 to pass, at most 2 fix "
+            f"rounds; since then one project every {core.cfg('studio.every_days', 3)} days, no spending cap, as many days "
+            f"as it takes, two critics (the whole screen, the hero up close), {core.cfg('studio.min_score', 9)}/10 to pass, "
+            f"at least {core.cfg('studio.min_review_rounds', 3)} and at most {core.cfg('studio.review_rounds', 8)} fix "
+            "rounds; the costs below are the totals of all sessions as Claude Code "
             "reports them, the value at API prices: the builds run on the owner's Claude subscription, so say \"worth\" or "
             "\"at API prices\", never that the owner paid it):\n"
             + "\n".join(lines) + f"\nTotal: {len(lines)} builds, ${cost:.2f}, {secs / 3600:.1f} hours of building.")

@@ -5,7 +5,7 @@ import sys
 import tempfile
 import unittest
 import unittest.mock
-from datetime import timedelta, timezone
+from datetime import date, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
@@ -259,6 +259,42 @@ class Studio(unittest.TestCase):
             text = texts.get(expected, f"{hook}\n\n{promise}\n\n1. $12.40")
             probs = studio.post_problems(text, hook, promise, "$12.40", self.FACTS)
             self.assertTrue(any(expected in p for p in probs), f"{expected}: {probs}")
+
+    def test_every_three_days_and_subject_request(self):
+        with tempfile.TemporaryDirectory() as tmp, \
+                unittest.mock.patch.object(studio, "PROJECTS", Path(tmp)), \
+                unittest.mock.patch.object(core, "now_rome", lambda: datetime(2026, 11, 21, 12, 30, tzinfo=core.ROME)):
+            self.assertEqual(studio.due().name, "2026-11-21")  # no project yet: one for today
+            studio.save_state(Path(tmp) / "2026-11-21", stage="queued", slot="2026-11-22_1100")  # posted a day late
+            p = studio.request_subject("a black hole")
+            self.assertEqual(p.name, "2026-11-25")  # 3 days after the last post day
+            self.assertEqual(studio.state(p)["subject_request"], "a black hole")
+            self.assertEqual(studio.due(), p)  # unfinished: resumed, no new project
+            studio.save_state(p, stage="build")
+            with self.assertRaises(SystemExit):
+                studio.request_subject("something else")
+            studio.save_state(p, stage="held")
+            old = Path(tmp) / "2026-11-01"
+            old.mkdir()
+            studio.save_state(old, stage="queued")
+            self.assertEqual(studio.new_project().name, "2026-11-28")
+        with tempfile.TemporaryDirectory() as tmp, \
+                unittest.mock.patch.object(studio, "PROJECTS", Path(tmp)), \
+                unittest.mock.patch.object(core, "now_rome", lambda: datetime(2026, 11, 21, 12, 30, tzinfo=core.ROME)):
+            (Path(tmp) / "2026-11-02").mkdir()
+            studio.save_state(Path(tmp) / "2026-11-02", stage="queued")
+            self.assertEqual(studio.new_project().name, "2026-11-21")  # never in the past
+
+    def test_hero_must_cover_most_of_the_stage(self):
+        self.assertEqual(studio.hero_problems({"hero": {"x": 8, "y": 48, "w": 1400, "h": 840}}), [])
+        self.assertIn("31% of the stage", studio.hero_problems({"hero": {"x": 352, "y": 48, "w": 880, "h": 720}})[0])
+        self.assertIn("inside the 1920x1080 stage", studio.hero_problems({"hero": {"x": 600, "y": 0, "w": 1400, "h": 1080}})[0])
+
+    def test_a_project_ready_early_waits_for_its_day(self):
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(core, "ROOT", Path(tmp)), \
+                unittest.mock.patch.object(core, "now_rome", lambda: datetime(2026, 11, 22, 12, 0, tzinfo=core.ROME)):
+            self.assertEqual(studio.next_slot(date(2026, 11, 24)), "2026-11-24_1100")
+            self.assertEqual(studio.next_slot(date(2026, 11, 20)), "2026-11-23_1100")  # late: the next free 11:00
 
     def test_camera_eases_between_keyframes(self):
         out = subprocess.run(["node", "-e", "import('./studio/tools/capture.mjs').then((m) => console.log(JSON.stringify("

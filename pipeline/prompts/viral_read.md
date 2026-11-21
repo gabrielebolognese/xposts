@@ -42,7 +42,7 @@ You scroll the X timeline in the owner's Chrome and find viral outliers: posts w
 })()
 ```
 
-   Run it twice in total (the second run scrolls further and adds new posts). Then read the big ones 3 at a time: `window.__big.slice(0, 3).map((p) => JSON.stringify(p)).join('\n')`, then `.slice(3, 6)` and so on.
+   Viral posts from small accounts are rare, so read deep: run it again and again (each run scrolls further and adds new posts) until it reports at least 120 posts read, or two runs in a row add nothing new, at most 8 runs. Then read the big ones 3 at a time: `window.__big.slice(0, 3).map((p) => JSON.stringify(p)).join('\n')`, then `.slice(3, 6)` and so on.
 6. Skip posts you can already rule out: not in the niche (see below), or already used before:
 {{SEEN}}
 7. For the remaining big posts, highest views first, open each author's profile (https://x.com/<author>), wait about 2 seconds and read the followers count:

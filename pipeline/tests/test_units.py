@@ -502,14 +502,17 @@ class Viral(unittest.TestCase):
 
     def test_outliers(self):
         import viral
-        p = self.POST
-        posts = [p, {**p, "id": "2", "followers": 900},  # too many followers
-                 {**p, "id": "3", "views": 4000},  # too few views
+        p = self.POST  # 400 followers, 9,000 views: 22x
+        posts = [p, {**p, "id": "2", "followers": 700, "views": 10000},  # under 800 followers: 14x, needs 15x
+                 {**p, "id": "8", "followers": 700, "views": 10500},  # exactly 15x
+                 {**p, "id": "9", "followers": 2400, "views": 47000},  # 800 or more: 19.6x, needs 20x
+                 {**p, "id": "10", "followers": 2400, "views": 318000},  # 132x
+                 {**p, "id": "3", "followers": 100, "views": 4000},  # 40x but under 5,000 views
                  {**p, "id": "4", "niche": False},  # off topic
                  {**p, "id": "5", "followers": -1},  # profile not checked
-                 {**p, "id": "6", "followers": 100, "views": 6000},  # the best views per follower
                  {**p, "id": "7"}]  # used before
-        self.assertEqual([x["id"] for x in viral.viral(posts, {"7"})], ["6", "1"])
+        self.assertEqual([x["id"] for x in viral.viral(posts, {"7"})], ["10", "1", "8"])
+        self.assertEqual((viral.needed_views(100), viral.needed_views(799), viral.needed_views(800)), (5000, 11985, 16000))
 
     def test_due_runs_and_late_ones_skipped(self):
         import viral

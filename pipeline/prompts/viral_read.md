@@ -42,13 +42,13 @@ You scroll the X timeline in the owner's Chrome and find viral outliers: posts w
 })()
 ```
 
-   Viral posts from small accounts are rare, so read deep: run it again and again (each run scrolls further and adds new posts) until it reports at least 120 posts read, or two runs in a row add nothing new, at most 8 runs. Then read the big ones 3 at a time: `window.__big.slice(0, 3).map((p) => JSON.stringify(p)).join('\n')`, then `.slice(3, 6)` and so on.
+   Real outliers are rare, so read deep: run it again and again (each run scrolls further and adds new posts) until it reports at least 120 posts read, or two runs in a row add nothing new, at most 8 runs. Then read the big ones 3 at a time: `window.__big.slice(0, 3).map((p) => JSON.stringify(p)).join('\n')`, then `.slice(3, 6)` and so on.
 6. Skip posts you can already rule out: not in the niche (see below), or already used before:
 {{SEEN}}
-7. For the remaining big posts, highest views first, open each author's profile (https://x.com/<author>), wait about 2 seconds and read the followers count:
+7. A post is viral when its views are at least {{RATIO_SMALL}} times its author's followers (authors under {{SMALL}} followers) or at least {{RATIO_LARGE}} times (authors with {{SMALL}} or more). For the remaining big posts, open each author's profile (https://x.com/<author>), wait about 2 seconds and read the followers count:
    `document.querySelector('a[href$="/verified_followers"], a[href$="/followers"]')?.innerText`
-   Check at most {{MAX_PROFILES}} profiles. Note the author's bio in a few words, to judge the niche.
-8. For each post from an author under {{MAX_FOLLOWERS}} followers that is an X Article (article true), open the post (https://x.com/<author>/status/<id>), open the article from its card, and read its title, its section headings and the first 1,500 characters of the body with javascript_tool (`document.querySelector('[data-testid="twitterArticleReadView"], article')?.innerText.slice(0, 2500)` or the page text).
+   Check at most {{MAX_PROFILES}} profiles, the likeliest outliers first: skip authors that are obviously far too big for their views (household names, companies, accounts you know have hundreds of thousands of followers) and start with unfamiliar personal accounts. Note the author's bio in a few words, to judge the niche.
+8. For each viral post (by the rule in step 7) that is an X Article (article true), open the post (https://x.com/<author>/status/<id>), open the article from its card, and read its title, its section headings and the first 1,500 characters of the body with javascript_tool (`document.querySelector('[data-testid="twitterArticleReadView"], article')?.innerText.slice(0, 2500)` or the page text).
 9. Close the tab with `tabs_close_mcp` (call `tabs_context_mcp` again first: the tab id can change).
 
 ## The niche

@@ -6,8 +6,9 @@ runs this every minute.
      viral.give_up_minutes after its time is skipped), a Claude in Chrome session (prompts/viral_read.md) scrolls the
      For you timeline of the Chrome account, keeps posts over viral.min_views views and opens their authors' profiles.
      Read only, no X API.
-  3. pick: a viral post has over viral.min_views views, an author under viral.max_followers followers, fits the niche
-     and was not used before; the most views per follower wins. None: no post this time.
+  3. pick: a viral post has over viral.min_views views and at least viral.ratio_small (15) times its author's
+     followers in views when the author has under viral.small_followers (800), else at least viral.ratio_large (20)
+     times; it fits the niche and was not used before. The most views per follower wins. None: no post this time.
   4. a normal post: Opus repurposes it (prompts/viral_write.md): the same hook in different words, checked in code (no
      links, hashtags, mentions, emojis or dashes, not a near copy, the AI-tells detector; up to viral.fix_rounds fixes,
      else review/viral-<date>-<n>.txt), queued at the next free minute at least viral.post_gap_minutes from other posts
@@ -138,7 +139,8 @@ def read(work: Path) -> dict:
         seen = "\n".join(f"- {i}" for i in sorted(used_ids())) or "(none)"
         out = ai.call("viral_read", work, "read", core.render(
             "viral_read", DEVICE=core.cfg("trend.chrome_device"), MIN_VIEWS=str(core.cfg("viral.min_views", 5000)),
-            MAX_FOLLOWERS=str(core.cfg("viral.max_followers", 800)), MAX_PROFILES=str(core.cfg("viral.max_profiles", 12)),
+            SMALL=str(core.cfg("viral.small_followers", 800)), RATIO_SMALL=str(core.cfg("viral.ratio_small", 15)),
+            RATIO_LARGE=str(core.cfg("viral.ratio_large", 20)), MAX_PROFILES=str(core.cfg("viral.max_profiles", 20)),
             SEEN=seen), schema="viral_read", tools=["ToolSearch"], chrome=True,
             timeout=core.cfg("viral.read_minutes", 30) * 60)
     finally:
@@ -150,12 +152,19 @@ def read(work: Path) -> dict:
     return out
 
 
+def needed_views(followers: int) -> int:
+    """Views a post needs to count as viral: min_views, and ratio_small times the followers under small_followers,
+    else ratio_large times."""
+    small = followers < core.cfg("viral.small_followers", 800)
+    ratio = core.cfg("viral.ratio_small", 15) if small else core.cfg("viral.ratio_large", 20)
+    return max(core.cfg("viral.min_views", 5000), ratio * followers)
+
+
 def viral(posts: list[dict], used: set[str]) -> list[dict]:
-    """The outliers: over min_views views, an author under max_followers followers, in the niche, not used before;
-    the most views per follower first."""
-    lo, cap = core.cfg("viral.min_views", 5000), core.cfg("viral.max_followers", 800)
-    hits = [p for p in posts if p["views"] >= lo and 0 <= p["followers"] < cap and p["niche"] and p["id"] not in used
-            and p["text"].strip()]
+    """The outliers: enough views for the author's followers (needed_views), in the niche, not used before; the most
+    views per follower first. Authors whose profile was not read (followers -1) never count."""
+    hits = [p for p in posts if p["followers"] >= 0 and p["views"] >= needed_views(p["followers"]) and p["niche"]
+            and p["id"] not in used and p["text"].strip()]
     return sorted(hits, key=lambda p: p["views"] / (p["followers"] + 1), reverse=True)
 
 
@@ -327,8 +336,9 @@ def make(d: date, n: int, dry: bool = False) -> None:
         if not hits:
             save(d, n, status="none", scanned=out["scanned"], big=len(out["posts"]))
             core.say("VIRAL", f"viral check {n + 1}: {out['scanned']} timeline posts, {len(out['posts'])} over "
-                              f"{core.cfg('viral.min_views', 5000):,} views, none from an account under "
-                              f"{core.cfg('viral.max_followers', 800)} followers in the niche: no post")
+                              f"{core.cfg('viral.min_views', 5000):,} views, none in the niche with "
+                              f"{core.cfg('viral.ratio_small', 15)}x its followers (under "
+                              f"{core.cfg('viral.small_followers', 800)}) or {core.cfg('viral.ratio_large', 20)}x (more): no post")
             return
         src = hits[0]
         save(d, n, source=summary(src))

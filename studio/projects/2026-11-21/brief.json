@@ -1,0 +1,434 @@
+{
+ "title": "Photon Ring: Sgr A*, Ray by Ray",
+ "slug": "photon-ring-sgra",
+ "subject": "A spinning Kerr black hole with Sgr A*'s mass and distance is ray-traced photon by photon on the GPU: exact null geodesics light up a relativistic thin accretion disk with a hot spot flaring around it. A virtual Event Horizon Telescope then observes the image through the night, and the shadow is checked against the analytic critical curve.",
+ "why_hard": "Claude has to write a Kerr null-geodesic integrator from scratch inside a WebGL2 fragment shader, in Mino time with the second-order radial and polar equations so turning points need no special handling. It must detect equatorial crossings, count photon-ring orders, and accumulate coordinate time for light-travel delays, all in fp32 without blowing up near the horizon. On top of that come the Page–Thorne disk flux with its cubic-root logarithms, closed-form redshift factors, a time-delayed hot spot, and relativistic spectra and line profiles built from read-back float textures. A real EHT array follows: ECEF station coordinates, Earth-rotation uv tracks with elevation limits, visibility DFTs and a dirty image in Web Workers. Two more workers bisect the numerical critical curve and compare it with Bardeen's analytic curve. Every number on screen comes out of that physics, and everything has to hold 60 fps on an integrated Radeon.",
+ "angle": "Opus 5.5 at maximum effort, no libraries: raw WebGL2 shaders plus hand-written canvas 2D, 7 Web Workers, one night",
+ "science": "UNITS: G=c=M=1 (lengths and times in M). Physical scale is Sgr A*: M=4.297e6 Msun and D=8.277 kpc (GRAVITY 2019), so r_g = GM/c² = 6.345e9 m, θ_g = r_g/D = 5.124 µas per M, and GM/c³ = 21.17 s per M. Spin a is a slider (default 0.94) and inclination i is a slider (default 72°).\n\nKERR CONSTANTS: Σ = r² + a²cos²θ, Δ = r² − 2r + a². Horizon r+ = 1 + √(1−a²). Prograde ISCO: Z1 = 1 + (1−a²)^{1/3}[(1+a)^{1/3} + (1−a)^{1/3}], Z2 = √(3a² + Z1²), r_isco = 3 + Z2 − √((3−Z1)(3+Z1+2Z2)). Prograde and retrograde photon orbits: r_ph± = 2[1 + cos((2/3)·arccos(∓a))]. Keplerian Ω(r) = 1/(r^{3/2} + a). Binding energy E_isco = (r^{3/2} − 2r^{1/2} + a)/(r^{3/4}√(r^{3/2} − 3r^{1/2} + 2a)) at r = r_isco, and radiative efficiency η = 1 − E_isco.\n\nRAY TRACING (GPU fragment shader, backward from the observer): observer at r0 = 1000, θ0 = i. Pixel → Bardeen image coordinates (α, β), with the hero spanning α ∈ ±20 M and β ∈ ±16.4 M (205 × 168 µas). Constants of motion: λ = −α·sin θ0 and η = (α² − a²)cos²θ0 + β².\nRadial potential R(r) = (r² + a² − aλ)² − Δ[η + (λ−a)²]. Polar potential Θ(θ) = η + a²cos²θ − λ²cot²θ.\nIntegrate in Mino time σ with the second-order system (no sign flips at turning points):\n- d²r/dσ² = R'(r)/2, with R' = 4r(r² + a² − aλ) − (2r − 2)(η + (λ−a)²)\n- d²θ/dσ² = Θ'(θ)/2, with Θ' = −2a²·sinθ·cosθ + 2λ²·cosθ/sin³θ\n- dφ/dσ = (a/Δ)(r² + a² − aλ) − a + λ/sin²θ\n- dt/dσ = ((r² + a²)/Δ)(r² + a² − aλ) + a(λ − a·sin²θ)\nInitial velocities: v_r = −√R(r0) (inward) and v_θ = sign(β)·√Θ(θ0). RK4 with adaptive step dσ = h/(|v_r|/r + |v_θ| + 1e-6), with h = 0.06 by default. This gives geometric stepping far away (about 120 steps from r0) and fine steps near the hole.\nTermination: r < r+(1 + 1e-3) means captured (shadow). r > 1.05·r0 with v_r > 0 means escaped, and the escape direction (θ, φ) samples a procedural star field, so the stars are lensed too. On a sign change of cosθ, interpolate to θ = π/2: if r_isco ≤ r ≤ r_out the ray hits the disk; otherwise increment the crossing count n and continue.\nThe geodesic map is static for a fixed (a, i), so it is traced progressively in 32×32 tiles (about 40k rays per frame) into two RGBA32F MRT textures:\n- T0 = (r_hit, φ_hit, t_hit, g)\n- T1 = (n, λ, r_min, steps)\n\nREDSHIFT: for an emitter on a prograde circular orbit, g = ν_obs/ν_em = 1/[u^t(1 − Ωλ)], which simplifies to g = r^{3/4}√(r^{3/2} − 3r^{1/2} + 2a) / (r^{3/2} + a − λ). This includes both Doppler and gravitational shifts, and toggles can switch either off for comparison.\n\nDISK FLUX (Page–Thorne / Novikov–Thorne): x = √r, x0 = √r_isco. Roots of x³ − 3x + 2a = 0: x1 = 2cos((arccos a − π)/3), x2 = 2cos((arccos a + π)/3), x3 = −2cos((arccos a)/3).\nF̂(r) = (3/(8π)) · 1/(x⁴(x³ − 3x + 2a)) · [x − x0 − (3/2)a·ln(x/x0) − Σ_k 3(x_k − a)²/(x_k Π_{j≠k}(x_k − x_j)) · ln((x − x_k)/(x0 − x_k))].\nPhysical flux F = F̂ · Ṁc²/r_g², with Ṁ = ṁ·L_Edd/(ηc²) and L_Edd = 1.26e31 W·(M/Msun). Effective temperature T(r) = (F/σ_SB)^{1/4}.\n\nPER-FRAME SHADING (cheap, from the map): observed bolometric intensity I = g⁴·F̂(r)·[1 + 0.35·N(r, φ − Ω(r)(t_obs − Δt))] + spot. N is a two-layer cross-faded flow noise in the co-rotating frame, and Δt = t_hit − min(t_hit) is the light-travel delay. The hot spot is a Gaussian in the disk plane, A·g⁴·exp(−d²/2σ_s²), centred at (r_s, φ_s0 + Ω(r_s)(t_obs − Δt)), with r_s = 7 M and σ_s = 0.6 M. The delays shear its image and make the light curve asymmetric. The hero shows log I in an inferno colormap.\nSpot period: T = 2π(r_s^{3/2} + a)·21.17 s, which is 43.1 min at r_s = 7 and a = 0.94 (GRAVITY flares show about 45 min). Playback runs 1 s real = 120 s sim.\n\nREADBACKS: a 128×128 float render of (I_total, I_spot, g, r) is read back every 4 frames. It feeds:\n- the light curve (Σ I_spot)\n- the centroid (intensity-weighted α, β in µas)\n- the flux fraction per order n (n = 0, 1, ≥2)\nA 256² static readback, redone only when (a, i) change, feeds a worker that computes:\n- the relativistic spectrum L_ν ∝ Σ_pix ΔΩ·g³·B_ν(ν/g, T(r)), against the g = 1 Newtonian curve (dashed)\n- the Fe Kα line: a histogram of E = 6.40·g keV, weighted by g⁴·r^{−q} (q = 3), over 3–8 keV in 100 bins\n\nCRITICAL CURVE CHECK: the analytic curve comes from spherical photon orbits. For r ∈ [r_ph+, r_ph−]: λ_c = −(r³ − 3r² + a²r + a²)/(a(r−1)), η_c = r³(4a² − r(r−3)²)/(a²(r−1)²), α = −λ_c/sinθ0, β = ±√(η_c + a²cos²θ0 − λ_c²cot²θ0). Two workers find the numerical curve with the same integrator in fp64 JS, ignoring the disk: 180 polar directions in the image plane, bisected to 1e-6 M on the boundary between captured and escaped. shadow_err_pct is the mean |r_num − r_ana|/r_ana. Shadow diameter d = 2√(A/π) (area-equivalent), converted to µas.\nA background spin sweep repeats this for a = 0 to 0.998 in 24 steps. The measured points land on the analytic d(a) curve and the horizontal centroid-offset curve, about one point every 2 s.\nAlso on screen: an fp32 GPU vs fp64 CPU rms Δr_hit over 64 probe pixels, and the null-constraint residual max|v_r² − R|/(R + 1).\n\nVIRTUAL EHT: EHT 2017 stations in ECEF metres:\n- ALMA (2225061.2, −5440057.4, −2481681.2)\n- APEX (2225039.5, −5441197.6, −2479303.4)\n- SMT (−1828796.2, −5054406.8, 3427865.2)\n- JCMT (−5464584.7, −2493001.2, 2150654.0)\n- SMA (−5464555.5, −2492928.0, 2150797.2)\n- LMT (−768715.6, −5988507.1, 2063354.9)\n- PV (5088967.8, −301681.2, 3825012.2)\n- SPT (809.8, −816.9, −6359568.7)\nSource at RA 17h45m40.04s, Dec δ = −29.0078°. Wavelength λ = 1.3035 mm (230 GHz). Greenwich hour angle H = GMST − RA.\n- u = (sinH·Bx + cosH·By)/λ\n- v = (−sinδ·cosH·Bx + sinδ·sinH·By + cosδ·Bz)/λ\nA baseline counts only while both stations see the source above 10° elevation. Samples are taken every 5 sim-min, and conjugates are included.\nFour workers DFT a 96×96 crop (±80 µas, 1.667 µas/px), re-rendered every 250 ms: V(u,v) = Σ I(l,m)·e^{−2πi(ul + vm)}, with l, m in radians (µas × 4.848e-12). Outputs:\n- |V| against baseline length ρ = √(u² + v²) in Gλ\n- an azimuthally averaged |V(ρ)| on a 64 × 36 polar grid, whose first minimum gives vis_null_glambda (a thin ring of 53 µas would null near 0.7655/d ≈ 3.0 Gλ)\n- the dirty image I_D(l,m) = Σ_k Re[V_k·e^{2πi(u_k l + v_k m)}] with uniform weights, which sharpens as the tracks grow\nReference: EHT measured Sgr A*'s ring diameter as 51.8 ± 2.3 µas.",
+ "headline_numbers": [
+  {
+   "key": "shadow_diam_uas",
+   "meaning": "Area-equivalent diameter of the numerically bisected critical curve (shadow edge) at the current spin and inclination, in µas for Sgr A* (M=4.297e6 Msun, D=8.277 kpc)"
+  },
+  {
+   "key": "shadow_err_pct",
+   "meaning": "Mean radial deviation between the ray-traced critical curve and Bardeen's analytic spherical-photon-orbit curve, in percent"
+  },
+  {
+   "key": "isco_r_M",
+   "meaning": "Prograde innermost stable circular orbit radius in M for the current spin, which is the disk's inner edge"
+  },
+  {
+   "key": "spot_period_min",
+   "meaning": "Coordinate-time orbital period of the hot spot, 2π(r_s^1.5+a)·GM/c³, in minutes"
+  },
+  {
+   "key": "flux_n1_pct",
+   "meaning": "Share of the total observed image flux carried by photon-ring images of order n≥1 (rays that crossed the equator at least once before hitting the disk)"
+  },
+  {
+   "key": "vis_null_glambda",
+   "meaning": "Baseline length of the first minimum of the azimuthally averaged visibility amplitude of the image at 230 GHz, in Gλ"
+  },
+  {
+   "key": "g_max",
+   "meaning": "Maximum redshift factor g over the visible disk (Doppler plus gravitational), where g⁴ sets the beaming boost of the approaching side"
+  },
+  {
+   "key": "rays_per_sec",
+   "meaning": "Kerr null geodesics integrated per second by the shader (RK4, Mino time), averaged over the last second"
+  }
+ ],
+ "design": {
+  "layout": "An observatory analysis console on the 1920×1080 stage with 8 px margins and gutters. A thin top status bar sits above three columns. The left rail (336 px) stacks the physics controls, the integrator stats and log, and this PC's resources. The centre column (880 px) is the hero: the ray-traced black hole, with the analytic critical curve, scale bar and colorbar overlaid. Below it is a strip of four image-plane decomposition maps (what each pixel's photon did). The right column (672 px) reads like a results figure, with the path of the light running top to bottom: geodesics and the spin sweep, then the time domain (hot-spot light curve and centroid loop), then the spectral domain (disk spectrum and Fe line), then the interferometer (uv coverage, visibility amplitudes, dirty image). This fits the subject because it follows a photon from metric to image to measurement, and the camera can dive down the right column like reading a paper.",
+  "regions": [
+   {
+    "name": "top-bar",
+    "x": 8,
+    "y": 8,
+    "w": 1904,
+    "h": 32,
+    "contents": "Title, target block (Sgr A*, M, D, θ_g = 5.124 µas/M), spin and inclination readout, sim UT clock for the observing night, coordinate time in M, total rays traced, tile progress, FPS"
+   },
+   {
+    "name": "controls",
+    "x": 8,
+    "y": 48,
+    "w": 336,
+    "h": 404,
+    "contents": "Sliders, knobs, toggles and fields for every physical and numerical parameter, each with a live value, units and tiny derived numbers beside it (r+, r_isco, r_ph±, η, L_Edd)"
+   },
+   {
+    "name": "integrator",
+    "x": 8,
+    "y": 460,
+    "w": 336,
+    "h": 300,
+    "contents": "Integrator statistics (rays/s, mean and max RK4 steps, capture/escape/disk-hit fractions, constraint residual, fp32 vs fp64 Δr) as numbers plus a steps-per-ray histogram, then a scrolling, colour-coded event log (tiles traced, bisection results, baselines rising and setting, spot passages)"
+   },
+   {
+    "name": "system",
+    "x": 8,
+    "y": 768,
+    "w": 336,
+    "h": 304,
+    "contents": "This PC: a 4×4 grid of per-thread CPU sparklines (16 threads), then RAM, GPU and disk traces, page FPS and a frame-time histogram, styled as thin instrument traces"
+   },
+   {
+    "name": "hero",
+    "x": 352,
+    "y": 48,
+    "w": 880,
+    "h": 720,
+    "contents": "The ray-traced Kerr black hole: log-intensity inferno image of the disk, n=1/n=2 photon rings, lensed star field and the moving hot spot. Overlays: the analytic critical curve (cyan dashed), the numerical bisection points, a centroid crosshair, a 50 µas scale bar, α/β axes ticked in M and µas, a spin-axis compass, a colorbar, and corner readouts"
+   },
+   {
+    "name": "maps",
+    "x": 352,
+    "y": 776,
+    "w": 880,
+    "h": 296,
+    "contents": "Four 214×296 mini-maps of the geodesic map: redshift g (diverging), light-travel delay Δt in M, photon-ring order n, emission radius r_hit. Each has its own colorbar and min/max/mean labels"
+   },
+   {
+    "name": "geodesics",
+    "x": 1240,
+    "y": 48,
+    "w": 416,
+    "h": 300,
+    "contents": "Photon paths in the meridional x–z plane through the hole: 64 CPU-traced rays from the image midlines, coloured by fate, with photon pulses animating along them. Horizon, ergosphere, ISCO and photon-orbit circles are drawn and labelled"
+   },
+   {
+    "name": "spin-sweep",
+    "x": 1664,
+    "y": 48,
+    "w": 248,
+    "h": 300,
+    "contents": "Analytic shadow diameter d(a) and horizontal offset against spin, with ray-traced bisection points accumulating as the sweep runs and a marker at the current a"
+   },
+   {
+    "name": "lightcurve",
+    "x": 1240,
+    "y": 356,
+    "w": 416,
+    "h": 232,
+    "contents": "Hot-spot flux and total flux against sim time (several orbits of history), with peak and trough labels, beaming-peak markers, and period and modulation readouts"
+   },
+   {
+    "name": "centroid",
+    "x": 1664,
+    "y": 356,
+    "w": 248,
+    "h": 232,
+    "contents": "Astrometric loop of the image centroid in µas (like GRAVITY's flare loops), fading trail, current position and loop size"
+   },
+   {
+    "name": "spectrum",
+    "x": 1240,
+    "y": 596,
+    "w": 332,
+    "h": 228,
+    "contents": "Observed νL_ν from IR to soft X-ray, relativistic (solid) against Newtonian g=1 (dashed), with peak frequency, total L and T_max labels"
+   },
+   {
+    "name": "line",
+    "x": 1580,
+    "y": 596,
+    "w": 332,
+    "h": 228,
+    "contents": "Relativistic Fe Kα line profile (3–8 keV): double-horned, with the blue peak, red wing extent and 6.40 keV rest marker"
+   },
+   {
+    "name": "uv",
+    "x": 1240,
+    "y": 832,
+    "w": 216,
+    "h": 240,
+    "contents": "EHT 2017 uv coverage at 230 GHz: Earth-rotation tracks growing through the night, coloured per baseline, with current points pulsing and an axis in Gλ"
+   },
+   {
+    "name": "visamp",
+    "x": 1464,
+    "y": 832,
+    "w": 232,
+    "h": 240,
+    "contents": "Visibility amplitude |V| against baseline length (log y), points coloured by baseline, an azimuthal-mean curve, and a first-null marker in Gλ"
+   },
+   {
+    "name": "dirty",
+    "x": 1704,
+    "y": 832,
+    "w": 208,
+    "h": 240,
+    "contents": "The dirty image from the sampled visibilities (what the array would see tonight) next to a tiny inset of the true image at EHT resolution, with the number of visibilities and the beam size"
+   }
+  ],
+  "mode": "dark",
+  "palette": {
+   "background": "#07060A",
+   "surface": "#0F0D14",
+   "line": "#28222F",
+   "text": "#ECE4D8",
+   "muted": "#8C8397",
+   "accents": [
+    "#FFB63D",
+    "#FF6A1A",
+    "#D1357A",
+    "#59D8FF",
+    "#8F7BFF",
+    "#F4F1E8"
+   ],
+   "up": "#6BE38A",
+   "down": "#FF5468",
+   "warn": "#FFC93D",
+   "active": "#59D8FF"
+  },
+  "fonts": "Bahnschrift SemiCondensed for panel titles and big readouts; Cascadia Mono for every number, axis tick and log line (10–11 px); Segoe UI Variable Small for the tiny labels and units",
+  "feel": "A night shift at a radio observatory, drawn like a Physical Review figure come alive. Deep violet-black surfaces, the inferno colormap of EHT images (amber, orange, magenta) for anything that glows, and cold cyan for light rays, analytic curves and active state. Hairline 1 px borders, thin traces, crisp tick marks. Calm, precise and dense: the black hole is the only warm light in the room and everything around it is measurement."
+ },
+ "panels": [
+  {
+   "name": "Kerr ray-traced image",
+   "region": "hero",
+   "shows": "A full-resolution GPU ray trace: Doppler-beamed thin disk, lensed back side arching over the shadow, n=1 and n=2 photon rings, lensed stars, and the hot spot sheared by light-travel delay. The analytic critical curve and bisection points are overlaid, plus centroid, scale bar, µas/M axes and colorbar"
+  },
+  {
+   "name": "Image-plane decomposition",
+   "region": "maps",
+   "shows": "What each pixel's photon did: redshift g, light-travel delay Δt, crossing order n and emission radius r, each with a colorbar and statistics"
+  },
+  {
+   "name": "Photon geodesics",
+   "region": "geodesics",
+   "shows": "CPU-traced Kerr null geodesics in the x–z plane with the horizon, ergosphere, ISCO and photon orbits; pulses travel along the rays"
+  },
+  {
+   "name": "Spin sweep validation",
+   "region": "spin-sweep",
+   "shows": "Analytic shadow size and offset against spin, with independently ray-traced points filling in"
+  },
+  {
+   "name": "Hot-spot light curve and centroid",
+   "region": "lightcurve",
+   "shows": "Flux against time over several 43-min orbits, with beaming peaks, plus the µas astrometric loop in the centroid panel"
+  },
+  {
+   "name": "Disk spectrum and Fe Kα line",
+   "region": "spectrum",
+   "shows": "Relativistic against Newtonian multi-colour disk νL_ν, and next to it in the line region the double-horned relativistic line profile"
+  },
+  {
+   "name": "Virtual EHT",
+   "region": "uv",
+   "shows": "Earth-rotation uv tracks of the 2017 array, with visibility amplitudes and the first null (visamp) and the dirty image (dirty) updating as the night progresses"
+  },
+  {
+   "name": "Integrator and log",
+   "region": "integrator",
+   "shows": "Rays/s, RK4 step histogram, capture/escape/hit fractions, null-constraint residual, fp32 vs fp64 agreement, and a live event log"
+  },
+  {
+   "name": "System resources",
+   "region": "system",
+   "shows": "16 per-thread CPU sparklines, RAM, GPU, disk, FPS and frame time from the kit's measurements"
+  },
+  {
+   "name": "Physics controls",
+   "region": "controls",
+   "shows": "All simulation parameters with live values and derived Kerr radii"
+  }
+ ],
+ "controls": [
+  {
+   "name": "Spin a",
+   "kind": "slider",
+   "value": "0.940",
+   "range": "0.000 – 0.998"
+  },
+  {
+   "name": "Inclination i",
+   "kind": "knob",
+   "value": "72°",
+   "range": "1° – 89°"
+  },
+  {
+   "name": "Mass M",
+   "kind": "field",
+   "value": "4.297e6 Msun",
+   "range": "1e6 – 1e10 Msun"
+  },
+  {
+   "name": "Distance D",
+   "kind": "field",
+   "value": "8.277 kpc",
+   "range": "1 – 20000 kpc"
+  },
+  {
+   "name": "Accretion rate ṁ",
+   "kind": "slider (log)",
+   "value": "0.010 L_Edd",
+   "range": "1e-4 – 1"
+  },
+  {
+   "name": "Disk outer radius r_out",
+   "kind": "slider",
+   "value": "24 M",
+   "range": "10 – 40 M"
+  },
+  {
+   "name": "Hot-spot radius r_s",
+   "kind": "slider",
+   "value": "7.0 M",
+   "range": "r_isco – 15 M"
+  },
+  {
+   "name": "Hot-spot size σ_s",
+   "kind": "slider",
+   "value": "0.6 M",
+   "range": "0.2 – 2.0 M"
+  },
+  {
+   "name": "Line emissivity index q",
+   "kind": "slider",
+   "value": "3.0",
+   "range": "1.5 – 5.0"
+  },
+  {
+   "name": "RK4 step factor h",
+   "kind": "slider",
+   "value": "0.060",
+   "range": "0.010 – 0.200"
+  },
+  {
+   "name": "Max steps per ray",
+   "kind": "field",
+   "value": "2000",
+   "range": "200 – 8000"
+  },
+  {
+   "name": "Rays per frame (tile budget)",
+   "kind": "slider",
+   "value": "40960",
+   "range": "4096 – 131072"
+  },
+  {
+   "name": "Doppler beaming",
+   "kind": "toggle",
+   "value": "on",
+   "range": "on / off"
+  },
+  {
+   "name": "Gravitational redshift",
+   "kind": "toggle",
+   "value": "on",
+   "range": "on / off"
+  },
+  {
+   "name": "Light-travel delay",
+   "kind": "toggle",
+   "value": "on",
+   "range": "on / off"
+  },
+  {
+   "name": "Show analytic critical curve",
+   "kind": "toggle",
+   "value": "on",
+   "range": "on / off"
+  },
+  {
+   "name": "Observing frequency",
+   "kind": "field",
+   "value": "230 GHz",
+   "range": "86 – 345 GHz"
+  },
+  {
+   "name": "Playback speed",
+   "kind": "slider",
+   "value": "120× (1 s = 2 sim-min)",
+   "range": "1× – 600×"
+  },
+  {
+   "name": "Elevation limit",
+   "kind": "slider",
+   "value": "10°",
+   "range": "0° – 30°"
+  }
+ ],
+ "mid_work": "Prewarm in code before the first frame, then the recorder's warm-up on top.\n(1) The geodesic map for (a=0.94, i=72°) is traced fully at load with a large tile budget, so the hero is complete from frame one.\n(2) The sim clock starts at UT 03:10 of the observing night, with the hot spot already 3.4 orbits in. The light-curve and centroid history for the previous ~150 sim-min are back-filled by evaluating the time-delayed spot flux from the same 128² geodesic readback at past times. These are real values, not fake.\n(3) EHT uv tracks and visibilities are accumulated from source rise to the start time, so the coverage is about 55% complete and the dirty image already shows a ring that keeps sharpening.\n(4) The spin-sweep workers start at load and are about 11 of 24 points done when recording begins.\n(5) The event log is pre-filled from these real prewarm events (tiles traced, baselines rising, bisection residuals, spot passages).\n(6) The spectrum and Fe line are computed at load.\nThe 25 s recorder warm-up fills the FPS, frame-time and 16-thread CPU charts with measured history. Nothing on screen is empty, and nothing boots on camera.",
+ "warmup_seconds": 25,
+ "video_seconds": 55,
+ "camera": [
+  {
+   "t": 0.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.0,
+   "focus": "Whole console: black hole glowing at centre, every panel moving"
+  },
+  {
+   "t": 6.0,
+   "cx": 0.47,
+   "cy": 0.45,
+   "zoom": 1.15,
+   "focus": "Slow creep toward the hero"
+  },
+  {
+   "t": 12.0,
+   "cx": 0.4125,
+   "cy": 0.39,
+   "zoom": 1.6,
+   "focus": "Hero: beamed disk, lensed back side, hot spot sweeping the approaching side"
+  },
+  {
+   "t": 18.0,
+   "cx": 0.42,
+   "cy": 0.38,
+   "zoom": 2.0,
+   "focus": "Photon ring close-up with the cyan analytic critical curve and bisection points on it"
+  },
+  {
+   "t": 24.0,
+   "cx": 0.75,
+   "cy": 0.27,
+   "zoom": 2.0,
+   "focus": "Geodesic paths with travelling pulses, spin-sweep points, top of the light curve"
+  },
+  {
+   "t": 30.0,
+   "cx": 0.75,
+   "cy": 0.6,
+   "zoom": 2.0,
+   "focus": "Hot-spot light curve and centroid loop, then the disk spectrum and Fe Kα line"
+  },
+  {
+   "t": 36.0,
+   "cx": 0.75,
+   "cy": 0.75,
+   "zoom": 2.0,
+   "focus": "Virtual EHT: uv tracks growing, visibility null, dirty image"
+  },
+  {
+   "t": 41.0,
+   "cx": 0.42,
+   "cy": 0.75,
+   "zoom": 1.9,
+   "focus": "Image-plane maps: redshift, delay, ring order, emission radius"
+  },
+  {
+   "t": 47.0,
+   "cx": 0.28,
+   "cy": 0.55,
+   "zoom": 1.8,
+   "focus": "Left rail: integrator stats and log, controls, edge of the system charts"
+  },
+  {
+   "t": 53.0,
+   "cx": 0.5,
+   "cy": 0.5,
+   "zoom": 1.0,
+   "focus": "Back to the full console"
+  }
+ ],
+ "uses_api": false,
+ "post_angle": "Day 5 of pushing Claude to the edge. Claude wrote a Kerr geodesic integrator inside a WebGL shader with no libraries, then bent millions of light rays around a spinning black hole with Sgr A*'s mass and distance. The disk is a Page–Thorne disk, the hot spot circles every ~43 minutes (GRAVITY sees ~45), and a virtual Event Horizon Telescope observes it through the night with the real 2017 stations. Quote the measured numbers: shadow_diam_uas against EHT's measured 51.8 ± 2.3 µas ring, the shadow_err_pct agreement with the analytic curve, the vis_null_glambda null and flux_n1_pct of light in the photon ring. Hook: \"Every photon in this video was traced. None were drawn.\""
+}

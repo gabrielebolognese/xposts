@@ -1,0 +1,27 @@
+{
+ "project": "2026-11-21",
+ "fps": 60,
+ "seconds": 55,
+ "scale": 2,
+ "warmup": 25,
+ "live": 90,
+ "errors": [],
+ "render_seconds": 1246,
+ "frame_ms": {
+  "avg": 3.8,
+  "max": 23
+ },
+ "report": {
+  "shadow_diam_uas": 51.167,
+  "shadow_err_pct": 0.000196,
+  "isco_r_M": 2.0236,
+  "spot_period_min": 43.13,
+  "flux_n1_pct": 1.51,
+  "vis_null_glambda": 4.101,
+  "ring_fit_uas": 38.5,
+  "g_max": 1.3296,
+  "rays_per_sec": 564224
+ },
+ "video": "video.mp4",
+ "mb": 61.8
+}

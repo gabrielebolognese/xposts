@@ -1,0 +1,34 @@
+<!doctype html><html><head><script src="../../../kit/studio-kit.js"></script></head><body><div id="stage"></div>
+<canvas id="c" width="16" height="16"></canvas>
+<script src="../kerr.js"></script><script src="../gl.js"></script>
+<script>
+window.BENCH = () => {
+  const c = document.getElementById('c');
+  const S = GLX.init(c); const gl = S.gl;
+  const RealDate = Object.getPrototypeOf(Date).now ? Object.getPrototypeOf(Date) : Date;
+  const px = new Float32Array(4);
+  const sync = () => { gl.bindFramebuffer(gl.READ_FRAMEBUFFER, S.map.fb); gl.readBuffer(gl.COLOR_ATTACHMENT0); gl.readPixels(0,0,1,1,gl.RGBA,gl.FLOAT,px); };
+  const a=0.94, inc=72*Math.PI/180;
+  const TP = { a, inc, h: 0.06, rin: Kerr.risco(a), rout: 24, maxSteps: 2000 };
+  const field=[-GLX.HALF_A,-GLX.HALF_B,2*GLX.HALF_A,2*GLX.HALF_B];
+  const tiles=[]; for(let ty=44;ty>=0;ty--)for(let tx=0;tx<55;tx++)tiles.push([tx,ty]);
+  const sel = tiles.slice(800,840).concat(tiles.slice(1400,1420)).concat(tiles.slice(100,120));
+  const out = {};
+  const variants = {
+    base: (s) => s,
+    noPhiT: (s) => s.replace('e = vec2((uA / D) * P - uA + LAM / s2, ((r * r + A2) / D) * P + uA * (LAM - uA * s2));', 'e = vec2(0.0);'),
+    loop2000: (s) => s.replace('k < 8000', 'k < 2000'),
+    cheapTrig: (s) => s.replace('float s = sin(th), c = cos(th);\n  s = abs', 'float c = cos(th); float s = sqrt(max(1.0 - c*c, 0.0)); s = abs'),
+    noProj: (s) => s.replace('if (Rn > uProj * Pn * Pn) vr', 'if (false) vr'),
+  };
+  for (const [name, fn] of Object.entries(variants)) {
+    const prog = GLX.program(gl, GLX.SRC.TRACE_VS, fn(GLX.SRC.TRACE_FS));
+    const save = S.trace; S.trace = prog;
+    GLX.trace(S, S.map, sel, TP, field); sync();
+    const t0 = RealDate.now(); for (let i = 0; i < 5; i++) { GLX.trace(S, S.map, sel, TP, field); sync(); }
+    out[name] = ((RealDate.now() - t0) / 5).toFixed(2);
+    S.trace = save;
+  }
+  return JSON.stringify(out);
+};
+</script></body></html>

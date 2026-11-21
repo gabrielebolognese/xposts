@@ -1,0 +1,129 @@
+{
+ "score": 8.4,
+ "critic": {
+  "scores": {
+   "subject_fit": 9,
+   "complex_but_clean": 9,
+   "no_defects": 7,
+   "alive": 8,
+   "mid_work": 9,
+   "real_numbers": 9,
+   "wow": 8
+  },
+  "issues": [
+   {
+    "severity": "major",
+    "where": "Hero, outer rim of the disk (near-side edge at β ≈ −5.5 M, and the whole disk silhouette)",
+    "problem": "The near-side outer edge meets the n=1 underside image along a hard, aliased black seam with visible stair steps, and the whole disk is ringed by a dark band with no stars. In the zoomed views this looks like a rendering bug, not physics.",
+    "fix": "Soften the r_out cutoff: taper the emissivity over the last ~0.5 M, or 2×2 jitter/supersample the edge tiles. Rays that cross the equator beyond r_out should keep integrating and sample the lensed star field, so the dark halo goes away (unless it is real, in which case label it)."
+   },
+   {
+    "severity": "major",
+    "where": "Whole page, frame timing (JS max 625 ms, on-page p99 41 ms)",
+    "problem": "Long main-thread tasks will show as visible stutters in a 60 fps recording, which is fatal for a smooth 'edge' video. The on-screen frame-time histogram also shows the >16 ms frames.",
+    "fix": "Move the DFT cycle, the model-V/ring-fit work and the PBO readback unpacking to workers, or split them into chunks under 4 ms per frame. Make sure the 625 ms task happens before the recorder warm-up ends."
+   },
+   {
+    "severity": "minor",
+    "where": "Fe Kα line panel labels (all frames)",
+    "problem": "The magenta spot marker passes straight through the 'red wing 3.78 keV' text (2 s, 19 s). The 'spot 7.92' and 'spot 7.35' labels are drawn on top of the cyan bars and are hard to read (36 s, 52 s).",
+    "fix": "Give marker labels a dark background pill and place them above the histogram envelope. Move the label to the other side of its line when it would cross another label."
+   },
+   {
+    "severity": "minor",
+    "where": "Hero, centroid readout label",
+    "problem": "The label's background box does not match the text. At 36 s, '−28.8, 8.4 µas' spills outside the dark box onto the bright disk edge. At 19 s there is no box at all.",
+    "fix": "Size the box from measureText every frame and always draw it. Flip the label to the left of the crosshair when it would cross the shadow boundary."
+   },
+   {
+    "severity": "minor",
+    "where": "Centroid loop panel axes",
+    "problem": "The axes autoscale from ±10 to ±15 µas at 36 s and back to ±10 at 52 s, so the loop visibly jumps in size even though the loop size readout barely changes (16.4–16.5 µas).",
+    "fix": "Use a fixed symmetric range (±15 µas), or autoscale with hysteresis that only ever expands."
+   },
+   {
+    "severity": "minor",
+    "where": "Hero, hot spot on the approaching side (36 s, 52 s)",
+    "problem": "Near the beaming peak the spot clips to a flat white-yellow blob above the top of the colorbar, so its light-travel-delay shear is lost.",
+    "fix": "Normalise log I to a running I_max that includes the spot, or add a soft-knee tone curve above 0 dex. Extend the colorbar to show the headroom."
+   },
+   {
+    "severity": "minor",
+    "where": "Integrator panel",
+    "problem": "Mean and max steps, the capture/escape/disk fractions, the null residual, fp32–fp64 Δr, probe fates and the histogram are identical in all four frames, so the panel reads as frozen. 'null resid. 1.1e-1' next to 'Δr 9.6e-6' also looks like a numerical failure to a physicist.",
+    "fix": "Add rolling per-pass statistics for the tiles traced this second (steps, residual), and pulse the histogram bin of the current tile. Label the residual precisely, e.g. 'max |H|/P² (pre-reprojection)', or show the RMS beside the max."
+   },
+   {
+    "severity": "minor",
+    "where": "uv coverage and dirty image (bottom right)",
+    "problem": "Coverage goes from 65% to 86% between 2 s and 52 s, but both panels look almost the same in every frame. The new track segments and the sharpening ring are not visible at a glance.",
+    "fix": "Draw the last ~10 sim-min of each track brighter and thicker, with larger pulsing heads, and fade older track points. Normalise the dirty image every frame and briefly flash the newly added visibilities."
+   },
+   {
+    "severity": "minor",
+    "where": "Spin sweep panel",
+    "problem": "In the lower plot the y tick '0' collides with the first data marker. In the upper plot the dashed i=17° curve runs into the 'shadow diameter d [µas]' label. The i=17° squares are hidden under the i=72° circles at small a.",
+    "fix": "Pad the y ranges by about 5%, move the axis labels to empty corners, and draw the i=17° markers on top with a different size or a small x offset."
+   },
+   {
+    "severity": "minor",
+    "where": "Visibilities / dirty image readouts versus the hero readouts",
+    "problem": "The virtual-EHT ring fit gives d ≈ 37–38 µas, while the hero shows a 51.2 µas shadow and the EHT 51.8 µas ring. This is consistent for a thin-disk crescent (first null 4.24 Gλ ↔ 37 µas), but viewers will read it as a disagreement.",
+    "fix": "Add a one-line note in the visamp panel, e.g. 'thin-disk crescent: emission inside the critical curve', or overplot the expected first null for a 51 µas ring for comparison."
+   },
+   {
+    "severity": "minor",
+    "where": "Hero, left edge (tile cursor)",
+    "problem": "The re-trace cursor is a lone cyan sliver on the hero frame edge. Without context it looks like a stray glitch pixel.",
+    "fix": "Draw a faint full-width scanline or a 32 px tile outline on the image at the current tile, with a tiny 'tile 1415/2475' tag."
+   },
+   {
+    "severity": "minor",
+    "where": "This PC, 4×4 CPU sparkline grid",
+    "problem": "Bright traces run through the 'Txx nn%' labels (for example T10 and T07), which hurts legibility when zoomed.",
+    "fix": "Reserve a 9 px label row above each sparkline, or clip the traces below the label baseline."
+   }
+  ],
+  "summary": "I'd post this after fixing the two major issues. It is an exceptional build. The layout follows the brief closely: the observatory console, the inferno-on-violet palette, cold cyan for analytic curves, and the right column that follows the light from metric to measurement. It is dense and crisp, with very few alignment errors. The numbers check out unusually well: r+ = 1.341, r_isco 2.024, r_ph± 1.425/3.946, θ_g 5.124 µas, scale bar 9.76 M = 0.414 au, Ṁ 3.33e19 kg/s = 5.3e-4 M☉/yr, Ω 0.0514 and P = 43.13 min, g_max⁴ = 3.13×, Δt 116.2 M = 41.0 min. The hot-spot phase advances exactly 283.8° per 34 sim-min, the rays-traced counter matches the tile/pass progress to the ray, and the first null matches the ring-fit diameter. Most regions change over time: the hot spot orbits and lenses over the top arc, the light curve, centroid, spectrum spot curve, Fe spot marker, spin sweep, event log, uv counts, beam and CPU traces all move. The integrator panel and the uv/dirty visuals look static. The main things holding it back: (1) an aliased black seam and a dark star-free halo at the disk outer edge in the hero, which looks like a bug up close; (2) main-thread hitches (625 ms max, p99 41 ms) that will stutter in the recording. The rest are minor: label collisions in the Fe line panel and the centroid label, the centroid-loop axes rescaling, a saturated hot spot, a frozen-looking integrator panel with a 1.1e-1 residual that will raise eyebrows, and uv/dirty panels that barely change on screen. The hero lacks a visible thin photon ring, so it is striking but not quite iconic, which keeps wow at 8."
+ },
+ "shots": {
+  "shots": [
+   "shots/at-2s.png",
+   "shots/at-2s-view1.png",
+   "shots/at-2s-view2.png",
+   "shots/at-19s.png",
+   "shots/at-19s-view1.png",
+   "shots/at-19s-view2.png",
+   "shots/at-36s.png",
+   "shots/at-36s-view1.png",
+   "shots/at-36s-view2.png",
+   "shots/at-52s.png",
+   "shots/at-52s-view1.png",
+   "shots/at-52s-view2.png"
+  ],
+  "errors": [],
+  "frameMs": {
+   "avg": 8.94,
+   "max": 625
+  },
+  "warmup": 25,
+  "numbers": "preview (made up until the live run)",
+  "report": {
+   "shadow_diam_uas": 51.167,
+   "shadow_err_pct": 0.000196,
+   "isco_r_M": 2.0236,
+   "spot_period_min": 43.13,
+   "flux_n1_pct": 1.66,
+   "vis_null_glambda": 4.101,
+   "ring_fit_uas": 38.5,
+   "g_max": 1.3296,
+   "rays_per_sec": 393216
+  },
+  "times": [
+   2,
+   19,
+   36,
+   52
+  ]
+ }
+}

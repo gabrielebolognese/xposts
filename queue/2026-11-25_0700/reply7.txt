@@ -1,0 +1,1 @@
+7. Free and MIT licensed, commercial use included. Preview the setup changes with --dry-run, undo them with code-review-graph uninstall. Go to GitHub and search for: tirth8205/code-review-graph. Or search for code-review-graph and open the official website.

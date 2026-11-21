@@ -1,0 +1,27 @@
+Today Claude Opus 5.5 found my laptop GPU could not handle the brief and scaled the work down ALONE, in 179 minutes for $113.94.
+
+This is day 9 of building Claude Studio in public.
+
+Today's Claude Studio project: a spinning black hole with Sgr A star's mass, ray-traced photon by photon on the GPU and checked against theory.
+
+On X today: 409 replies written and 13,602 views.
+
+The new feature today is in my posting tool: it reads popular posts and turns their ideas into fresh drafts.
+
+Most of the rest went into the video pipeline:
+- Clip picking and judging for three streamers' streams
+- A fix-and-review pass on the whole pipeline
+- Short-video text for the game clips channel
+- A browser video editing app, running on this computer
+- Sound level checked, now right on the target
+
+Testing caught two bugs in the article maker, one of them a quote crash, and both are fixed. The job hunter now runs its daily search on its own, even after earlier manual runs. I also rebuilt the dashboard timeline into 13 denser rows.
+
+On the X side, 161 replies are drafted and waiting for my review, split into thoughtful and casual ones.
+
+I turned off the scheduled articles and the Friday post, and profile lookups now point at the posting handle. I also finished a breakdown of how the feed's ranking code works, so it's ready for edits.
+
+See you on day 10
+
+1000 followers ❌
+monetization ❌

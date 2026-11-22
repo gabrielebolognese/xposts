@@ -1,0 +1,9 @@
+The agent platform of 2027 is the final form. One app layer wins, and every tool you pay for gets demoted to a database it reads and writes.
+
+The stack I keep sketching:
+you set goals
+one orchestrator splits them across hundreds of agents
+shared skills, memory and tools underneath
+your CRM, docs and inbox at the bottom as plain storage
+
+You stop opening apps. The agent is the interface.

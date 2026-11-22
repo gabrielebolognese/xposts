@@ -1,1 +1,1 @@
-2. The token cut did not cost accuracy in their test. Across 244 retrieval questions on 4 models, TOON scored 72.2% vs 71.4% for JSON. Headers also declare the row count [N] and the field list {fields}, so truncated or malformed output can't slip through.
+2. For any change it shows what can break: the callers, dependents and tests it can reach, with a risk score. It stays on your machine as one SQLite file with no cloud service, and cloud embeddings are opt-in. It exposes 30 MCP tools by default.

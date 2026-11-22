@@ -1,1 +1,1 @@
-1. TOON is an open-source encoding of the JSON data model, built for LLM prompts. Nested objects use YAML-style indentation. Arrays of uniform objects become CSV-style tables: one header with the field names, then one row per item. Round-trips to JSON are lossless.
+1. AI review agents often re-read big parts of a repo for every change. code-review-graph builds a structural map of your code with Tree-sitter, keeps it updated incrementally, and serves compact context over MCP. The assistant reads only the files a change touches.

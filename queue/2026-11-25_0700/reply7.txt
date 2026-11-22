@@ -1,1 +1,10 @@
-7. Free and MIT licensed, commercial use included. Preview the setup changes with --dry-run, undo them with code-review-graph uninstall. Go to GitHub and search for: tirth8205/code-review-graph. Or search for code-review-graph and open the official website.
+7. Mini setup guide. Go to GitHub and search for: lidge-jun/opencodex. Or search the web for opencodex and open the official website.
+
+1. Make sure you have Node 18+. The Bun runtime is bundled automatically.
+2. Run: npm install -g --allow-scripts=bun @bitkyc08/opencodex
+3. Run: ocx start
+4. Open the dashboard on localhost:10100. Add a provider (40+ built-ins or any OpenAI-compatible endpoint) and pick a model.
+5. On the Connect page, turn on the Codex switch, then run codex as usual.
+6. Using Claude Code instead? Run: ocx claude
+
+The software is MIT licensed. You still pay your model providers through your own keys or accounts.

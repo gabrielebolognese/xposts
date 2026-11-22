@@ -441,7 +441,7 @@ def follow_ups(t: datetime) -> None:
 def main() -> None:
     lock = socket.socket()
     try:
-        lock.bind(("127.0.0.1", core.cfg("viral.lock_port", 47620)))
+        lock.bind(("127.0.0.1", core.cfg("viral.lock_port", 47621)))
     except OSError:
         return  # another viral run is working
     try:

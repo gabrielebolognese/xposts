@@ -263,6 +263,6 @@
   "find_every_minutes": 30,
   "find_give_up_hours": 48,
   "post_gap_minutes": 30,
-  "lock_port": 47620
+  "lock_port": 47621
  }
 }

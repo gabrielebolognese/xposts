@@ -1,0 +1,34 @@
+Today Claude Opus 5.5 wrote 4316 lines over 262 turns with ZERO libraries, then took notes from a separate critic for 2 rounds.
+
+This is day 10 of building Claude Studio in public.
+
+Latest Claude Studio project: a spinning black hole modeled on Sgr A star, ray-traced photon by photon on a laptop GPU and checked against theory.
+
+On X today: 574 replies written and 30,401 views.
+
+My first fix today was a glitch where one bad frame made a character's shoulders spike, and now they look normal on every frame.
+
+- Re-rendered three full-size stills, no glitch left
+- Moved video rendering to the cloud
+- Kept a switch to render on this computer instead
+
+Then I built a tool that looks through about 440 game clips and describes each one, six at a time. 431 are done so far, with zero failures.
+
+I also cleaned house: 348 duplicate clips deleted, 92 kept, about 30 GB freed, and one channel's old exports moved to the recycle bin.
+
+On the posting side, I tightened a lot:
+
+- Work network replies: 100+ reactions, max 2 days old
+- One shortcut opens the review app with posts loaded
+- Viral bar: 15x views per follower, 20x for big accounts
+- Fixed a tool clash that silently blocked viral checks
+- Reply check scheduled one hour after each post
+
+I tested the full posting flow from start to finish, then let the tool run on its own. It has already posted a thread and a viral post.
+
+Reply hunting on the short-post site ran for several rounds, and most kept about 35 drafts each. I also drafted replies to three posts from a well-known account.
+
+See you on day 11
+
+1000 followers ❌
+monetization ❌

@@ -1,0 +1,12 @@
+6. How to get it:
+Go to GitHub and search for: getagentseal/codeburn
+Or search for CodeBurn AI coding cost tracker and open the official website.
+
+1. Install Node.js 22.15 or newer.
+2. Try it without installing: npx codeburn
+3. To keep it: npm install -g codeburn or brew install codeburn
+4. Run codeburn for the terminal dashboard, or codeburn web for the browser.
+5. Open the branch view to see the cost of each feature.
+6. Run codeburn optimize --apply to review and apply fixes. Undo with codeburn act undo --last
+
+No account and no API key needed.

@@ -1,0 +1,3 @@
+1. Your AI bill gives you a month total. It doesn't break that down by project, model or task, and it doesn't show which part was wasted.
+
+CodeBurn (getagentseal/codeburn, about 11.9k stars) fixes that. It reads the session files your coding agents already write to disk and prices every token. No account, no sign-up, no API key.

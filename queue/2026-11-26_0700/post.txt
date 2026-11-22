@@ -1,0 +1,3 @@
+Find the files and MCP servers wasting your Claude Code tokens, each with an estimated saving.
+
+What it shows, how it cuts waste, and setup:

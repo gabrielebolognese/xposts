@@ -166,7 +166,7 @@ def queue_post(d: date, text: str, quote: str) -> str:
 def make(d: date, dry: bool = False) -> None:
     lock = socket.socket()
     try:
-        lock.bind(("127.0.0.1", core.cfg("teaser.lock_port", 47618)))
+        lock.bind(("127.0.0.1", core.cfg("teaser.lock_port", 47632)))
     except OSError:
         return  # another Friday post run is working
     work = DIR / (f"{d}-dry" if dry else str(d))

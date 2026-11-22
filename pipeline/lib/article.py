@@ -370,7 +370,7 @@ def build_page(d: date, art: dict, pillar: dict, png: Path, key: str = "") -> Pa
 def make(d: date) -> None:
     lock = socket.socket()
     try:
-        lock.bind(("127.0.0.1", core.cfg("article.lock_port", 47617)))
+        lock.bind(("127.0.0.1", core.cfg("article.lock_port", 47631)))
     except OSError:
         return  # another article run is working
     work = DIR / str(d)

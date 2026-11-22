@@ -27,6 +27,7 @@ c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699)  # no xAutoRe
 c["article"].update(min_words=150, lock_port=47698, days=["mon", "wed", "sun"])  # the fixture article is short; the
 c["teaser"].update(lock_port=47697, day="fri")  # scheduled articles and the Friday post are off, their tests still run
 c["viral"].update(lock_port=47696)
+c["own_posts"]["file"] = "../xar/data/own_posts.jsonl"  # a test inbox next to the work copy, never the real xAutoReply
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
 EOF
 printf 'pipeline/data/\npipeline/runs/\npipeline/review/\npipeline/logs/\npipeline/.lock\n__pycache__/\n' > "$W/.gitignore"
@@ -217,13 +218,23 @@ for i, t in enumerate(["main post", "1. first reply", "2. second reply"]):
 open("due.txt", "w").write(f"{due} {other}")
 EOF
 read due other < due.txt; rm due.txt
+mkdir -p "$T/xar/data"
 python pipeline/lib/poster.py
 [ -f "posted/$other/post.txt" ] && [ ! -d "queue/$other" ] || fail "the single post was not posted" "$(tail -5 pipeline/logs/runner.log)"
 python -c 'import json,sys; assert len(json.load(open(sys.argv[1]))["ids"]) == 3' "posted/$due/thread.json" || fail "the thread was not posted in 3 parts"
 [ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "autopost: update queue" ] || fail "posting not pushed"
 git --git-dir="$T/remote.git" ls-tree -r --name-only main | grep -q "^posted/$due/thread.json$" || fail "posted/ not on the remote"
 grep -q "POSTED .*posted $due -> https://x.com/i/status/fake" pipeline/logs/runner.log || fail "no POSTED line in the log"
-ok "posting loop: a due post and a 3-part thread went out (fake X), moved to posted/ and pushed"
+python - "$T/xar/data/own_posts.jsonl" "$due" "$other" <<'EOF' || fail "xAutoReply was not told about the two original posts"
+import json, sys
+lines = [json.loads(l) for l in open(sys.argv[1], encoding="utf-8")]
+by = {e["slot"]: e for e in lines}
+assert len(lines) == 2, lines
+assert by[sys.argv[2]]["kind"] == "thread" and by[sys.argv[2]]["text"] == "main post", by
+assert by[sys.argv[3]]["kind"] == "post" and by[sys.argv[3]]["id"].startswith("fake") and len(by[sys.argv[3]]["checks_at"]) == 2
+assert by[sys.argv[3]]["url"].endswith("/status/" + by[sys.argv[3]]["id"])
+EOF
+ok "posting loop: a due post and a 3-part thread went out (fake X), moved to posted/ and pushed; xAutoReply told about the 2 originals"
 
 # L2: a thread that missed its slot (PC off, post.js moved it to missed/) goes back to the virality queue
 name="$(python - <<'EOF'

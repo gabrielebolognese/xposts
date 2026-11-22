@@ -214,11 +214,13 @@
   "chrome_warmup_seconds": 60,
   "chrome_ports": [
    47614,
-   47615
+   47615,
+   47617,
+   47622
   ],
   "session_margin_minutes": 20,
   "xautoreply": "../xAutoReply",
-  "lock_port": 47616
+  "lock_port": 47630
  },
  "article": {
   "days": [],
@@ -234,7 +236,7 @@
    1500,
    600
   ],
-  "lock_port": 47617
+  "lock_port": 47631
  },
  "teaser": {
   "day": "off",
@@ -245,7 +247,7 @@
   "max_chars": 1300,
   "fix_rounds": 2,
   "read_minutes": 20,
-  "lock_port": 47618
+  "lock_port": 47632
  },
  "viral": {
   "runs_per_day": 3,
@@ -264,5 +266,9 @@
   "find_give_up_hours": 48,
   "post_gap_minutes": 30,
   "lock_port": 47621
+ },
+ "own_posts": {
+  "file": "../xAutoReply/data/own_posts.jsonl",
+  "check_minutes": [60, 240]
  }
 }

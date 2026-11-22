@@ -5,6 +5,9 @@ the repo. Each round, holding the queue lock:
      goes into data/posted-now.json, and its queue/ folder (if it had a slot) is removed so it never goes out twice
   3. post.js posts every due queue/ folder (posts and threads) and moves it to posted/ or missed/
   4. the changes in queue/, posted/ and missed/ are committed and pushed
+Every original post that goes out (a post, a quote post, the first post of a thread; never the thread's replies) gets
+one line in xAutoReply's inbox (own_posts.file), so xAutoReply reads its replies with Claude in Chrome after
+own_posts.check_minutes (60 and 240) and drafts answers for the user to post by hand.
 The X keys live in the .env file next to post.js, which only the user writes; this code never reads it.
 POSTS_FAKE_X=1 (tests) makes post.js and post-now.js use a fake X client.
 """
@@ -19,6 +22,7 @@ import subprocess
 import sys
 import time
 import traceback
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -30,6 +34,39 @@ REQUESTS = core.DATA / "post-now"
 POSTED_NOW = core.DATA / "posted-now.json"
 POOL = core.DATA / "virality.json"
 FOLDERS = ("queue", "posted", "missed")
+POSTED_LINE = re.compile(r"^posted (\S+) -> https://x\.com/i/status/(\S+?)( \(thread[^)]*\))?$")
+
+
+def tell_xautoreply(post_id: str, slot: str, kind: str, text: str) -> None:
+    """One JSON line per original post in xAutoReply's inbox. No inbox folder (xAutoReply is not next to this repo, or
+    a test copy): nothing. A failed write is a warning, never a stop: the post is already out."""
+    target = core.cfg("own_posts.file", "")
+    path = (core.ROOT / target).resolve() if target else None
+    if not path or not path.parent.is_dir():
+        return
+    at = datetime.now(timezone.utc).replace(microsecond=0)
+    iso = lambda t: t.isoformat().replace("+00:00", "Z")  # noqa: E731
+    handle = core.cfg("x_handle", "")
+    entry = {"id": post_id, "url": f"https://x.com/{handle or 'i'}/status/{post_id}", "posted_at": iso(at),
+             "checks_at": [iso(at + timedelta(minutes=m)) for m in core.cfg("own_posts.check_minutes", [60, 240])],
+             "kind": kind, "slot": slot, "text": text.strip()[:1000], "source": "x-autopost"}
+    try:
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except OSError as exc:
+        core.say("WARN", f"could not tell xAutoReply about post {post_id}: {exc}")
+
+
+def told_from_line(line: str) -> None:
+    """post.js printed 'posted <folder> -> https://x.com/i/status/<id>[ (thread, N replies)]': the folder is in posted/."""
+    m = POSTED_LINE.match(line.strip())
+    if not m:
+        return
+    slot, post_id, thread = m.groups()
+    folder = core.ROOT / "posted" / slot
+    kind = "thread" if thread else "quote" if (folder / "quote.txt").exists() else "post"
+    text = (folder / "post.txt").read_text(encoding="utf-8", errors="replace") if (folder / "post.txt").exists() else ""
+    tell_xautoreply(post_id, slot, kind, text)
 
 
 def node(script: str, extra: dict | None = None) -> subprocess.CompletedProcess:
@@ -41,6 +78,7 @@ def report(p: subprocess.CompletedProcess, posts: bool = True) -> None:
     for line in p.stdout.decode("utf-8", "replace").splitlines() if posts else []:
         if line.startswith(("posted", "missed")):
             core.say("POSTED" if line.startswith("posted") else "MISSED", line)
+            told_from_line(line)
     for line in p.stderr.decode("utf-8", "replace").splitlines():
         if line.strip():
             core.say("ERROR", f"posting: {line.strip()[:300]}")
@@ -83,6 +121,7 @@ def post_now(req_file: Path) -> None:
     core.save_json(POSTED_NOW, done)
     req_file.unlink()
     core.say("POSTED", f"posted now -> {url} ({len(ids)} parts){'' if p.returncode == 0 else ', not all parts went out'}")
+    tell_xautoreply(str(ids[0]), slot or f"now-{run}", "thread", stages.thread_parts(draft)[0])
 
 
 def changed() -> list[str]:

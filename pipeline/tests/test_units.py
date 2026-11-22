@@ -561,5 +561,32 @@ class Viral(unittest.TestCase):
             self.assertEqual(viral.article_key(date(2030, 1, 7)), "2030-01-07-2")
 
 
+class OwnPosts(unittest.TestCase):
+    def test_original_posts_are_told_to_xautoreply(self):
+        import poster
+        with tempfile.TemporaryDirectory() as tmp:
+            root, inbox = Path(tmp) / "repo", Path(tmp) / "xar" / "data" / "own_posts.jsonl"
+            core.write_text(root / "posted" / "2030-01-01_0700" / "post.txt", "main post")
+            core.write_text(root / "posted" / "2030-01-01_0900" / "post.txt", "a quote post")
+            core.write_text(root / "posted" / "2030-01-01_0900" / "quote.txt", "123")
+            conf = {"own_posts.file": str(inbox), "own_posts.check_minutes": [60, 240], "x_handle": "someone"}
+            with unittest.mock.patch.object(core, "ROOT", root), \
+                    unittest.mock.patch.object(core, "cfg", lambda k, d=None: conf.get(k, d)):
+                poster.told_from_line("posted 2030-01-01_0700 -> https://x.com/i/status/111 (thread, 3 replies)")
+                self.assertFalse(inbox.exists())  # no xAutoReply data folder: nothing written
+                inbox.parent.mkdir(parents=True)
+                poster.told_from_line("posted 2030-01-01_0700 -> https://x.com/i/status/111 (thread, 3 replies)")
+                poster.told_from_line("posted 2030-01-01_0900 -> https://x.com/i/status/222")
+                poster.told_from_line("missed 2030-01-01_1100 (200 min late), moved to missed/")
+            lines = [json.loads(line) for line in inbox.read_text(encoding="utf-8").splitlines()]
+        self.assertEqual([(e["id"], e["kind"], e["text"]) for e in lines],
+                         [("111", "thread", "main post"), ("222", "quote", "a quote post")])
+        first = lines[0]
+        self.assertEqual(first["url"], "https://x.com/someone/status/111")
+        posted = datetime.fromisoformat(first["posted_at"].replace("Z", "+00:00"))
+        self.assertEqual([datetime.fromisoformat(c.replace("Z", "+00:00")) - posted for c in first["checks_at"]],
+                         [timedelta(minutes=60), timedelta(minutes=240)])
+
+
 if __name__ == "__main__":
     unittest.main()

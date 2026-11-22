@@ -18,6 +18,7 @@ queue/
 - Images are posted in alphabetical order (name them 1.png, 2.png if order matters).
 - A `quote.txt` holding a post id makes the post quote that post (the Friday post quotes the week's most viewed X Article).
 - A post more than 3 hours late goes to `missed/` instead of being posted.
+- Every original post that goes out (a post, a quote post, the first post of a thread, never its replies) adds one line to xAutoReply's inbox, `../xAutoReply/data/own_posts.jsonl` (config `own_posts`): the post id, link, time, kind, text and the times to check it (60 and 240 minutes later). xAutoReply reads the replies then with Claude in Chrome and drafts answers for you to post by hand. No xAutoReply folder next to this repo: nothing is written.
 - No links in post.txt: a post with a URL costs $0.20 instead of $0.015.
 
 ## Setup

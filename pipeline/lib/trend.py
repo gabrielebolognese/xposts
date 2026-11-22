@@ -104,7 +104,7 @@ def port_held(port: int) -> bool:
 
 def chrome_busy() -> str:
     """Why xAutoReply needs Chrome right now, else "" (the signals its own lead discovery checks)."""
-    for port in core.cfg("trend.chrome_ports", [47614, 47615]):
+    for port in core.cfg("trend.chrome_ports", [47614, 47615, 47617, 47622]):
         if port_held(port):
             return f"an xAutoReply runner holds port {port}"
     peer = core.cfg("trend.xautoreply", "")
@@ -278,7 +278,7 @@ def queue_post(d: date, text: str, images: list[Path]) -> str:
 def make(d: date, dry: bool = False) -> None:
     lock = socket.socket()
     try:
-        lock.bind(("127.0.0.1", core.cfg("trend.lock_port", 47616)))
+        lock.bind(("127.0.0.1", core.cfg("trend.lock_port", 47630)))
     except OSError:
         return  # another trend run is working
     work = DIR / (f"{d}-dry" if dry else str(d))

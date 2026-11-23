@@ -1,0 +1,9 @@
+6. Mini setup guide.
+Find it: go to GitHub and search for nadimtuhin/claude-token-optimizer, or do a web search for claude-token-optimizer npm.
+1. Make sure you have Node 20 or newer.
+2. Open your project folder and back up first: cp CLAUDE.md CLAUDE.md.mine
+3. See your startup load: npx -y claude-token-optimizer measure
+4. Move old session notes and finished tasks into side files: npx -y claude-token-optimizer prune --yes
+5. Run measure again and compare before and after.
+6. Optional: install globally with npm install -g claude-token-optimizer, then use the short command cto.
+7. Keep your own backup. The tool saves CLAUDE.md.bak, but the next run replaces it.

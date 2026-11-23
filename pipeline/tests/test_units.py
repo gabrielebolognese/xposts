@@ -15,8 +15,6 @@ import stages  # noqa: E402
 import virality  # noqa: E402
 from datetime import datetime  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "studio" / "lib"))
-import studio  # noqa: E402
 
 
 def with_cfg(over: dict):
@@ -244,80 +242,9 @@ class Links(unittest.TestCase):
             self.assertEqual(stages.links(t), [], t)
 
 
-class Studio(unittest.TestCase):
-    FACTS = "Build cost: $12.40. Lines of code: 1834. Page at 58 to 61 fps. nodes = 1284113. Video: 50 s at 60 fps, 1080p."
-
-    def test_model_name(self):
-        self.assertEqual(studio.model_name("claude-opus-5-5"), "Claude Opus 5.5")
-        self.assertEqual(studio.model_name("claude-haiku-5-5"), "Claude Haiku 5.5")
-
-    def test_post_rules(self):
-        good = "Opus built a chess engine brain overnight\n\nWhat it computes:\n\n1. It cost $12.40 and 1834 lines, at 61 fps."
-        self.assertEqual(studio.post_problems(good, "Opus built a chess engine brain overnight", "What it computes:", "$12.40",
-                                              self.FACTS), [])
-        cases = {
-            "the hook must be one line": ("x" * 101, "p"),
-            "the build cost $12.40 is missing": ("hook", "p"),
-            "numbers not in the facts: 999": ("hook", "p"),
-            "a hashtag": ("hook", "p"),
-        }
-        texts = {"the build cost $12.40 is missing": "hook\n\np\n\n1. it was cheap",
-                 "numbers not in the facts: 999": "hook\n\np\n\n1. $12.40 and 999 nodes",
-                 "a hashtag": "hook\n\np\n\n1. $12.40 #claude"}
-        for expected, (hook, promise) in cases.items():
-            text = texts.get(expected, f"{hook}\n\n{promise}\n\n1. $12.40")
-            probs = studio.post_problems(text, hook, promise, "$12.40", self.FACTS)
-            self.assertTrue(any(expected in p for p in probs), f"{expected}: {probs}")
-
-    def test_every_three_days_and_subject_request(self):
-        with tempfile.TemporaryDirectory() as tmp, \
-                unittest.mock.patch.object(studio, "PROJECTS", Path(tmp)), \
-                unittest.mock.patch.object(core, "now_rome", lambda: datetime(2026, 11, 21, 12, 30, tzinfo=core.ROME)):
-            self.assertEqual(studio.due().name, "2026-11-21")  # no project yet: one for today
-            studio.save_state(Path(tmp) / "2026-11-21", stage="queued", slot="2026-11-22_1100")  # posted a day late
-            p = studio.request_subject("a black hole")
-            self.assertEqual(p.name, "2026-11-25")  # 3 days after the last post day
-            self.assertEqual(studio.state(p)["subject_request"], "a black hole")
-            self.assertEqual(studio.due(), p)  # unfinished: resumed, no new project
-            studio.save_state(p, stage="build")
-            with self.assertRaises(SystemExit):
-                studio.request_subject("something else")
-            studio.save_state(p, stage="held")
-            old = Path(tmp) / "2026-11-01"
-            old.mkdir()
-            studio.save_state(old, stage="queued")
-            self.assertEqual(studio.new_project().name, "2026-11-28")
-        with tempfile.TemporaryDirectory() as tmp, \
-                unittest.mock.patch.object(studio, "PROJECTS", Path(tmp)), \
-                unittest.mock.patch.object(core, "now_rome", lambda: datetime(2026, 11, 21, 12, 30, tzinfo=core.ROME)):
-            (Path(tmp) / "2026-11-02").mkdir()
-            studio.save_state(Path(tmp) / "2026-11-02", stage="queued")
-            self.assertEqual(studio.new_project().name, "2026-11-21")  # never in the past
-
-    def test_hero_must_cover_most_of_the_stage(self):
-        self.assertEqual(studio.hero_problems({"hero": {"x": 8, "y": 48, "w": 1400, "h": 840}}), [])
-        self.assertIn("31% of the stage", studio.hero_problems({"hero": {"x": 352, "y": 48, "w": 880, "h": 720}})[0])
-        self.assertIn("inside the 1920x1080 stage", studio.hero_problems({"hero": {"x": 600, "y": 0, "w": 1400, "h": 1080}})[0])
-
-    def test_a_project_ready_early_waits_for_its_day(self):
-        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(core, "ROOT", Path(tmp)), \
-                unittest.mock.patch.object(core, "now_rome", lambda: datetime(2026, 11, 22, 12, 0, tzinfo=core.ROME)):
-            self.assertEqual(studio.next_slot(date(2026, 11, 24)), "2026-11-24_1100")
-            self.assertEqual(studio.next_slot(date(2026, 11, 20)), "2026-11-23_1100")  # late: the next free 11:00
-
-    def test_camera_eases_between_keyframes(self):
-        out = subprocess.run(["node", "-e", "import('./studio/tools/capture.mjs').then((m) => console.log(JSON.stringify("
-                              "[0, 2, 4, 9].map((t) => m.cameraAt([{t: 0, cx: 0.5, cy: 0.5, zoom: 1}, {t: 4, cx: 0.3, cy: 0.7, zoom: 2}], t)))))"],
-                             cwd=core.ROOT, capture_output=True, timeout=60).stdout.decode()
-        a, mid, b, after = json.loads(out)
-        self.assertEqual((a["zoom"], b["zoom"], after["zoom"]), (1, 2, 2))
-        self.assertAlmostEqual(mid["zoom"], 1.5)
-        self.assertAlmostEqual(mid["cx"], 0.4)
-
 
 class BuildInPublic(unittest.TestCase):
     GOOD = {"hook": "Today Claude Opus 5.5 proved to be EXTREMELY capable even with tight time and budget.",
-            "studio": "a chess engine written from scratch that replays the Game of the Century.",
             "done": "Big day for the video tool.\n\n- Fixed the posting queue\n- Added a stats tab\n\n"
                     "The thread writer got stricter. Every reply now needs a number."}
 
@@ -325,17 +252,16 @@ class BuildInPublic(unittest.TestCase):
         import bip
         self.assertEqual(bip.problems(self.GOOD), [])
         self.assertEqual(bip.assemble(self.GOOD, 5, "20", "1,234"), "\n\n".join([
-            self.GOOD["hook"], "This is day 5 of building Claude Studio in public.",
-            "Today's Claude Studio project: a chess engine written from scratch that replays the Game of the Century.",
+            self.GOOD["hook"], "This is day 5 of building in public.",
             "On X today: 20 replies written and 1,234 views.", self.GOOD["done"], "See you on day 6",
             f"1000 followers {chr(0x274C)}\nmonetization {chr(0x274C)}"]))
 
     def test_rules(self):
         import bip
-        bad = {"hook": "One. Two.", "studio": "x " * 70,
+        bad = {"hook": "One. Two.",
                "done": "- " + "x" * 61 + "\n" + ("A sentence. Another one.\n" * 4) + "Long " * 40 + "." + chr(0x2014)}
         probs = " | ".join(bip.problems(bad))
-        for want in ("hook: exactly one sentence", "studio: with", "list item over 60", "4 paragraphs",
+        for want in ("hook: exactly one sentence", "list item over 60", "4 paragraphs",
                      "sentence over 150", "no em or en dashes"):
             self.assertIn(want, probs)
 

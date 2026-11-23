@@ -62,22 +62,6 @@
    "model": "opus",
    "effort": "medium"
   },
-  "studio_brief": {
-   "model": "opus",
-   "effort": "high"
-  },
-  "studio_build": {
-   "model": "opus",
-   "effort": "xhigh"
-  },
-  "studio_critic": {
-   "model": "opus",
-   "effort": "high"
-  },
-  "studio_post": {
-   "model": "opus",
-   "effort": "high"
-  },
   "bip": {
    "model": "opus",
    "effort": "high"
@@ -174,18 +158,6 @@
  "inspect": {
   "min_slop_score": 70,
   "min_fingerprint_score": 100
- },
- "studio": {
-  "every_days": 3,
-  "post_time": "11:00",
-  "build_hours": 24,
-  "review_rounds": 8,
-  "min_review_rounds": 3,
-  "min_score": 9,
-  "fps": 60,
-  "scale": 2,
-  "check_minutes": 5,
-  "lock_port": 47619
  },
  "bip": {
   "time": "14:00",

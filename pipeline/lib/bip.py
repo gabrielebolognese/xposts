@@ -2,12 +2,11 @@
 it serves a small form at http://127.0.0.1:<bip.port> and opens it in the browser: the replies written today and
 today's views. On submit:
   1. Jarvis's /mbrief for the last bip.brief_minutes (Jarvis's API on this PC): what got done today, all projects
-  2. two screenshots: Jarvis's STATISTICS tab (lib/bip-shot.mjs) and today's Claude Studio project
-  3. Opus writes the parts from pipeline/prompts/bip.md (a hook about building, the day's Claude Studio project in
-     one sentence, what got done); the code adds the fixed lines (the day opener, "Today's Claude Studio project:",
-     "On X today: ..." with the typed numbers, the closer) and checks the format. A "hook" in the day's state file
-     is used as the first line instead of the model's.
-  4. queue/<now> gets post.txt and the two screenshots; the posting loop posts it within 30 s
+  2. a screenshot of Jarvis's STATISTICS tab (lib/bip-shot.mjs)
+  3. Opus writes the parts from pipeline/prompts/bip.md (a hook about building, what got done); the code adds the
+     fixed lines (the day opener, "On X today: ..." with the typed numbers, the closer) and checks the format. A
+     "hook" in the day's state file is used as the first line instead of the model's.
+  4. queue/<now> gets post.txt and the screenshot; the posting loop posts it within 30 s
 The form shows each step, then the post and its link. State: pipeline/data/bip/<date>.json.
 """
 from __future__ import annotations
@@ -31,13 +30,11 @@ import ai  # noqa: E402
 import core  # noqa: E402
 
 DIR = core.DATA / "bip"
-STUDIO = core.ROOT / "studio" / "projects"
 PAGE = core.PIPE / "bip.html"
 CROSS = chr(0x274C)
 DASHES = f"[{chr(0x2014)}{chr(0x2013)}]"
 EMOJI = f"[{chr(0x1F000)}-{chr(0x1FAFF)}{chr(0x2600)}-{chr(0x27BF)}]"
 SENTENCE_MAX, ITEM_MAX, PARAGRAPHS_MAX = 150, 60, 3
-TODAY_LABEL = "Today's Claude Studio project:"
 SAVING = threading.Lock()
 
 
@@ -104,45 +101,25 @@ def jarvis_shot(out: Path) -> None:
         raise RuntimeError(f"the Jarvis screenshot failed: {err[-1][:200]}")
 
 
-def studio_project(d: date) -> Path | None:
-    """Today's Claude Studio project (the one that posts today), else the latest finished one."""
-    done = [p for p in sorted(STUDIO.iterdir()) if p.is_dir() and not p.name.startswith("_")
-            and (p / "post.txt").exists()] if STUDIO.exists() else []
-    today = [p for p in done if str(core.load_json(p / "state.json", {}).get("slot", "")).startswith(str(d))]
-    return (today or done or [None])[-1]
-
-
-def studio_shot(p: Path) -> Path | None:
-    """The full screen screenshot nearest two thirds into the video."""
-    shots = {int(m.group(1)): f for f in (p / "shots").glob("at-*s.png") if (m := re.fullmatch(r"at-(\d+)s\.png", f.name))}
-    if not shots:
-        return None
-    target = core.load_json(p / "brief.json", {}).get("video_seconds", 60) * 0.65
-    return shots[min(shots, key=lambda t: abs(t - target))]
-
-
 # The post --------------------------------------------------------------------------------------------------------------
 
 def sentences(line: str) -> list[str]:
     return [s for s in re.split(r"(?<=[.!?])\s+", line.strip()) if s]
 
 
-def problems(parts: dict, label: str = TODAY_LABEL) -> list[str]:
-    """The measurable rules: one-sentence hook and project line, the mix in what got done, lengths, plain text."""
+def problems(parts: dict) -> list[str]:
+    """The measurable rules: a one-sentence hook, the mix in what got done, lengths, plain text."""
     out = []
-    for key in ("hook", "studio"):
-        text = parts.get(key, "").strip()
-        if "\n" in text or len(sentences(text)) != 1:
-            out.append(f"{key}: exactly one sentence on one line")
-    if len(f"{label} {parts.get('studio', '').strip()}") > SENTENCE_MAX:
-        out.append(f"studio: with \"{label} \" in front it must stay within {SENTENCE_MAX} characters")
+    text = parts.get("hook", "").strip()
+    if "\n" in text or len(sentences(text)) != 1:
+        out.append("hook: exactly one sentence on one line")
     lines = [ln.strip() for ln in parts.get("done", "").splitlines() if ln.strip()]
     if not any(ln.startswith("- ") for ln in lines) or all(ln.startswith("- ") for ln in lines):
         out.append("done: mix a list with sentences and paragraphs")
     paragraphs = [ln for ln in lines if not ln.startswith("- ") and len(sentences(ln)) >= 2]
     if len(paragraphs) > PARAGRAPHS_MAX:
         out.append(f"done: {len(paragraphs)} paragraphs, at most {PARAGRAPHS_MAX}")
-    for key in ("hook", "studio", "done"):
+    for key in ("hook", "done"):
         text = parts.get(key, "")
         for line in (ln.strip() for ln in text.splitlines()):
             if line.startswith("- "):
@@ -161,9 +138,9 @@ def problems(parts: dict, label: str = TODAY_LABEL) -> list[str]:
     return out
 
 
-def assemble(parts: dict, day: int, replies: str, views: str, label: str = TODAY_LABEL) -> str:
-    return "\n\n".join([parts["hook"].strip(), f"This is day {day} of building Claude Studio in public.",
-                        f"{label} {parts['studio'].strip()}", f"On X today: {replies} replies written and {views} views.",
+def assemble(parts: dict, day: int, replies: str, views: str) -> str:
+    return "\n\n".join([parts["hook"].strip(), f"This is day {day} of building in public.",
+                        f"On X today: {replies} replies written and {views} views.",
                         parts["done"].strip(), f"See you on day {day + 1}", f"1000 followers {CROSS}\nmonetization {CROSS}"])
 
 
@@ -173,15 +150,9 @@ def recent_hooks(d: date) -> list[str]:
     return [t.splitlines()[0] for t in texts if t]
 
 
-def write_post(d: date, brief: str, project: Path | None, replies: str, views: str, work: Path) -> str:
-    studio, label = "(no Claude Studio project yet)", TODAY_LABEL
-    if project:
-        facts = (project / "facts.txt").read_text(encoding="utf-8") if (project / "facts.txt").exists() else ""
-        when = str(core.load_json(project / "state.json", {}).get("slot", ""))[:10] or project.name  # the day it posts
-        label = TODAY_LABEL if when == str(d) else "Latest Claude Studio project:"
-        studio = f"Its X post:\n{(project / 'post.txt').read_text(encoding='utf-8')}\n\nMeasured facts:\n{facts[:4000]}"
+def write_post(d: date, brief: str, replies: str, views: str, work: Path) -> str:
     given = load(d).get("hook")  # a first line the owner chose for this day, used as it is
-    prompt = core.render("bip", DATE=str(d), DAY=str(day_number(d)), LABEL=label, STUDIO=studio, BRIEF=brief,
+    prompt = core.render("bip", DATE=str(d), DAY=str(day_number(d)), BRIEF=brief,
                          RECENT="\n".join(f"- {h}" for h in recent_hooks(d)) or "(none yet)")
 
     def ask(name: str, text: str) -> dict:
@@ -190,15 +161,15 @@ def write_post(d: date, brief: str, project: Path | None, replies: str, views: s
 
     parts = ask("write", prompt)
     for rnd in range(core.cfg("bip.fix_rounds", 2)):
-        probs = problems(parts, label)
+        probs = problems(parts)
         if not probs:
             break
         parts = ask(f"fix-{rnd + 1}", f"{prompt}\n\nYour last answer:\n{json.dumps(parts, ensure_ascii=False, indent=1)}"
-                    "\n\nIt breaks these rules. Fix them and return all three parts again:\n" + "\n".join(f"- {p}" for p in probs))
-    probs = problems(parts, label)
+                    "\n\nIt breaks these rules. Fix them and return both parts again:\n" + "\n".join(f"- {p}" for p in probs))
+    probs = problems(parts)
     if probs:
         raise RuntimeError("the post still breaks the format: " + "; ".join(probs[:4]))
-    return assemble(parts, day_number(d), replies, views, label)
+    return assemble(parts, day_number(d), replies, views)
 
 
 def queue_post(text: str, images: list[Path]) -> str:
@@ -234,15 +205,11 @@ def make(d: date, replies: int, views: int) -> None:
         save(d, status="working", step="Asking Jarvis for today's brief (/mbrief, a few minutes)", replies=replies, views=views)
         brief = jarvis_brief()
         core.write_text(work / "brief.txt", brief)
-        save(d, step="Taking the screenshots")
+        save(d, step="Taking the screenshot")
         images = [work / "1-jarvis-stats.png"]
         jarvis_shot(images[0])
-        project = studio_project(d)
-        if project and (shot := studio_shot(project)):
-            shutil.copy(shot, work / "2-claude-studio.png")
-            images.append(work / "2-claude-studio.png")
         save(d, step="Writing the post", images=[i.name for i in images])
-        text = write_post(d, brief, project, r, v, work)
+        text = write_post(d, brief, r, v, work)
         core.write_text(work / "post.txt", text)
         slot = queue_post(text, images)
         save(d, status="queued", slot=slot, text=text, step="Posting (the posting loop sends it within 30 s)")

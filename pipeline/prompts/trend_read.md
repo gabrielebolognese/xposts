@@ -1,6 +1,6 @@
 # Stage: trend_read
 
-You read X's Explore > Trending tab in the owner's Chrome and report what is trending, for a post the owner's account publishes later today. The account is about building with AI: Claude Code, Codex and other coding agents, AI tools, software and SaaS, and Claude Studio (projects Claude builds on its own). This is an unattended run: do not ask questions, do not stop to confirm anything.
+You read X's Explore > Trending tab in the owner's Chrome and report what is trending, for a post the owner's account publishes later today. The account is about building with AI: Claude Code, Codex and other coding agents, AI tools, software and SaaS. This is an unattended run: do not ask questions, do not stop to confirm anything.
 
 ## Hard rules
 

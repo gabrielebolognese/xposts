@@ -1,10 +1,9 @@
 {
  "type": "object",
  "additionalProperties": false,
- "required": ["hook", "studio", "done"],
+ "required": ["hook", "done"],
  "properties": {
   "hook": {"type": "string", "description": "One sentence about building with Claude today, not about what was built"},
-  "studio": {"type": "string", "description": "One sentence: what today's Claude Studio project is (the label goes in front of it)"},
   "done": {"type": "string", "description": "What got done today, rewritten as a post"}
  }
 }

@@ -2,8 +2,7 @@
 from article.start (05:00), once:
   1. the pillar of the article (pipeline/article-pillars.json, one per article in turn from article.first_date):
      automation playbook, free alternative, viral breakdown, growth myth
-  2. the data for it from this PC: Claude Studio builds (cost, hours, turns, scores), the thread pipeline's funnel,
-     the tools it found and scored, this week's trends
+  2. the data for it from this PC: the thread pipeline's funnel, the tools it found and scored, this week's trends
   3. Opus writes the article (prompts/article_write.md, with web research), checked in code: words, headings,
      paragraph length, the markdown subset, no emojis, dashes or hashtags, the AI-tells detector; up to
      article.fix_rounds fixes, else review/article-<date>.txt
@@ -43,7 +42,6 @@ import stages  # noqa: E402
 
 DIR = core.DATA / "article"
 OUT = core.ROOT / "articles"
-STUDIO = core.ROOT / "studio" / "projects"
 PILLARS = core.PIPE / "article-pillars.json"
 TEMPLATE = core.PIPE / "article.html"
 SHOT = core.PIPE / "lib" / "article-shot.mjs"
@@ -153,32 +151,6 @@ def shorten(text: str, n: int) -> str:
     return text if len(text) <= n else text[:n].rsplit(" ", 1)[0] + "..."
 
 
-def studio_data() -> str:
-    lines, cost, secs = [], 0.0, 0
-    for p in sorted(STUDIO.glob("20*")):
-        st, b = core.load_json(p / "state.json", {}), core.load_json(p / "brief.json", {})
-        if not st.get("cost_usd"):
-            continue
-        cost += st["cost_usd"]
-        secs += st.get("build_seconds", 0)
-        lines.append(f"- {p.name}, \"{b.get('title', p.name)}\": {shorten(str(b.get('subject', '')), 220)} Build: "
-                     f"${st['cost_usd']:.2f}, {st.get('build_seconds', 0) / 3600:.1f} hours, {st.get('turns', '?')} "
-                     f"turns, model {st.get('model_id', '?')}, critic score {st.get('review_score', '?')}/10 after "
-                     f"{st.get('review_round', 0)} fix rounds")
-    if not lines:
-        return "Claude Studio: no finished builds yet."
-    return ("Claude Studio builds (Claude Code alone; the builds up to 2026-11-21 ran overnight, every Claude Code session "
-            "capped at 7 hours and $160 with --max-budget-usd, the build and each fix round separate sessions, so a "
-            "project's total could pass the cap by design, and an Opus critic scored frames, 8/10 to pass, at most 2 fix "
-            f"rounds; since then one project every {core.cfg('studio.every_days', 3)} days, no spending cap, as many days "
-            f"as it takes, two critics (the whole screen, the hero up close), {core.cfg('studio.min_score', 9)}/10 to pass, "
-            f"at least {core.cfg('studio.min_review_rounds', 3)} and at most {core.cfg('studio.review_rounds', 8)} fix "
-            "rounds; the costs below are the totals of all sessions as Claude Code "
-            "reports them, the value at API prices: the builds run on the owner's Claude subscription, so say \"worth\" or "
-            "\"at API prices\", never that the owner paid it):\n"
-            + "\n".join(lines) + f"\nTotal: {len(lines)} builds, ${cost:.2f}, {secs / 3600:.1f} hours of building.")
-
-
 def reason_group(reason: str) -> str:
     key = re.sub(r"\s+\d.*$", "", reason.split(":")[0]).strip()
     if "archived" in key:
@@ -239,7 +211,7 @@ def trends_data(d: date) -> str:
 def gather(pillar: dict, d: date) -> str:
     if not pillar["sources"]:
         return "(no data from the owner's systems for this article: use only facts you verify)"
-    makers = {"studio": studio_data, "pipeline": pipeline_data, "bip": lambda: f"Build in public: day {bip.day_number(d)}.",
+    makers = {"pipeline": pipeline_data, "bip": lambda: f"Build in public: day {bip.day_number(d)}.",
               "tools": lambda: tools_data(d), "trends": lambda: trends_data(d)}
     return "\n\n".join(makers[s]() for s in pillar["sources"])
 

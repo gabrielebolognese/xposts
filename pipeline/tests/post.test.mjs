@@ -97,7 +97,7 @@ test('a folder without replies is still one single post', async () => {
   assert.ok(!fs.existsSync(path.join('posted', DUE, 'thread.json')));
 });
 
-test('a Claude Studio folder posts its video as the one media item, uploaded as a tweet_video', async () => {
+test('a folder with a video posts it as the one media item, uploaded as a tweet_video', async () => {
   const dir = setup([]);
   fs.writeFileSync(path.join(dir, 'video.mp4'), 'fake mp4');
   fs.writeFileSync(path.join(dir, 'still.png'), 'fake png');

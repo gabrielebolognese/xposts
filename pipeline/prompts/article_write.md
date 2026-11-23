@@ -6,7 +6,6 @@ You write today's X Article (X's long-form format: a title, a cover image and a 
 
 It is about doing more with AI: Claude, Claude Code, Codex, skills and the tools around them, automating work, and making content that grows on X and Instagram with AI. What the owner runs, every day, on one PC:
 - an auto post pipeline that searches the web for new Claude Code and Codex tools, scores them, and writes an X thread every morning about the best one
-- Claude Studio: every 3 days Claude Code builds one complex project on its own (a chess engine, a heart simulation...), which is recorded and posted
 - a daily build-in-public post (day {{BIP_DAY}} today)
 
 Today is {{DATE}}.

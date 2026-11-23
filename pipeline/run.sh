@@ -3,9 +3,8 @@
 # Start it in Git Bash from the x-autopost folder:
 #   bash pipeline/run.sh          posts what is due every 30 seconds (the X keys come from .env), searches categories
 #                                 for tools, turns the best ones into threads scored for virality, and keeps queue/
-#                                 filled with the highest scored ones (1 a day, 4 days ahead); it also builds a Claude
-#                                 Studio project every 3 days, for as long as it takes (studio/lib/studio.py), and
-#                                 queues it for 11:00; on Tuesday, Thursday and Saturday it reads X's Trending tab
+#                                 filled with the highest scored ones (1 a day, 4 days ahead); on Tuesday, Thursday
+#                                 and Saturday it reads X's Trending tab
 #                                 from 06:20 and queues a trending post for 09:00 (pipeline/lib/trend.py); 3 times a
 #                                 day at random times it looks for viral outliers in the timeline and repurposes the
 #                                 best one, with an X Article when it is one (pipeline/lib/viral.py, at most 3 articles
@@ -52,12 +51,6 @@ $PY pipeline/lib/summary.py start
 every=$(cfg poster.interval_seconds)
 ( while :; do $PY pipeline/lib/poster.py; sleep "$every"; done ) &   # the posting loop, independent of the steps
 poster=$!
-studio=""
-if [ -f studio/lib/studio.py ] && [ -z "${POSTS_NO_STUDIO:-}" ]; then   # the Claude Studio build (one every 3 days)
-  check=$(( $(cfg studio.check_minutes) * 60 ))
-  ( while :; do $PY studio/lib/studio.py; sleep "$check"; done ) &
-  studio=$!
-fi
 bip=""
 if [ -z "${POSTS_NO_BIP:-}" ]; then   # the daily build-in-public post: a form opens at bip.time (14:00)
   ( while :; do $PY pipeline/lib/bip.py; sleep 60; done ) &
@@ -89,8 +82,8 @@ nap() { sleep "$1" & napper=$!; wait "$napper"; }   # wait returns at once when 
 
 stop() {
   trap - INT TERM
-  kill "$poster" $studio $bip $trend $article $teaser $viral $napper 2>/dev/null
-  wait "$poster" $studio $bip $trend $article $teaser $viral 2>/dev/null
+  kill "$poster" $bip $trend $article $teaser $viral $napper 2>/dev/null
+  wait "$poster" $bip $trend $article $teaser $viral 2>/dev/null
   echo
   $PY pipeline/lib/summary.py stop
   rm -f "$LOCK"

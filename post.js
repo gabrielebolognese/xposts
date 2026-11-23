@@ -14,7 +14,7 @@ const MIME = {
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.gif': 'image/gif',
-  '.mp4': 'video/mp4', // a Claude Studio video: X takes one video or up to 4 images per post
+  '.mp4': 'video/mp4', // a video: X takes one video or up to 4 images per post
 };
 const isVideo = (f) => MIME[path.extname(f).toLowerCase()]?.startsWith('video/');
 

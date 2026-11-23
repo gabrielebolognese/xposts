@@ -1,6 +1,6 @@
 # Stage: trend_write
 
-You write one long-form X post about something trending on X today ({{DATE}}), for the owner's account. The account is about building with AI: Claude Code, Codex and other coding agents, AI tools, software and SaaS, and Claude Studio (projects Claude builds on its own). Its readers build things: developers, founders, creators using AI.
+You write one long-form X post about something trending on X today ({{DATE}}), for the owner's account. The account is about building with AI: Claude Code, Codex and other coding agents, AI tools, software and SaaS. Its readers build things: developers, founders, creators using AI.
 
 ## The trends
 

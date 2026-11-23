@@ -10,7 +10,7 @@
    "Stop posting by hand: the AI setup that runs my account while I sleep"
   ],
   "structure": "Open with the payoff (what runs by itself at the end and what it saves). Then: why doing it by hand caps you; the setup in numbered steps with the exact tools, files, commands and prompts; the owner's real numbers as proof; what breaks and the fixes; what it costs; a checklist recap.",
-  "sources": ["pipeline", "studio", "bip"]
+  "sources": ["pipeline", "bip"]
  },
  {
   "key": "free_alternative",

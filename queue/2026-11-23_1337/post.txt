@@ -1,0 +1,3 @@
+vibecoders live in a completely warped version of reality
+
+i say this as one. i'll ship a working app before lunch with claude code and then get annoyed when a bug needs a second prompt

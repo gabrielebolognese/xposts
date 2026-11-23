@@ -1,1 +1,1 @@
-2. For any change it shows what can break: the callers, dependents and tests it can reach, with a risk score. It stays on your machine as one SQLite file with no cloud service, and cloud embeddings are opt-in. It exposes 30 MCP tools by default.
+2. It ships with 40+ built-in providers, and you can add any OpenAI-compatible endpoint. It also works the other way around: the same gateway serves Claude Code, Claude Desktop and Grok Build, not just Codex. It is MIT licensed, has 18,696 stars on GitHub and shipped v2.100.8 on 2026-11-21. Development is very active.

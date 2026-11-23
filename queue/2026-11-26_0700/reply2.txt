@@ -1,3 +1,1 @@
-2. It auto-detects 42 AI coding tools, including Claude Code, Codex, Cursor and Gemini. Run codeburn and you get the total, then cost by tool, model, project and task. Task means coding, debugging or planning, worked out from the session itself. Same numbers in the browser with codeburn web.
-
-The branch view adds up every session you ran on a branch. That gives you the cost of a feature, useful if you quote clients per feature.
+2. The tool is claude-token-optimizer by Nadim Tuhin, a Node.js CLI whose command is cto. It's free and open source under MIT, with no paid tier and no account. It runs locally. It measures what Claude Code loads at startup, file by file, keeps CLAUDE.md short, and moves older material into side files Claude opens only when needed. That moved content stays in your repo and costs 0 tokens until you ask Claude to read it. 661 stars on GitHub.

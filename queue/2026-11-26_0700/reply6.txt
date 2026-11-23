@@ -1,12 +1,9 @@
-6. How to get it:
-Go to GitHub and search for: getagentseal/codeburn
-Or search for CodeBurn AI coding cost tracker and open the official website.
-
-1. Install Node.js 22.15 or newer.
-2. Try it without installing: npx codeburn
-3. To keep it: npm install -g codeburn or brew install codeburn
-4. Run codeburn for the terminal dashboard, or codeburn web for the browser.
-5. Open the branch view to see the cost of each feature.
-6. Run codeburn optimize --apply to review and apply fixes. Undo with codeburn act undo --last
-
-No account and no API key needed.
+6. Mini setup guide.
+Find it: go to GitHub and search for nadimtuhin/claude-token-optimizer, or do a web search for claude-token-optimizer npm.
+1. Make sure you have Node 20 or newer.
+2. Open your project folder and back up first: cp CLAUDE.md CLAUDE.md.mine
+3. See your startup load: npx -y claude-token-optimizer measure
+4. Move old session notes and finished tasks into side files: npx -y claude-token-optimizer prune --yes
+5. Run measure again and compare before and after.
+6. Optional: install globally with npm install -g claude-token-optimizer, then use the short command cto.
+7. Keep your own backup. The tool saves CLAUDE.md.bak, but the next run replaces it.

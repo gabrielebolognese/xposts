@@ -1,3 +1,1 @@
-4. A simple loop: run codeburn optimize, apply what makes sense, keep working, then open Compare periods. It puts two date ranges side by side and shows the difference, so you see if the fix actually cut spend.
-
-The data is also in a desktop app for macOS, Windows and Linux, plus the menu bar. Latest release v0.9.28 (2026-11-08) added quota-exhaustion forecasts in the menu bar and a loop guard.
+4. Two more worth knowing. cto compress shrinks a markdown file with fixed rules: it drops blank lines, verbose fences, long lists, HTML comments and inline SVGs. It's lossy, so review the result. cto audit runs 19 structural checks, has a --json flag for CI, --fix creates missing files, and it exits 1 on errors, so it can fail a build. Or let Claude Code do the setup: ask it to back up your CLAUDE.md, follow the repo's AGENTS.md, and show the token count before and after.

@@ -1,5 +1,1 @@
-5. Pricing: 100% free and MIT licensed. No paid tier, no feature held back.
-
-Prompts, code and project names stay on your machine, and the CLI sends nothing. The desktop app asks about anonymous telemetry at first launch. It starts on outside the EU, EEA, UK and Switzerland.
-
-Catch: on subscription plans the dollar figures are API-equivalent estimates, not your invoice.
+5. The catches. Counts come from the old Claude 2 tokenizer, so treat them as estimates for comparing before and after, not for billing. The 11,000 to 800 drop (93%) is the author's own RedwoodJS project. Your savings depend on how bloated your CLAUDE.md is. The latest npm release is 2.3.20, and features committed on 2026-10-14, like --file and cto companions, may not be on npm yet.

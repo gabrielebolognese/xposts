@@ -1,0 +1,32 @@
+Today Claude Opus 5.5 ran into the limits of fp32 precision, worked past them ALONE, and still matched the textbook answer to 0.000196%.
+
+This is day 11 of building Claude Studio in public.
+
+Latest Claude Studio project: a spinning black hole with Sgr A star's mass, ray-traced photon by photon on the GPU and checked against theory.
+
+On X today: 166 replies written and 9,806 views.
+
+Most of my day went into the video pipeline, and four new videos came out of it:
+
+- Why AI content looks cheap
+- Five ways an AI assistant can run a business
+- Five helper skills that make a real difference
+- A screen demo
+
+All four are packed into upload bundles and ready to go. Getting there took a lot of redoing: I reworked the story shots and script stages several times until the flow felt right. I also fixed script drafts line by line wherever the voice tool misheard the words.
+
+The video queue also ran on six more ideas:
+
+- 4 are waiting for visuals
+- 2 were held back by the voice check
+
+I also set up a watcher that will send each finished video back to the chat app.
+
+On X, I ran a lot of searches and drafted 14 replies, short of my goal of about 35. Most results were spam or already handled. I also followed up with 14 accounts from my list and answered comments on my own posts.
+
+The site kept freezing and I kept reloading it, and the account check still passed.
+
+See you on day 12
+
+1000 followers ❌
+monetization ❌

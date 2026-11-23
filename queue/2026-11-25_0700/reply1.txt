@@ -1,3 +1,1 @@
-1. Your AI bill gives you a month total. It doesn't break that down by project, model or task, and it doesn't show which part was wasted.
-
-CodeBurn (getagentseal/codeburn, about 11.9k stars) fixes that. It reads the session files your coding agents already write to disk and prices every token. No account, no sign-up, no API key.
+1. opencodex is a local gateway between your coding tool and your model provider. It accepts 3 API formats: Responses, Chat Completions and Anthropic Messages. It translates each request into whatever your provider speaks. Everything runs on your machine on localhost:10100. You keep using codex the way you do now and only swap the model underneath: Claude, Gemini, Grok, GLM, DeepSeek, Kimi, Qwen or a local Ollama model.

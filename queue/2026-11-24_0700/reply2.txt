@@ -1,1 +1,8 @@
-2. It ships with 40+ built-in providers, and you can add any OpenAI-compatible endpoint. It also works the other way around: the same gateway serves Claude Code, Claude Desktop and Grok Build, not just Codex. It is MIT licensed, has 18,696 stars on GitHub and shipped v2.100.8 on 2026-11-21. Development is very active.
+2. The numbers from the README. Claude Code on Django, hard structural questions (transitive closure and impact), with and without Auryn:
+
+Accuracy: 22% to 92%
+Run time per task: 208s to 70s
+Cost per task: $0.72 to $0.38
+Tokens per task: 466k to 355k
+
+This is FalkorDB's own benchmark. The README doesn't say how many tasks were run, which Django version was used or which model.

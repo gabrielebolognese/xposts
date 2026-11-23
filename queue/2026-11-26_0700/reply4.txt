@@ -1,1 +1,3 @@
-4. Not on Node? Run the Docker image instead. It serves on port 4010 with your fixtures folder mounted, so apps in other languages work too, as long as their SDK lets you set a custom base URL. Point that base URL at the local port and your existing test suite runs offline, with the same responses on every run.
+4. A simple loop: run codeburn optimize, apply what makes sense, keep working, then open Compare periods. It puts two date ranges side by side and shows the difference, so you see if the fix actually cut spend.
+
+The data is also in a desktop app for macOS, Windows and Linux, plus the menu bar. Latest release v0.9.28 (2026-11-08) added quota-exhaustion forecasts in the menu bar and a loop guard.

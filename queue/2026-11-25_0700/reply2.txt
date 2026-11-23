@@ -1,3 +1,1 @@
-2. It auto-detects 42 AI coding tools, including Claude Code, Codex, Cursor and Gemini. Run codeburn and you get the total, then cost by tool, model, project and task. Task means coding, debugging or planning, worked out from the session itself. Same numbers in the browser with codeburn web.
-
-The branch view adds up every session you ran on a branch. That gives you the cost of a feature, useful if you quote clients per feature.
+2. It ships with 40+ built-in providers, and you can add any OpenAI-compatible endpoint. It also works the other way around: the same gateway serves Claude Code, Claude Desktop and Grok Build, not just Codex. It is MIT licensed, has 18,696 stars on GitHub and shipped v2.100.8 on 2026-11-21. Development is very active.

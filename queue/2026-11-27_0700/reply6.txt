@@ -1,9 +1,6 @@
-6. Mini setup guide.
-Find it: go to GitHub and search for nadimtuhin/claude-token-optimizer, or do a web search for claude-token-optimizer npm.
-1. Make sure you have Node 20 or newer.
-2. Open your project folder and back up first: cp CLAUDE.md CLAUDE.md.mine
-3. See your startup load: npx -y claude-token-optimizer measure
-4. Move old session notes and finished tasks into side files: npx -y claude-token-optimizer prune --yes
-5. Run measure again and compare before and after.
-6. Optional: install globally with npm install -g claude-token-optimizer, then use the short command cto.
-7. Keep your own backup. The tool saves CLAUDE.md.bak, but the next run replaces it.
+6. Mini setup guide. Go to GitHub and search for: CopilotKit/aimock. Or do a web search for: aimock CopilotKit and open the official site.
+1. Check you have Node.js 20.15.0 or later.
+2. Install it in your project: npm install @copilotkit/aimock
+3. Start every mock on one port from a config file: npx @copilotkit/aimock --config aimock.json
+4. Before your SDK client is created, set its base URL environment variable to the local aimock port.
+5. Run your tests. No API keys needed. In CI, use strict mode so nothing slips through to a paid API.

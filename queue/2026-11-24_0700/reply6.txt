@@ -1,1 +1,12 @@
-6. Know the catch before you switch. The README warns that some providers, notably Anthropic, may suspend or restrict accounts that route API traffic through proxies. Use it at your own risk. Anonymous telemetry is on by default. Turn it off with ocx telemetry disable, OCX_TELEMETRY=0 or DO_NOT_TRACK=1. It is an independent project, not affiliated with OpenAI or Anthropic.
+6. Setup guide:
+
+Go to GitHub and search for: FalkorDB/Auryn
+Or search the web for: FalkorDB Auryn codegraph
+
+1. Make sure you have Python 3.12 or newer.
+2. pip install falkordb-auryn
+3. auryn quickstart
+This boots embedded FalkorDB, ingests a small sample payments API and opens the graph viewer on port 8080.
+4. Run auryn ingest on your own repo. It auto-detects every language in a single pass.
+5. On native Windows or older-glibc Linux, use auryn install --backend remote and point it at your FalkorDB server.
+6. Ask your agent a structural question, like who calls this function or what changing it affects. Answers come with file and line citations.

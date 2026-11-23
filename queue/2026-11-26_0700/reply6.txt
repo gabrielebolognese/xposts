@@ -1,6 +1,12 @@
-6. Mini setup guide. Go to GitHub and search for: CopilotKit/aimock. Or do a web search for: aimock CopilotKit and open the official site.
-1. Check you have Node.js 20.15.0 or later.
-2. Install it in your project: npm install @copilotkit/aimock
-3. Start every mock on one port from a config file: npx @copilotkit/aimock --config aimock.json
-4. Before your SDK client is created, set its base URL environment variable to the local aimock port.
-5. Run your tests. No API keys needed. In CI, use strict mode so nothing slips through to a paid API.
+6. How to get it:
+Go to GitHub and search for: getagentseal/codeburn
+Or search for CodeBurn AI coding cost tracker and open the official website.
+
+1. Install Node.js 22.15 or newer.
+2. Try it without installing: npx codeburn
+3. To keep it: npm install -g codeburn or brew install codeburn
+4. Run codeburn for the terminal dashboard, or codeburn web for the browser.
+5. Open the branch view to see the cost of each feature.
+6. Run codeburn optimize --apply to review and apply fixes. Undo with codeburn act undo --last
+
+No account and no API key needed.

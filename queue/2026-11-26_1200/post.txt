@@ -1,0 +1,3 @@
+Stop pasting console errors into Claude Code. Let it read Chrome's console and network itself.
+
+Free, by the Chrome DevTools team. Setup below:

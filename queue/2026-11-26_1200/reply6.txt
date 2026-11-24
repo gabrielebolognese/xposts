@@ -1,0 +1,8 @@
+6. Setup guide. Go to GitHub and search for: ChromeDevTools/chrome-devtools-mcp. Or search the web for Chrome DevTools MCP and open Chrome's official docs page.
+
+1. Install Node.js LTS, npm and Chrome current stable or newer.
+2. Claude Code: run /plugin marketplace add ChromeDevTools/chrome-devtools-mcp
+3. Then run /plugin install chrome-devtools-mcp@chrome-devtools-plugins
+4. Codex: run codex mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
+5. Any other MCP client: add a server named chrome-devtools with "command": "npx" and "args": ["-y", "chrome-devtools-mcp@latest"]. That pulls the latest version, currently v1.13.0.
+6. Restart the client, open your dev page and ask the agent to check the console, network requests and performance.

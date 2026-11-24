@@ -179,11 +179,7 @@
   "jarvis_web": "http://127.0.0.1:5173"
  },
  "trend": {
-  "days": [
-   "tue",
-   "thu",
-   "sat"
-  ],
+  "days": [],
   "time": "09:00",
   "read_at": "06:20",
   "give_up": "10:30",
@@ -204,11 +200,11 @@
   "lock_port": 47630
  },
  "article": {
-  "days": [],
+  "days": ["mon"],
   "start": "05:00",
   "time": "09:00",
   "give_up": "18:00",
-  "first_date": "2026-11-22",
+  "first_date": "2026-11-30",
   "min_words": 1000,
   "max_words": 3500,
   "fix_rounds": 2,
@@ -220,10 +216,11 @@
   "lock_port": 47631
  },
  "teaser": {
-  "day": "off",
-  "read_at": "06:20",
-  "time": "09:00",
-  "give_up": "16:00",
+  "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+  "start": "16:00",
+  "time": "18:00",
+  "give_up": "23:00",
+  "find_every_minutes": 60,
   "min_chars": 800,
   "max_chars": 1300,
   "fix_rounds": 2,
@@ -231,7 +228,7 @@
   "lock_port": 47632
  },
  "viral": {
-  "runs_per_day": 3,
+  "runs_per_day": 0,
   "window": ["08:00", "21:30"],
   "min_gap_minutes": 120,
   "give_up_minutes": 120,

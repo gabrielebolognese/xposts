@@ -16,7 +16,7 @@ queue/
 ```
 
 - Images are posted in alphabetical order (name them 1.png, 2.png if order matters).
-- A `quote.txt` holding a post id makes the post quote that post (the Friday post quotes the week's most viewed X Article).
+- A `quote.txt` holding a post id makes the post quote that post (the daily article post quotes the latest X Article).
 - A post more than 3 hours late goes to `missed/` instead of being posted.
 - Every original post that goes out (a post, a quote post, the first post of a thread, never its replies) adds one line to xAutoReply's inbox, `../xAutoReply/data/own_posts.jsonl` (config `own_posts`): the post id, link, time, kind, text and the times to check it (60 and 240 minutes later). xAutoReply reads the replies then with Claude in Chrome and drafts answers for you to post by hand. No xAutoReply folder next to this repo: nothing is written.
 - No links in post.txt: a post with a URL costs $0.20 instead of $0.015.
@@ -122,7 +122,7 @@ The form stays open until the post is out or midnight; a failed step shows why, 
 
 ## Trending posts
 
-On Tuesday, Thursday and Saturday the runner posts one long-form post about something on X's Explore > Trending tab at 09:00. `bash pipeline/run.sh` runs it, nothing else to start:
+Switched off since 2026-11-24 (`trend.days` is empty in `pipeline/config.json`; put days back to turn it on). When on, on Tuesday, Thursday and Saturday the runner posts one long-form post about something on X's Explore > Trending tab at 09:00. `bash pipeline/run.sh` runs it, nothing else to start:
 
 1. **Read.** From 06:20 (before xAutoReply's first reply session, and it waits while xAutoReply is using Chrome) a Claude in Chrome session reads the Trending tab in your logged-in Chrome, picks up to 3 trends that fit the account (AI, coding agents, software, building; never politics, sports or gossip) and reads their top posts (`pipeline/prompts/trend_read.md`). It only reads: no likes, no clicks that change anything, no X API calls. When Chrome was closed it opens it and closes it again afterwards.
 2. **Write.** Opus picks the trend with the best angle for builders, checks the facts on the web and writes the post by the long-form rulebook (`x_long_form_post_writing_rules.txt`, `pipeline/prompts/trend_write.md`). The code checks it (`pipeline/lib/longform-check.mjs`: 800 to 3,000 characters, the two-line hook, paragraphs up to 250 characters, no emojis, dashes or markdown; no links or hashtags; the same AI-tells check as the threads) and asks for up to 2 fixes. A post that still fails goes to `pipeline/review/trend-<date>.txt` and is not posted.
@@ -133,7 +133,7 @@ When nothing on the tab fits the account there is no post that day, and the runn
 
 ## Viral posts
 
-Three times a day, at random times between 08:00 and 21:30 (at least 2 hours apart, picked each morning), the runner looks for posts that went viral for a reason other than a big audience and repurposes the best one (`pipeline/lib/viral.py`). No guessing: it copies what is already working.
+Switched off since 2026-11-24 (`viral.runs_per_day` is 0 in `pipeline/config.json`; set it back to 3 to turn it on). When on: three times a day, at random times between 08:00 and 21:30 (at least 2 hours apart, picked each morning), the runner looks for posts that went viral for a reason other than a big audience and repurposes the best one (`pipeline/lib/viral.py`). No guessing: it copies what is already working.
 
 1. **Read.** When xAutoReply is not using Chrome (like the trending post; a check still blocked 2 hours after its time is skipped), a Claude in Chrome session scrolls the For you timeline of the account signed in to Chrome, reads at least 120 posts, keeps the ones with more than 5,000 views and opens up to 20 of their authors' profiles (`pipeline/prompts/viral_read.md`, read only, no X API).
 2. **Pick.** A viral post: more than 5,000 views and at least 15 times its author's followers in views (authors under 800 followers) or at least 20 times (800 or more), in the niche (AI tools, Claude and Codex, automation, building, creator and growth with AI), never used before. The most views per follower wins. None: no post, and the runner says so.
@@ -144,15 +144,21 @@ Run a check now: `python pipeline/lib/viral.py --now`. Settings: the `viral` blo
 
 ## X Articles
 
-Articles now come only from viral X Articles (see Viral posts above), at most 3 a week. The scheduled pillar articles (Monday, Wednesday, Sunday) are switched off since 2026-11-21: `article.days` is empty in `pipeline/config.json`; put days back in it to turn them on again. Each article is posted by hand from its page:
+One X Article a week, every Monday (`article.days` in `pipeline/config.json`), written from 05:00 and opened at 09:00 to post by hand from its page:
 
-1. **Brief.** A viral article's title and what it says become the brief: the same hook, your own words and structure, verified facts, nothing of the original author's presented as yours. (The scheduled articles, when switched on, take turns over the pillars in `pipeline/article-pillars.json`: automation playbook, free alternative, viral breakdown, growth myth.)
+1. **Pillar.** The articles take turns over the pillars in `pipeline/article-pillars.json`, one per week from 2026-11-30 (`article.first_date`): automation playbook, free alternative, viral breakdown, growth myth.
 2. **Write.** Opus writes it with web research, checking every tool, price and view count it uses, plus this PC's real numbers where they fit (the thread pipeline's funnel, the tools it scored, the week's trends) (`pipeline/prompts/article_write.md`). The code checks it: 1,000 to 3,500 words, at least 3 sections, paragraphs up to 400 characters, headings, lists, quotes, bold and italic only, no emojis, dashes or hashtags, and the AI-tells check; up to 2 fixes, else it waits in `pipeline/review/article-<date>.txt`.
 3. **Cover.** Opus designs the cover as an HTML file for this article (`pipeline/prompts/article_cover.md`) and `pipeline/lib/article-shot.mjs` exports it as a 1500x600 PNG at 2x (5:2, the Article cover shape). Text that spills out of the frame gets one fix round.
-4. **Page.** `articles/<date>/article.html` (`<date>-2` for a second one that day) shows the cover and the article. It opens in the browser as soon as it is ready. Press **Post**: the cover downloads and the article is copied with its formatting. On X: Articles, Write, add the cover, paste the title (**Copy title**) and the article, publish.
+4. **Page.** `articles/<date>/article.html` (`<date>-2` for a second one that day) shows the cover and the article. It opens in the browser at 09:00, or as soon as it is ready when later. Press **Post**: the cover downloads and the article is copied with its formatting. On X: Articles, Write, add the cover, paste the title (**Copy title**) and the article, publish.
 
 The pages stay on this PC (`articles/` is not committed). Settings: the `article` block and the `article_*` models in `pipeline/config.json`.
 
-## Friday post about the article
+## Daily article post
 
-Switched off since 2026-11-21 (`teaser.day` is "off" in `pipeline/config.json`): a viral article already gets its own post. When on, every Friday at 09:00 it posts about 1,000 characters quoting the week's most viewed X Article, written to make people open it, not a summary (`pipeline/lib/teaser.py`). Set `teaser.day` back to "fri" to turn it on.
+Every day at 18:00, the Monday of the article included, the runner posts about 1,000 characters quoting the latest X Article, written to make people open it, not a summary (`pipeline/lib/teaser.py`):
+
+1. **Find.** From 16:00 it needs the article's post on your profile (`x_handle`). The first time, a Claude in Chrome session reads your profile (read only, it waits while xAutoReply is using Chrome) and the post id is kept for the next days. On Monday post the article from its page first: until it is on your profile the runner looks again every hour, and after 23:00 that day has no post.
+2. **Write.** Opus writes the post (`pipeline/prompts/teaser_write.md`) and sees the posts already made about the same article, so each day has a new hook and angle. The code checks it: `pipeline/lib/longform-check.mjs` (the two-line hook, paragraphs, no emojis, dashes or markdown), 800 to 1,300 characters, no links or hashtags, a hook not used on an earlier day, and the AI-tells check; up to 2 fixes, else `pipeline/review/teaser-<date>.txt`.
+3. **Posting.** `queue/<date>_1800` with `post.txt` and `quote.txt` (the article's post id), so the article card shows under the text.
+
+See one without queueing it: `python pipeline/lib/teaser.py --now --dry`. Settings: the `teaser` block in `pipeline/config.json`.

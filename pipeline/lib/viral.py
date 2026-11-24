@@ -457,6 +457,8 @@ def main() -> None:
             make(d, n, dry="--dry" in sys.argv)
             return
         follow_ups(t)
+        if not core.cfg("viral.runs_per_day", 3):
+            return  # switched off (0 checks a day)
         n = due_run(t)
         if n is not None and chrome_free(d, n):
             make(d, n)

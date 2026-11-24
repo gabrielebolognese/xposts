@@ -1,6 +1,6 @@
 # Stage: teaser_find
 
-You find posts on the owner's X profile in the owner's Chrome: the X Articles they published this week, with their views. This is an unattended run: do not ask questions, do not stop to confirm anything.
+You find posts on the owner's X profile in the owner's Chrome: the X Articles listed below, with their views. This is an unattended run: do not ask questions, do not stop to confirm anything.
 
 The articles (the date each was written, then its title; the owner may have changed a title slightly when publishing it):
 {{ARTICLES}}

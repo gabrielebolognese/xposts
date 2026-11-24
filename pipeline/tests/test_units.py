@@ -23,7 +23,7 @@ def with_cfg(over: dict):
     return unittest.mock.patch.object(core, "cfg", lambda key, default=None: over[key] if key in over else real(key, default))
 
 
-OLD_SCHEDULE = {"article.days": ["mon", "wed", "sun"], "teaser.day": "fri"}  # switched off since 2026-11-21
+SWITCHED_OFF = {"trend.days": ["tue", "thu", "sat"], "viral.runs_per_day": 3}  # off since 2026-11-24, still tested
 
 CHECKER = core.ROOT / ".claude" / "skills" / "x-threads" / "check.mjs"
 CATS = [{"id": i, "name": f"cat {i}"} for i in (1, 2, 3)]
@@ -278,6 +278,7 @@ class Trend(unittest.TestCase):
 
     def test_when_it_runs(self):
         import trend
+        self.enterContext(with_cfg(SWITCHED_OFF))
         tue = "2030-01-01"
         self.assertFalse(trend.due(self.at(f"{tue}T06:19"), {}))
         self.assertTrue(trend.due(self.at(f"{tue}T06:20"), {}))
@@ -356,12 +357,12 @@ class Article(unittest.TestCase):
                      "body: no hashtags"):
             self.assertIn(want, probs)
 
-    def test_three_a_week_pillars_take_turns(self):
+    def test_weekly_pillars_take_turns(self):
         import article
         from datetime import date
-        self.enterContext(with_cfg(OLD_SCHEDULE))
-        days = [date(2026, 11, 22) + timedelta(days=i) for i in range(9)]  # Sunday 22 to Monday 30
-        self.assertEqual([d.day for d in days if article.article_day(d)], [22, 23, 25, 29, 30])
+        days = [date(2026, 11, 30) + timedelta(days=i) for i in range(29)]  # Monday 30 November to Monday 28 December
+        self.assertEqual([str(d) for d in days if article.article_day(d)],
+                         ["2026-11-30", "2026-12-07", "2026-12-14", "2026-12-21", "2026-12-28"])
         keys = [article.pillar_for(d)["key"] for d in days if article.article_day(d)]
         self.assertEqual(keys, ["automation", "free_alternative", "viral_breakdown", "growth_myth", "automation"])
 
@@ -369,46 +370,43 @@ class Article(unittest.TestCase):
 class Teaser(unittest.TestCase):
     def test_when_it_runs(self):
         import teaser
-        self.enterContext(with_cfg(OLD_SCHEDULE))
         at = lambda iso: datetime.fromisoformat(iso).replace(tzinfo=core.ROME)  # noqa: E731
-        fri = "2030-01-04"
-        self.assertFalse(teaser.due(at(f"{fri}T06:19"), {}))
-        self.assertTrue(teaser.due(at(f"{fri}T06:20"), {}))
-        self.assertTrue(teaser.due(at(f"{fri}T15:59"), {}))
-        self.assertFalse(teaser.due(at(f"{fri}T16:00"), {}))
-        self.assertFalse(teaser.due(at("2030-01-03T07:00"), {}))  # Thursday
+        for day in ("2029-12-31", "2030-01-01", "2030-01-06"):  # every day: Monday, Tuesday, Sunday
+            self.assertFalse(teaser.due(at(f"{day}T15:59"), {}))
+            self.assertTrue(teaser.due(at(f"{day}T16:00"), {}))
+            self.assertTrue(teaser.due(at(f"{day}T22:59"), {}))
+            self.assertFalse(teaser.due(at(f"{day}T23:00"), {}))
+        mon = "2029-12-31"
         for done in teaser.DONE:
-            self.assertFalse(teaser.due(at(f"{fri}T07:00"), {"status": done}))
+            self.assertFalse(teaser.due(at(f"{mon}T17:00"), {"status": done}))
+        looked = at(f"{mon}T16:00").timestamp()  # the article was not on the profile yet: looked again after an hour
+        self.assertFalse(teaser.due(at(f"{mon}T16:59"), {"status": "waiting", "find_at": looked}))
+        self.assertTrue(teaser.due(at(f"{mon}T17:00"), {"status": "waiting", "find_at": looked}))
 
-    def test_week_articles_are_the_sunday_monday_wednesday_before(self):
+    def test_latest_article_and_its_earlier_posts(self):
         import article
         import teaser
-        from datetime import date
-        self.enterContext(with_cfg(OLD_SCHEDULE))
-        with tempfile.TemporaryDirectory() as tmp:
-            with unittest.mock.patch.object(article, "DIR", Path(tmp)):
-                self.assertEqual(teaser.week_articles(date(2030, 1, 4)), [])
-                for day, status in (("2029-12-30", "opened"), ("2029-12-31", "ready"), ("2030-01-02", "review"),
-                                    ("2030-01-03", "opened"), ("2029-12-29", "opened")):  # Sun Mon Wed Thu Sat
-                    core.save_json(Path(tmp) / f"{day}.json", {"status": status})
-                    core.save_json(Path(tmp) / day / "article.json", {"title": f"T {day}", "body": "B"})
-                self.assertEqual([str(d) for d, _ in teaser.week_articles(date(2030, 1, 4))], ["2029-12-30", "2029-12-31"])
-                self.assertEqual(teaser.week_articles(date(2030, 1, 11)), [])  # the next week has none
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(article, "DIR", Path(tmp) / "a"), \
+                unittest.mock.patch.object(teaser, "DIR", Path(tmp) / "t"):
+            self.assertIsNone(teaser.latest_article())
+            for key, status in (("2029-12-24", "opened"), ("2029-12-31", "ready"), ("2030-01-07", "review")):
+                core.save_json(Path(tmp) / "a" / f"{key}.json", {"status": status})
+                core.save_json(Path(tmp) / "a" / key / "article.json", {"title": f"T {key}", "body": "B"})
+            key, art = teaser.latest_article()  # the newest made one: the 7 January one waits in review
+            self.assertEqual((key, art["title"]), ("2029-12-31", "T 2029-12-31"))
+            for day, art_key, status in (("2029-12-31", "2029-12-31", "queued"), ("2030-01-01", "2029-12-31", "queued"),
+                                         ("2030-01-02", "2029-12-31", "review"), ("2029-12-30", "2029-12-24", "queued"),
+                                         ("2030-01-03", "2029-12-31", "queued")):
+                core.save_json(Path(tmp) / "t" / f"{day}.json", {"article": art_key, "status": status, "text": f"P {day}"})
+            self.assertEqual(teaser.past_posts("2029-12-31", date(2030, 1, 3)), ["P 2029-12-31", "P 2030-01-01"])
 
-    def test_most_viewed(self):
+    def test_a_hook_used_on_an_earlier_day(self):
         import teaser
-        from datetime import date
-        week = [(date(2029, 12, 30), {"title": "Sun"}), (date(2029, 12, 31), {"title": "Mon"}),
-                (date(2030, 1, 2), {"title": "Wed"})]
-        found = {"articles": [{"date": "2029-12-30", "post_id": "11", "views": 300},
-                              {"date": "2029-12-31", "post_id": "22", "views": 4200},
-                              {"date": "2029-12-27", "post_id": "33", "views": 90000},  # not this week's
-                              {"date": "2030-01-02", "post_id": "", "views": 99000}]}  # no post id
-        day, art, hit = teaser.most_viewed(found, week)
-        self.assertEqual((str(day), art["title"], hit["post_id"]), ("2029-12-31", "Mon", "22"))
-        found["articles"][0]["views"] = 4200  # a tie: the newest wins
-        self.assertEqual(teaser.most_viewed(found, week)[2]["post_id"], "22")
-        self.assertIsNone(teaser.most_viewed({"articles": []}, week))
+        past = ["claude code users\nOne number predicted my bill.\n\nBody."]
+        self.assertEqual(teaser.hook_line("people running agents\none NUMBER predicted my bill!\n\nOther."),
+                         teaser.hook_line(past[0]))
+        self.assertNotEqual(teaser.hook_line("claude code users\nthe cheaper build won.\n\nBody."),
+                            teaser.hook_line(past[0]))
 
 
 class Viral(unittest.TestCase):
@@ -418,6 +416,7 @@ class Viral(unittest.TestCase):
     def test_three_random_times_two_hours_apart(self):
         import random
         import viral
+        self.enterContext(with_cfg(SWITCHED_OFF))
         for seed in range(40):
             ts = viral.pick_times(random.Random(seed))
             mins = [viral.minutes(t) for t in ts]

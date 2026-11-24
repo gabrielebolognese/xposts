@@ -24,10 +24,11 @@ c["runner"].update(idle_minutes=1, error_pause_minutes=0)
 c["retries"]["transient_backoff_seconds"] = []
 c["discovery"]["searches_per_day"] = 1
 c["virality"]["max_per_day"] = 20  # the scenarios make many threads in one day
-c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699)  # no xAutoReply in the test copy
-c["article"].update(min_words=150, lock_port=47698, days=["mon", "wed", "sun"])  # the fixture article is short; the
-c["teaser"].update(lock_port=47697, day="fri")  # scheduled articles and the Friday post are off, their tests still run
-c["viral"].update(lock_port=47696)
+c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699, days=["tue", "thu", "sat"])  # no xAutoReply in
+# the test copy; the trending and viral posts are switched off, their tests still run
+c["article"].update(min_words=150, lock_port=47698)  # the fixture article is short
+c["teaser"].update(lock_port=47697)
+c["viral"].update(lock_port=47696, runs_per_day=3)
 c["slots"]["times"] = ["07:00"]  # the scenarios count slots one a day
 c["own_posts"]["file"] = "../xar/data/own_posts.jsonl"  # a test inbox next to the work copy, never the real xAutoReply
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
@@ -320,16 +321,16 @@ grep -q '"status": "gave_up"' pipeline/data/trend/2030-01-05.json && [ -z "$(cal
 unset POSTS_TREND_FAKE
 ok "trending post: Monday nothing; nothing fits: skipped without a post; after 10:30: given up"
 
-# W: the X Article. Wednesday (2030-01-02) from 05:00: written, cover made, articles/<date>/article.html built with
+# W: the X Article. Monday (2029-12-31) from 05:00: written, cover made, articles/<date>/article.html built with
 #    the Post button; it opens at 09:00, once
 export POSTS_ARTICLE_FAKE=1
 : > "$FAKE_LOG"
-POSTS_ARTICLE_NOW=2030-01-02T04:59 python pipeline/lib/article.py
-[ ! -f pipeline/data/article/2030-01-02.json ] || fail "article ran before 05:00"
-POSTS_ARTICLE_NOW=2030-01-02T05:00 python pipeline/lib/article.py
+POSTS_ARTICLE_NOW=2029-12-31T04:59 python pipeline/lib/article.py
+[ ! -f pipeline/data/article/2029-12-31.json ] || fail "article ran before 05:00"
+POSTS_ARTICLE_NOW=2029-12-31T05:00 python pipeline/lib/article.py
 c="$(calls)"; [ "$c" = "article_write article_cover " ] || fail "article call order" "calls: $c"
-page=articles/2030-01-02/article.html
-[ -f "$page" ] && [ -f articles/2030-01-02/cover.png ] || fail "no article page" "$(tail -5 pipeline/logs/runner.log)"
+page=articles/2029-12-31/article.html
+[ -f "$page" ] && [ -f articles/2029-12-31/cover.png ] || fail "no article page" "$(tail -5 pipeline/logs/runner.log)"
 grep -q 'id="post"' "$page" && grep -q 'Two overnight Claude Code builds cost' "$page" || fail "page without the Post button or the title"
 python - "$page" <<'PY' || fail "the page data is broken"
 import json, re, sys
@@ -338,43 +339,45 @@ d = json.loads(re.search(r'<script id="data" type="application/json">(.*?)</scri
 assert d["cover"].startswith("data:image/png;base64,") and "<h2>The setup</h2>" in d["html"] and "**" not in d["text"]
 assert d["words"] > 150 and d["pillar"]
 PY
-grep -q '"status": "ready"' pipeline/data/article/2030-01-02.json || fail "article not ready"
-POSTS_ARTICLE_NOW=2030-01-02T09:00 python pipeline/lib/article.py
-grep -q '"status": "opened"' pipeline/data/article/2030-01-02.json || fail "article page not opened at 09:00"
+grep -q '"status": "ready"' pipeline/data/article/2029-12-31.json || fail "article not ready"
+POSTS_ARTICLE_NOW=2029-12-31T09:00 python pipeline/lib/article.py
+grep -q '"status": "opened"' pipeline/data/article/2029-12-31.json || fail "article page not opened at 09:00"
 grep -q "POST .*X article: the page is open in the browser" pipeline/logs/runner.log || fail "no POST line for the article"
-POSTS_ARTICLE_NOW=2030-01-02T09:30 python pipeline/lib/article.py
-POSTS_ARTICLE_NOW=2030-01-03T06:00 python pipeline/lib/article.py
-[ -z "$(calls)" ] && [ ! -f pipeline/data/article/2030-01-03.json ] || fail "article ran again or on a Thursday"
+POSTS_ARTICLE_NOW=2029-12-31T09:30 python pipeline/lib/article.py
+POSTS_ARTICLE_NOW=2030-01-02T06:00 python pipeline/lib/article.py
+[ -z "$(calls)" ] && [ ! -f pipeline/data/article/2030-01-02.json ] || fail "article ran again or on a Wednesday"
 unset POSTS_ARTICLE_FAKE
-ok "X article: Wednesday 05:00 written with its cover and page (Post button), opened at 09:00, once; not on a Thursday"
+ok "X article: Monday 05:00 written with its cover and page (Post button), opened at 09:00, once; not on a Wednesday"
 
-# F: the Friday post. Friday 2030-01-04 06:20: it finds the week's articles (Monday's and Wednesday's) on the profile
-#    with their views (fake reader), writes the post about the most viewed (Monday's) and queues
-#    queue/2030-01-04_0900 with post.txt and quote.txt; post.js quotes the article
+# F: the daily article post. Monday 2029-12-31, the article's own day: from 16:00 it looks for the article on the
+#    profile (fake reader); not there yet, so it looks again an hour later, then writes the post and queues
+#    queue/2029-12-31_1800 quoting it (post.js sends quote_tweet_id). Tuesday the post id is kept: no profile read,
+#    and the writer sees Monday's post. A day with nothing made by 23:00 is given up
 export POSTS_TREND_FAKE=1
 : > "$FAKE_LOG"
-cp pipeline/data/article/2030-01-02.json pipeline/data/article/2029-12-31.json
-mkdir -p pipeline/data/article/2029-12-31 && cp pipeline/data/article/2030-01-02/article.json pipeline/data/article/2029-12-31/
-POSTS_TEASER_NOW=2030-01-04T06:20 python pipeline/lib/teaser.py
-c="$(calls)"; [ "$c" = "teaser_find teaser_write " ] || fail "Friday post call order" "calls: $c"
-[ -f queue/2030-01-04_0900/post.txt ] && [ "$(cat queue/2030-01-04_0900/quote.txt)" = 1900000000000000777 ]   || fail "no Friday post queued with the quote" "$(tail -5 pipeline/logs/runner.log)"
-grep -q '"article": "2029-12-31"' pipeline/data/teaser/2030-01-04.json && grep -q '"views": 5400' pipeline/data/teaser/2030-01-04.json || fail "Friday post did not pick the most viewed article"
-POSTS_TEASER_NOW=2030-01-04T07:00 python pipeline/lib/teaser.py
-[ -z "$(calls)" ] || fail "Friday post ran twice"
+POSTS_TEASER_NOW=2029-12-31T15:59 python pipeline/lib/teaser.py
+[ ! -f pipeline/data/teaser/2029-12-31.json ] && [ -z "$(calls)" ] || fail "article post ran before 16:00"
+FAKE_TEASER_NONE=1 POSTS_TEASER_NOW=2029-12-31T16:00 python pipeline/lib/teaser.py
+c="$(calls)"; [ "$c" = "teaser_find " ] && [ ! -d queue/2029-12-31_1800 ] && grep -q '"status": "waiting"' pipeline/data/teaser/2029-12-31.json   || fail "article not on the profile: not waiting" "calls: $c"
+POSTS_TEASER_NOW=2029-12-31T16:30 python pipeline/lib/teaser.py
+[ -z "$(calls)" ] || fail "the profile was read again within the hour"
+POSTS_TEASER_NOW=2029-12-31T17:00 python pipeline/lib/teaser.py
+c="$(calls)"; [ "$c" = "teaser_find teaser_write " ] || fail "article post call order" "calls: $c"
+[ -f queue/2029-12-31_1800/post.txt ] && [ "$(cat queue/2029-12-31_1800/quote.txt)" = 1900000000000000777 ]   || fail "no article post queued with the quote" "$(tail -5 pipeline/logs/runner.log)"
+grep -q '"post_id": "1900000000000000777"' pipeline/data/article/2029-12-31.json || fail "the article post id was not kept"
+POSTS_TEASER_NOW=2029-12-31T17:30 python pipeline/lib/teaser.py
+[ -z "$(calls)" ] || fail "article post ran twice in a day"
+POSTS_TEASER_NOW=2030-01-01T16:00 python pipeline/lib/teaser.py
+c="$(calls)"; [ "$c" = "teaser_write " ] && [ "$(cat queue/2030-01-01_1800/quote.txt 2>/dev/null)" = 1900000000000000777 ]   || fail "Tuesday article post: not queued without a profile read" "calls: $c $(tail -3 pipeline/logs/runner.log)"
+grep -q "one number predicted my whole bill" pipeline/data/teaser/2030-01-01/calls/*-write.prompt.md   || fail "Tuesday's writer did not see Monday's post"
+POSTS_TEASER_NOW=2030-01-02T23:00 python pipeline/lib/teaser.py
+grep -q '"status": "gave_up"' pipeline/data/teaser/2030-01-02.json && [ -z "$(calls)" ] || fail "late day not given up"
 due="$(python -c 'import sys; sys.path.insert(0, "pipeline/lib"); import core; print(core.slot_name(core.now_rome()))')"
-mv queue/2030-01-04_0900 "queue/$due"
+mv queue/2029-12-31_1800 "queue/$due"
 out="$(POSTS_FAKE_X=1 node post.js 2>&1)"
 printf '%s' "$out" | grep -q '"quote_tweet_id":"1900000000000000777"' || fail "post.js did not quote the article" "$out"
-# the week after: no article was made that Wednesday, so no Friday post and no model call
-POSTS_TEASER_NOW=2030-01-11T06:20 python pipeline/lib/teaser.py
-grep -q '"status": "skipped"' pipeline/data/teaser/2030-01-11.json && [ -z "$(calls)" ] || fail "Friday post without an article"
-# an article made but not on the profile (not posted): skipped after the read, nothing queued
-cp pipeline/data/article/2030-01-02.json pipeline/data/article/2030-01-16.json
-mkdir -p pipeline/data/article/2030-01-16 && cp pipeline/data/article/2030-01-02/article.json pipeline/data/article/2030-01-16/
-FAKE_TEASER_NONE=1 POSTS_TEASER_NOW=2030-01-18T06:20 python pipeline/lib/teaser.py
-c="$(calls)"; [ "$c" = "teaser_find " ] && [ ! -d queue/2030-01-18_0900 ] || fail "article not on the profile" "calls: $c"
 unset POSTS_TREND_FAKE
-ok "Friday post: found the week's articles, queued 2030-01-04_0900 quoting the most viewed (post.js sends quote_tweet_id); no article or not posted: no post"
+ok "article post: Monday waited for the article on the profile, then queued 2029-12-31_1800 quoting it (post.js sends quote_tweet_id); Tuesday without a profile read and with a new hook; late: given up"
 
 # V: viral posts (Monday 2030-02-04). A check finds a viral post (412 followers, 48,200 views): repurposed and queued
 #    at the next free minute. The next check skips it (used) and takes the viral X Article: with this week's budget

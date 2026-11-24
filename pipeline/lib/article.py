@@ -1,5 +1,5 @@
-"""The X Articles, 3 a week on article.days (Monday, Wednesday, Sunday). run.sh runs this every minute. On those days,
-from article.start (05:00), once:
+"""The X Article, once a week on article.days (Monday). run.sh runs this every minute. On that day, from article.start
+(05:00), once:
   1. the pillar of the article (pipeline/article-pillars.json, one per article in turn from article.first_date):
      automation playbook, free alternative, viral breakdown, growth myth
   2. the data for it from this PC: the thread pipeline's funnel, the tools it found and scored, this week's trends
@@ -13,8 +13,9 @@ from article.start (05:00), once:
 At article.time (09:00), or when it is ready later, the page opens in the browser. Posting is by hand: X has no API
 for Articles. A failed try runs once more after 10 minutes; not ready by article.give_up (18:00): skipped that day.
 State: pipeline/data/article/<date>.json; model calls: pipeline/data/article/<date>/.
-Since 2026-11-21 article.days is empty: articles come from lib/viral.py, which calls make_viral() for an X Article
-that went viral (its hook as the brief, the page opened at once; key <date>, or <date>-2 for a second one that day).
+lib/viral.py (switched off since 2026-11-24) calls make_viral() for an X Article that went viral (its hook as the
+brief, the page opened at once; key <date>, or <date>-2 for a second one that day). Every day lib/teaser.py posts about
+the latest article, quoting it.
   python pipeline/lib/article.py --now     make today's article now, whatever the day (the runner opens it)
 """
 from __future__ import annotations

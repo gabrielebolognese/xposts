@@ -3,7 +3,7 @@
 fixtures.json, where {NAME} and {REPO} become the tool the prompt is about. Environment switches: FAKE_LOG (append
 each stage name), FAKE_TOOL (the name a category search finds), FAKE_EDITOR_FAIL, FAKE_VIRAL=<score> (the virality
 evaluation lands near that final score instead of 85), FAKE_FAIL_STAGE=<stage> (that stage fails like a broken call),
-FAKE_TREND_NONE (nothing on the Trending tab fits the niche), FAKE_TEASER_NONE (none of the week's articles is on the profile),
+FAKE_TREND_NONE (nothing on the Trending tab fits the niche), FAKE_TEASER_NONE (the article is not on the profile),
 FAKE_VIRAL_NONE (no post over the views threshold in the timeline), FAKE_VIRAL_ARTICLE (only a new viral X Article).
 """
 import json
@@ -51,6 +51,8 @@ if stage == "trend_read" and os.environ.get("FAKE_TREND_NONE"):
     out["candidates"] = []
 if stage == "teaser_find" and os.environ.get("FAKE_TEASER_NONE"):
     out.update(status="not_found", articles=[])
+if stage == "teaser_write" and "(none: this is the first post" not in prompt:  # a later day: a new hook
+    out["post"] = out["post"].replace("one number predicted my whole bill.", "the cheaper build was the better one.")
 if stage == "viral_read" and os.environ.get("FAKE_VIRAL_NONE"):
     out["posts"] = []
 if stage == "viral_read" and os.environ.get("FAKE_VIRAL_ARTICLE"):  # only a new X Article post

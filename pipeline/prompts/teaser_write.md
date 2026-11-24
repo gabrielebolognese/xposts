@@ -8,6 +8,14 @@ Title: {{TITLE}}
 
 {{ARTICLE}}
 
+## The posts before this one
+
+One post about this article goes out every day while it is the newest. These already went out:
+
+{{PAST}}
+
+Yours must read as a new post next to them: a different hook (both lines), a different detail teased, a different way into the article. Never reuse their sentences.
+
 ## The job: curiosity, not a summary
 
 The post is NOT a summary. Someone who reads the post must want the article, and must NOT get what the article gives them. If the reader could skip the article after your post, the post failed.

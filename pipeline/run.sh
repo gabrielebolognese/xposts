@@ -3,13 +3,11 @@
 # Start it in Git Bash from the x-autopost folder:
 #   bash pipeline/run.sh          posts what is due every 30 seconds (the X keys come from .env), searches categories
 #                                 for tools, turns the best ones into threads scored for virality, and keeps queue/
-#                                 filled with the highest scored ones (2 a day, each part with its image); on Tuesday, Thursday
-#                                 and Saturday it reads X's Trending tab
-#                                 from 06:20 and queues a trending post for 09:00 (pipeline/lib/trend.py); 3 times a
-#                                 day at random times it looks for viral outliers in the timeline and repurposes the
-#                                 best one, with an X Article when it is one (pipeline/lib/viral.py, at most 3 articles
-#                                 a week, posted by hand). The scheduled articles and the Friday post are switched off
-#                                 in pipeline/config.json (article.days, teaser.day).
+#                                 filled with the highest scored ones (2 a day at 07:00 and 12:00, each part with its
+#                                 image); the build-in-public post at 14:00 (pipeline/lib/bip.py); every Monday an X
+#                                 Article to post by hand (pipeline/lib/article.py); every day at 18:00 a post quoting
+#                                 the latest article (pipeline/lib/teaser.py). The trending and viral posts are
+#                                 switched off in pipeline/config.json (trend.days, viral.runs_per_day).
 #                                 Runs until you press Ctrl+C, then prints what it did. Nothing posts while it is stopped.
 #   bash pipeline/run.sh --once   stops after one thread (ready or sent to review)
 #   bash pipeline/run.sh --posts N  stops once N threads are ready (threads sent to review do not count); it searches
@@ -57,22 +55,22 @@ if [ -z "${POSTS_NO_BIP:-}" ]; then   # the daily build-in-public post: a form o
   bip=$!
 fi
 trend=""
-if [ -z "${POSTS_NO_TREND:-}" ]; then   # the trending post (Tue, Thu, Sat 09:00): reads X's Trending tab from 06:20
+if [ -z "${POSTS_NO_TREND:-}" ]; then   # the trending post (trend.days empty: switched off)
   ( while :; do $PY pipeline/lib/trend.py; sleep 60; done ) &
   trend=$!
 fi
 article=""
-if [ -z "${POSTS_NO_ARTICLE:-}" ]; then   # scheduled X Articles on article.days (none now: they come from viral.py)
+if [ -z "${POSTS_NO_ARTICLE:-}" ]; then   # the X Article on article.days (Monday), written from 05:00, opened at 09:00
   ( while :; do $PY pipeline/lib/article.py; sleep 60; done ) &
   article=$!
 fi
 teaser=""
-if [ -z "${POSTS_NO_TEASER:-}" ]; then   # the Friday post quoting an article (teaser.day "off": switched off)
+if [ -z "${POSTS_NO_TEASER:-}" ]; then   # the daily 18:00 post quoting the latest X Article
   ( while :; do $PY pipeline/lib/teaser.py; sleep 60; done ) &
   teaser=$!
 fi
 viral=""
-if [ -z "${POSTS_NO_VIRAL:-}" ]; then   # viral outliers from the timeline, 3 times a day at random times, repurposed
+if [ -z "${POSTS_NO_VIRAL:-}" ]; then   # viral outliers from the timeline (viral.runs_per_day 0: switched off)
   ( while :; do $PY pipeline/lib/viral.py; sleep 60; done ) &
   viral=$!
 fi

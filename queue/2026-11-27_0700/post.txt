@@ -1,0 +1,3 @@
+Google open-sourced a Claude Code and Codex plugin that finds where your docs and code disagree.
+
+How it works, setup commands, and the catch:

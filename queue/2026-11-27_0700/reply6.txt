@@ -1,0 +1,18 @@
+6. Go to GitHub and search for: google/elephant-goldfish-model. Or do a web search for: Elephant-Goldfish Model EGM.
+
+1. Claude Code (version 2.1.271 or later):
+claude plugin marketplace add google/elephant-goldfish-model
+claude plugin install egm@egm
+
+2. Codex CLI:
+codex plugin marketplace add google/elephant-goldfish-model
+codex plugin add egm@egm
+
+3. On Antigravity CLI, use the install line in the repo README.
+
+4. Start a new session after installing.
+
+5. Review a doc you already have:
+/egm:egm-review docs/designs/webhooks.md
+
+6. Run the Drift report skill on your design docs folder. For each mismatch, decide whether to fix the doc or the code.

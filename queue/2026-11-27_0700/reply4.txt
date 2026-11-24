@@ -1,0 +1,3 @@
+4. It works on more than code docs. The built-in draft and design review flow targets software specs. For other documents, you pick the reviewers and standards with /egm-review-loop.
+
+v0.1.1, released 2026-11-06, also added a TRIZ inventive catalyst reviewer and improved how reviews handle context.

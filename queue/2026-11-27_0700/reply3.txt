@@ -1,0 +1,5 @@
+3. The isolation is enforced. If your agent cannot create fresh subagents, EGM stops the review.
+
+In Claude Code, isolation needs version 2.1.271 or later. Update before you trust the results.
+
+Claude Code, Codex and Antigravity CLI pass the project's automated installation and end-to-end workflow fixtures. v0.1.1 added experimental Cursor, OpenCode V1 and GitHub Copilot adapters.

@@ -1,0 +1,6 @@
+2. Start with the Drift report skill. Point it at a folder of design docs. The agent compares each doc with the current source code and reports where they diverge. You decide whether to update the doc or the code.
+
+To check one doc, README or PR plan against the live code, you don't need to write a new spec:
+/egm:egm-review docs/designs/webhooks.md
+
+Fresh agents review it across 5 stages. They check the design, its clarity, its fit with the code and its implementation plan.

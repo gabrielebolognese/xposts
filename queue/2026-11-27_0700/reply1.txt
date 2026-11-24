@@ -1,0 +1,5 @@
+1. When an agent drafts a spec and reviews it in the same long chat, the review shares the same blind spots. Specs also drift away from the code over time.
+
+Elephant-Goldfish Model (EGM) splits those jobs. The Elephant holds your project context and drafts. Goldfish reviewers run in fresh subagents. They see only the document and the source it references, not the earlier conversation.
+
+It lives in the google GitHub org, is Apache-2.0 licensed and has 20,789 stars.

@@ -1,1 +1,0 @@
-2. It ships with 40+ built-in providers, and you can add any OpenAI-compatible endpoint. It also works the other way around: the same gateway serves Claude Code, Claude Desktop and Grok Build, not just Codex. It is MIT licensed, has 18,696 stars on GitHub and shipped v2.100.8 on 2026-11-21. Development is very active.

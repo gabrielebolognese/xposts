@@ -1,3 +1,0 @@
-In FalkorDB's Django test, Claude Code went from 22% to 92% accuracy with this free codegraph.
-
-How it works, the 2-command setup, and the catches:

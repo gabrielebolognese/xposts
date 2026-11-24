@@ -1,1 +1,0 @@
-5. Other tools work too. Set the tool's OpenAI-compatible base URL to localhost:10100/v1, or its Anthropic base URL to localhost:10100. By default the gateway binds to 127.0.0.1 and needs no extra auth. Exposing it beyond your own machine requires an auth token.

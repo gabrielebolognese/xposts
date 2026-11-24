@@ -1,3 +1,0 @@
-Codex can run on Claude. Claude Code can run on Gemini. One local gateway, zero client patches.
-
-What it does, how to set it up, and the catch:

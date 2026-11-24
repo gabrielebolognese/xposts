@@ -15,3 +15,17 @@ __pycache__/
 
 # the weekly X Article pages and covers stay on this PC
 articles/
+
+# thread images: made on this PC from pipeline/runs and posted from here, never committed
+queue/*/post.png
+queue/*/post.jpg
+queue/*/reply*.png
+queue/*/reply*.jpg
+posted/*/post.png
+posted/*/post.jpg
+posted/*/reply*.png
+posted/*/reply*.jpg
+missed/*/post.png
+missed/*/post.jpg
+missed/*/reply*.png
+missed/*/reply*.jpg

@@ -15,6 +15,7 @@ cp "$SRC/scheduler.js" "$SRC/post.js" "$SRC/post-now.js" "$SRC/package.json" "$S
 cp -r "$SRC/.claude/skills/x-threads" "$W/.claude/skills/"
 for d in lib prompts schemas vendor tests; do cp -r "$SRC/pipeline/$d" "$W/pipeline/"; done
 cp "$SRC/pipeline/run.sh" "$SRC/pipeline/categories.json" "$SRC/pipeline/article.html" "$SRC/pipeline/article-pillars.json" "$W/pipeline/"
+cp "$SRC/pipeline/thread-card.html" "$SRC/pipeline/thread-style.css" "$W/pipeline/"
 python - "$SRC/pipeline/config.json" "$W/pipeline/config.json" <<'EOF'
 import json, sys
 c = json.load(open(sys.argv[1], encoding="utf-8"))
@@ -27,6 +28,7 @@ c["trend"].update(chrome_ports=[], xautoreply="", lock_port=47699)  # no xAutoRe
 c["article"].update(min_words=150, lock_port=47698, days=["mon", "wed", "sun"])  # the fixture article is short; the
 c["teaser"].update(lock_port=47697, day="fri")  # scheduled articles and the Friday post are off, their tests still run
 c["viral"].update(lock_port=47696)
+c["slots"]["times"] = ["07:00"]  # the scenarios count slots one a day
 c["own_posts"]["file"] = "../xar/data/own_posts.jsonl"  # a test inbox next to the work copy, never the real xAutoReply
 json.dump(c, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
 EOF
@@ -39,7 +41,7 @@ git -C "$W" config core.autocrlf false
 git -C "$W" add -A && git -C "$W" commit -qm init
 git -C "$W" remote add origin "$T/remote.git" && git -C "$W" push -q -u origin main 2>/dev/null
 
-export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1 POSTS_NO_ARTICLE=1 POSTS_NO_TEASER=1 POSTS_NO_VIRAL=1
+export POSTS_CLAUDE="$W/pipeline/tests/fake_claude.py" POSTS_FAKE_X=1 POSTS_DISCOVER_FAKE=1 FAKE_LOG="$T/calls.log" POSTS_NO_BIP=1 POSTS_NO_TREND=1 POSTS_NO_ARTICLE=1 POSTS_NO_TEASER=1 POSTS_NO_VIRAL=1 POSTS_IMAGES_FAKE=1
 cd "$W" || exit 1
 
 seed() {  # seed <tool name>: a pending discovery, as a category search would leave it
@@ -73,6 +75,7 @@ out="$(bash pipeline/run.sh --once 2>&1)"
 slot="$(ls queue 2>/dev/null | head -1)"
 [ -n "$slot" ] && [ -f "queue/$slot/post.txt" ] || fail "no queue folder" "$out"
 [ "$(ls queue/$slot | grep -c '^reply[0-9]*\.txt$')" = 5 ] || fail "not 5 reply files" "$(ls queue/$slot)"
+[ "$(ls queue/$slot | grep -cE '^(post|reply[1-5])\.png$')" = 6 ] || fail "not an image for each of the 6 parts" "$(ls queue/$slot)"
 grep -q "^5\. Go to GitHub and search for: fakeorg/" "queue/$slot/reply5.txt" || fail "no access reply" "$(cat "queue/$slot/reply5.txt")"
 (cat "queue/$slot/post.txt"; for i in 1 2 3 4 5; do printf '\n#--#\n'; cat "queue/$slot/reply$i.txt"; done) > "$T/thread.txt"
 node .claude/skills/x-threads/check.mjs "$T/thread.txt" >/dev/null || fail "queued thread breaks the rulebook" "$(node .claude/skills/x-threads/check.mjs "$T/thread.txt")"
@@ -80,7 +83,7 @@ node .claude/skills/x-threads/check.mjs "$T/thread.txt" >/dev/null || fail "queu
 [ "$(git --git-dir="$T/remote.git" log -1 --format=%s main)" = "pipeline: arrange the thread queue" ] || fail "not pushed" "$out"
 printf '%s' "$out" | grep -q "Stopped. This session: 1 threads ready, 0 sent to review/, 0 dropped, 1 category searches. 1 threads are scheduled, through" || fail "stop summary" "$out"
 [ ! -f pipeline/.lock ] || fail "lock left behind"
-c="$(calls)"; [ "$c" = "discover analyze score hooks hook_critic thread editor virality " ] || fail "unexpected call order" "calls: $c"
+c="$(calls)"; [ "$c" = "discover analyze score hooks hook_critic thread editor virality thread_images thread_images_critic " ] || fail "unexpected call order" "calls: $c"
 [ "$(rotation_last)" = 201 ] || fail "rotation not at the first category (201)"
 [ "$(status_of "Claude Code skills Tool")" = ready ] || fail "discovery not marked ready"
 ok "search, analyze ... virality: thread arranged into $slot and pushed, summary printed, rotation at the first category"
@@ -115,7 +118,7 @@ grep -q '"stage": "thread"' "$run/state.json" || fail "state not at thread" "$(c
 : > "$FAKE_LOG"
 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 0 ] || fail "resume exit $rc"
-c="$(calls)"; [ "$c" = "thread editor virality " ] || fail "resume redid earlier stages" "calls: $c"
+c="$(calls)"; [ "$c" = "thread editor virality thread_images thread_images_critic " ] || fail "resume redid earlier stages" "calls: $c"
 [ "$(slot_of "Resumable tool")" = "$(nth_slot 2)" ] || fail "second thread not in the second slot"
 ok "failure in thread: the next step resumed at thread; the thread took the second slot"
 
@@ -134,7 +137,7 @@ ok "virality 94 beats 85: it took $(nth_slot 1), the others moved back one slot 
 seed "Weak hook tool"
 FAKE_VIRAL=75 python pipeline/lib/step.py >/dev/null 2>&1; rc=$?
 [ $rc = 0 ] || fail "weak hook exit $rc"
-c="$(calls)"; [ "$c" = "analyze score hooks hook_critic thread editor virality virality_hooks hook_score virality " ] \
+c="$(calls)"; [ "$c" = "analyze score hooks hook_critic thread editor virality virality_hooks hook_score virality thread_images thread_images_critic " ] \
   || fail "hook optimization order" "calls: $c"
 python -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["hook"].startswith("Stop overpaying"), d["hook"]' \
   "$(ls -td pipeline/runs/* | head -1)/draft.json" || fail "the hook was not replaced"

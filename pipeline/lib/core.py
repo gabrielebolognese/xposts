@@ -85,7 +85,7 @@ COLORS = {
     "DROP": ORANGE, "MISSED": ORANGE, "REVIEW": ORANGE,   # discarded, missed its time, or sent to review/
     "ERROR": RED, "WARN": YELLOW,
     "SLOT": BLUE, "POST": BLUE, "IDLE": BLUE, "LIMIT": BLUE,  # important status: queue changes, posting, waiting
-    "TREND": BLUE, "ARTICLE": BLUE, "VIRAL": BLUE,  # trending post, X Article, viral posts
+    "TREND": BLUE, "ARTICLE": BLUE, "VIRAL": BLUE, "IMAGES": BLUE,  # trending post, X Article, viral, thread images
 }  # every other tag (STEP, PICK, SEARCH, SCORE, HOOK...) is routine progress: dark gray
 
 

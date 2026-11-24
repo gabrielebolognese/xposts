@@ -64,7 +64,7 @@ While the runner is on, posts go out within about 30 seconds of their time. When
 
 ## Auto threads
 
-A runner discovers tools, skills and workflows for Claude Code and Codex, writes an X thread about the best ones, scores each thread for virality, and keeps `queue/` filled with the highest scored threads: 1 a day at 07:00 (Italian time), at most 4 days ahead. Start it in Git Bash from this folder:
+A runner discovers tools, skills and workflows for Claude Code and Codex, writes an X thread about the best ones, scores each thread for virality, and keeps `queue/` filled with the highest scored threads: 2 a day, at 07:00 and 12:00 (Italian time), at most 4 days ahead. Every part of every thread, the main post and each reply, carries its own image. Start it in Git Bash from this folder:
 
 ```
 bash pipeline/run.sh
@@ -72,10 +72,10 @@ bash pipeline/run.sh
 
 It keeps going until you press Ctrl+C, then prints what it did, through which day threads are scheduled and how many wait in the virality queue. This is the always-on runner: once the day's threads are made it waits, and at midnight the next day's generation starts. A stopped run picks up where it left off next time.
 
-- `bash pipeline/run.sh --posts 20` makes 20 threads and stops: use it once to fill the queue. To reach the number it searches more categories than the usual 2 a day.
+- `bash pipeline/run.sh --posts 20` makes 20 threads and stops: use it once to fill the queue. To reach the number it searches more categories than the usual 3 a day.
 - `bash pipeline/run.sh --once` stops after one thread.
 
-**Discovery.** The runner works through the 18 Claude Code and Codex categories in `pipeline/categories.json` in order, 2 category searches a day, and starts a new cycle after the last one. Each search collects signals from GitHub, Hacker News, Reddit and Hugging Face, then Sonnet searches the web around them. Every tool found is stored once in `pipeline/data/discoveries.json`; a tool comes back only for a meaningful change (a new release, a pricing change), at least 60 days after its thread. To add a category, add a line to `categories.json` with the next id.
+**Discovery.** The runner works through the 18 Claude Code and Codex categories in `pipeline/categories.json` in order, 3 category searches a day, and starts a new cycle after the last one. Each search collects signals from GitHub, Hacker News, Reddit and Hugging Face, then Sonnet searches the web around them. Every tool found is stored once in `pipeline/data/discoveries.json`; a tool comes back only for a meaningful change (a new release, a pricing change), at least 60 days after its thread. To add a category, add a line to `categories.json` with the next id.
 
 **Each thread goes through these stages** (Opus from here on):
 1. Analyze: the official repo, docs, releases, license and pricing are verified, with facts and sources. Archived, abandoned, unsafe or unverifiable projects are dropped.
@@ -84,16 +84,25 @@ It keeps going until you press Ctrl+C, then prints what it did, through which da
 4. Thread: the main post (a hook line of at most 100 characters and a promise line, at most 150 in total), then 4 to 7 replies, numbered 1. 2. 3., at most 560 characters each, every one with a real number. The last reply is a mini setup guide of up to 1,000 characters that says how to find the tool (a GitHub search or a DM or comment CTA), never a link. Rules: `.claude/skills/x-threads/SKILL.md`.
 5. Quality control and up to 3 fix rounds.
 6. Virality: hook score and full-thread score out of 100 (final = hook x 0.65 + thread x 0.35), from the rules in `pipeline/prompts/virality.md`. Under 80, alternative hooks are tried first. Under 70, the thread is dropped.
+7. Images: one 4:5 image (1080x1350, rendered at 2x) for every part, in one house style (see Thread images below).
 
-**The virality queue.** Finished threads wait in `pipeline/data/virality.json`. The highest scores always go out first: before every step the runner puts the best threads into the next free slots, so a new thread that beats the ones already scheduled takes the earliest slot and pushes the others back, out of `queue/` when they no longer fit. A thread not posted within 7 days of being made expires. Slots that are due within 15 minutes are never changed. `python pipeline/lib/virality.py` lists the queue with scores. The runner makes 1 to 3 threads a day (it searches up to 4 categories when none is ready yet) and starts a new day's generation at midnight.
+**The virality queue.** Finished threads wait in `pipeline/data/virality.json`. The highest scores always go out first: before every step the runner puts the best threads into the next free slots, so a new thread that beats the ones already scheduled takes the earliest slot and pushes the others back, out of `queue/` when they no longer fit. A thread not posted within 7 days of being made expires. Slots that are due within 15 minutes are never changed. `python pipeline/lib/virality.py` lists the queue with scores. A thread gets a slot only once all its images exist. The runner makes 2 to 3 threads a day (it searches up to 6 categories while fewer than 2 are ready) and starts a new day's generation at midnight.
 
-**Threads in `queue/`:** a folder holds `post.txt` (the main post) and `reply1.txt`, `reply2.txt` and so on. `post.js` posts the main post, then each reply under the previous one, a random 10 to 40 seconds apart. It writes the posted ids to `thread.json`, so a thread that stops halfway resumes at the next reply on the next run, and a started thread is always finished, never moved to `missed/`.
+**Threads in `queue/`:** a folder holds `post.txt` (the main post) and `reply1.txt`, `reply2.txt` and so on, each with its image (`post.png`, `reply1.png` ...; the images are not committed to git). `post.js` posts the main post, then each reply under the previous one with its own image, a random 10 to 40 seconds apart. It writes the posted ids to `thread.json`, so a thread that stops halfway resumes at the next reply on the next run, and a started thread is always finished, never moved to `missed/`.
 
 Threads that still fail quality control after the fix rounds land in `pipeline/review/` with a NEEDS REVIEW note. A DM or comment CTA means you answer those people yourself.
 
+**Thread images.** Once the text is final (`pipeline/lib/thread_images.py`):
+1. Opus draws one diagram per part (`pipeline/prompts/thread_images.md`), in the house style: a white background, black only, cards with the text inside them joined by arrows, three fonts (a sans for card titles, a serif for card text, a mono for commands), and nothing decorative (no colours, icons, kickers, titles or labels outside the cards). The reply that introduces the tool has a real screenshot of its GitHub page (`pipeline/lib/github-shot.mjs`, logged out, light theme) as one of its cards.
+2. The page is `pipeline/thread-card.html` with `pipeline/thread-style.css`. `pipeline/lib/article-shot.mjs` renders it with no network and reports anything that spills out, text outside a card or an arrow, and overlapping cards.
+3. Code checks each diagram: at least 2 cards and an arrow, black, white and greys only, no shadows, gradients or images, no dashes, emojis or web addresses, at most 70 words, every number found in the thread or its facts. An Opus critic then looks at every image (`pipeline/prompts/thread_images_critic.md`) and scores it against the style; under 8 it is redone, at most 2 fix rounds. A part that still fails gets a plain two-card diagram with its first sentence, so no part goes out without an image.
+4. The images go to `pipeline/runs/<run>/images/` and are copied into the queue folder. Threads made before this existed get their images when the runner has nothing else to do; they get a slot only once they have them.
+
+Make or remake one thread's images: `python pipeline/lib/thread_images.py --run <run folder name>`. Settings: the `images` block and the `thread_images*` models in `pipeline/config.json`.
+
 **Dashboard.** `npm run dashboard` opens http://localhost:3001: every thread the runner is making or has made, live (its stage, the hook, the full thread with character counts, the virality score, its slot or why it was dropped), the next slots and the runner log. It refreshes every few seconds and only reads the runner's files.
 
-**Post thread now** (on any finished thread in the dashboard) posts that thread on X right away, outside the schedule: the runner's posting loop picks the request up within 30 seconds and posts the main post and the replies 10 to 40 seconds apart. It needs the runner to be running. Nothing else in the schedule changes: the thread is recorded in `pipeline/data/posted-now.json` so it never goes out again, and if it had a slot, its folder is removed and the slot goes to the next best thread. The card then links to the post on X.
+**Post thread now** (on any finished thread in the dashboard) posts that thread on X right away, outside the schedule: the runner's posting loop picks the request up within 30 seconds and posts the main post and the replies, each with its image, 10 to 40 seconds apart. It needs the runner to be running. Nothing else in the schedule changes: the thread is recorded in `pipeline/data/posted-now.json` so it never goes out again, and if it had a slot, its folder is removed and the slot goes to the next best thread. The card then links to the post on X.
 
 - **Settings:** models, slots, the daily searches, scores and limits live in `pipeline/config.json`.
 - **Local state (never committed):** `pipeline/data/` (rotation, searches, discoveries, virality queue, history), `pipeline/runs/` (every file of every thread), `pipeline/logs/`.

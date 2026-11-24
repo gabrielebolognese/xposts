@@ -17,6 +17,12 @@ const MIME = {
   '.mp4': 'video/mp4', // a video: X takes one video or up to 4 images per post
 };
 const isVideo = (f) => MIME[path.extname(f).toLowerCase()]?.startsWith('video/');
+// In a thread folder reply3.png is reply 3's image; every other image or video is the main post's
+const isReplyMedia = (f) => /^reply\d+\.[a-z0-9]+$/i.test(f) && Boolean(MIME[path.extname(f).toLowerCase()]);
+export function replyMedia(full, n) {
+  const f = fs.readdirSync(full).find((x) => isReplyMedia(x) && x.toLowerCase().startsWith(`reply${n}.`));
+  return f ? path.join(full, f) : null;
+}
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -39,30 +45,31 @@ const replyFiles = (full) =>
 const progressFile = (dir) => path.join(QUEUE, dir, 'thread.json');
 export const started = (dir) => fs.existsSync(progressFile(dir));
 
+// Uploads one image or video file and returns its media id
+export async function upload(client, file) {
+  const ext = path.extname(file).toLowerCase();
+  const buf = fs.readFileSync(file);
+  try {
+    // v2 upload endpoint (chunked; for a video it waits until X has processed it)
+    return await client.v2.uploadMedia(buf, {
+      media_type: MIME[ext],
+      media_category: isVideo(file) ? 'tweet_video' : ext === '.gif' ? 'tweet_gif' : 'tweet_image',
+    });
+  } catch (err) {
+    // fallback: v1.1 upload, which accepts OAuth 1.0a keys
+    console.log(`v2 upload failed for ${path.basename(file)}, trying v1.1:`, err?.code ?? err?.message);
+    return client.v1.uploadMedia(buf, { mimeType: MIME[ext] });
+  }
+}
+
 async function postMain(client, full, text) {
-  const files = fs.readdirSync(full).sort();
+  const files = fs.readdirSync(full).sort().filter((f) => !isReplyMedia(f));
   const video = files.find(isVideo);
   const images = video ? [video] : files.filter((f) => MIME[path.extname(f).toLowerCase()]).slice(0, 4);
   if (!text && images.length === 0) throw new Error('empty post (no post.txt and no image)');
 
   const mediaIds = [];
-  for (const img of images) {
-    const ext = path.extname(img).toLowerCase();
-    const buf = fs.readFileSync(path.join(full, img));
-    let id;
-    try {
-      // v2 upload endpoint (chunked; for a video it waits until X has processed it)
-      id = await client.v2.uploadMedia(buf, {
-        media_type: MIME[ext],
-        media_category: isVideo(img) ? 'tweet_video' : ext === '.gif' ? 'tweet_gif' : 'tweet_image',
-      });
-    } catch (err) {
-      // fallback: v1.1 upload, which accepts OAuth 1.0a keys
-      console.log(`v2 upload failed for ${img}, trying v1.1:`, err?.code ?? err?.message);
-      id = await client.v1.uploadMedia(buf, { mimeType: MIME[ext] });
-    }
-    mediaIds.push(id);
-  }
+  for (const img of images) mediaIds.push(await upload(client, path.join(full, img)));
 
   const payload = {};
   if (text) payload.text = text;
@@ -78,12 +85,16 @@ async function postMain(client, full, text) {
 }
 
 // Posts parts[ids.length...] as a chain: part 0 on its own (postFirst, or plain text), each next part as a reply to
-// the previous id, a random 10 to 40 seconds apart. A failed part is retried once after 30 s. ids grows as parts go
-// out and save() runs after each one, so a caller can resume a chain that stopped halfway.
-export async function chain(client, parts, ids = [], { save = () => {}, wait = sleep, postFirst = null, label = 'thread' } = {}) {
+// the previous id, a random 10 to 40 seconds apart. media[i] is a file attached to part i (or null). A failed part is
+// retried once after 30 s. ids grows as parts go out and save() runs after each one, so a caller can resume a chain
+// that stopped halfway; only the parts still to post upload their media.
+export async function chain(client, parts, ids = [], { save = () => {}, wait = sleep, postFirst = null, label = 'thread', media = [] } = {}) {
   const once = async (part) => {
-    if (part === 0) return postFirst ? postFirst() : (await client.v2.tweet({ text: parts[0] })).data.id;
-    const { data } = await client.v2.tweet({ text: parts[part], reply: { in_reply_to_tweet_id: ids.at(-1) } });
+    if (part === 0 && postFirst) return postFirst();
+    const payload = { text: parts[part] };
+    if (part > 0) payload.reply = { in_reply_to_tweet_id: ids.at(-1) };
+    if (media[part]) payload.media = { media_ids: [await upload(client, media[part])] };
+    const { data } = await client.v2.tweet(payload);
     return data.id;
   };
   for (let part = ids.length; part < parts.length; part++) {
@@ -113,7 +124,8 @@ export async function publish(dir, client, wait = sleep) {
 
   const ids = started(dir) ? JSON.parse(fs.readFileSync(progressFile(dir), 'utf8')).ids : [];
   const save = () => fs.writeFileSync(progressFile(dir), JSON.stringify({ ids }, null, 1) + '\n');
-  await chain(client, [text, ...replies], ids, { save, wait, postFirst: () => postMain(client, full, text), label: dir });
+  const media = [null, ...replies.map((_, i) => replyMedia(full, i + 1))];
+  await chain(client, [text, ...replies], ids, { save, wait, postFirst: () => postMain(client, full, text), label: dir, media });
   return { id: ids[0], replies: replies.length };
 }
 

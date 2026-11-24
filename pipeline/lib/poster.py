@@ -28,6 +28,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import core  # noqa: E402
 import stages  # noqa: E402
+import thread_images  # noqa: E402
 
 STAMP = core.DATA / "poster.json"
 REQUESTS = core.DATA / "post-now"
@@ -99,9 +100,14 @@ def post_now(req_file: Path) -> None:
         req_file.unlink()
         return
     out = core.DATA / "post-now" / f"{run}.ids.json"
-    thread = base64.b64encode(json.dumps(stages.thread_parts(draft), ensure_ascii=False).encode("utf-8")).decode()
+    parts = stages.thread_parts(draft)
+    thread = base64.b64encode(json.dumps(parts, ensure_ascii=False).encode("utf-8")).decode()
+    images = core.RUNS / run / thread_images.OUT  # each part's image, when the thread has them
+    media = [str(img) if (img := thread_images.image_of(images, name)) else None
+             for name in thread_images.part_names(len(parts))]
     core.say("POST", f"posting now from the dashboard: {run}")
-    p = node("post-now.js", {"THREAD": thread, "RUN": run, "POST_NOW_OUT": str(out)})
+    p = node("post-now.js", {"THREAD": thread, "RUN": run, "POST_NOW_OUT": str(out),
+                             "MEDIA": base64.b64encode(json.dumps(media).encode("utf-8")).decode()})
     report(p, posts=False)  # the POSTED line below says it once
     ids = core.load_json(out, {}).get("ids", [])
     out.unlink(missing_ok=True)

@@ -1,0 +1,78 @@
+/* The house style of every thread image, 1080x1350 rendered at 2x: a diagram on white. Black only: cards with the text
+   inside them, joined by black arrows. Three fonts with three jobs: a sans for card titles, a serif for what a card
+   says, a mono for commands and code. No colour, no shadows, no gradients, no decoration; text lives only in cards and
+   on arrows. System fonts only: the render blocks the network. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1350px; }
+body { background: #fff; color: #000; font-family: "Segoe UI", system-ui, sans-serif; overflow: hidden;
+       -webkit-font-smoothing: antialiased; }
+main {
+  width: 1080px; height: 1350px; padding: 72px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: safe center; align-items: stretch;
+}
+
+.fitbox { display: flex; flex-direction: column; align-items: stretch; width: 100%; margin: 0 auto; flex: none; }
+
+/* Cards: the only place text lives (besides an arrow's label) */
+.card { border: 3px solid #000; border-radius: 16px; background: #fff; padding: 30px 34px; min-width: 0; }
+.card.bold { border-width: 6px; }
+.card.dashed { border-style: dashed; }
+.card > * + * { margin-top: 10px; }
+.t { font-family: "Segoe UI", system-ui, sans-serif; font-weight: 700; font-size: 46px; line-height: 1.15; }
+.t.small { font-size: 36px; }
+.b { font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 37px; line-height: 1.35; }
+.c { font-family: "Cascadia Mono", "Cascadia Code", Consolas, monospace; font-size: 31px; line-height: 1.5;
+     white-space: pre-wrap; word-break: break-word; }
+.n { font-family: "Segoe UI", system-ui, sans-serif; font-weight: 800; font-size: 120px; line-height: 1;
+     font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+.n small { font-size: 0.45em; letter-spacing: 0; }
+.card ul, .card ol { padding-left: 44px; font-family: Georgia, Cambria, serif; font-size: 36px; line-height: 1.35; }
+.card li + li { margin-top: 8px; }
+
+/* Layout: a column (top to bottom) or a row (left to right) of cards and arrows, or a grid of cards */
+.col { display: flex; flex-direction: column; align-items: stretch; }
+.row { display: flex; flex-direction: row; align-items: stretch; }
+.row > .card, .row > .col { flex: 1 1 0; }
+.row > .card { display: flex; flex-direction: column; justify-content: center; } /* same height, text centred */
+.row > .card + .card, .row > .col + .col, .row > .card + .col, .row > .col + .card { margin-left: 28px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+/* A row of arrows, one over each card of the row below (or under each card of the row above): it lines up with a
+   .row of the same number of cards, so every arrow starts or lands on a card, never in the gap between two */
+.arrows { display: flex; flex: none; }
+.arrows > .arrow { flex: 1 1 0; width: auto; }
+.arrows > .arrow + .arrow { margin-left: 28px; }
+.gap { height: 28px; flex: none; }
+
+/* Arrows: <div class="arrow down"></div>, right, left, up; an optional <span> inside is the arrow's label */
+.arrow { position: relative; flex: none; }
+.arrow::before, .arrow::after { content: ""; position: absolute; }
+.arrow.down, .arrow.up { height: 88px; width: 100%; }
+.arrow.down::before, .arrow.up::before { left: 50%; width: 4px; margin-left: -2px; background: #000; }
+.arrow.down::before { top: 6px; bottom: 20px; }
+.arrow.up::before { top: 20px; bottom: 6px; }
+.arrow.down::after { left: 50%; bottom: 4px; margin-left: -13px; border-left: 13px solid transparent;
+                     border-right: 13px solid transparent; border-top: 20px solid #000; }
+.arrow.up::after { left: 50%; top: 4px; margin-left: -13px; border-left: 13px solid transparent;
+                   border-right: 13px solid transparent; border-bottom: 20px solid #000; }
+.arrow.right, .arrow.left { width: 84px; height: 60px; align-self: center; }
+.arrow.right::before, .arrow.left::before { top: 50%; height: 4px; margin-top: -2px; background: #000; }
+.arrow.right::before { left: 6px; right: 20px; }
+.arrow.left::before { left: 20px; right: 6px; }
+.arrow.right::after { right: 4px; top: 50%; margin-top: -13px; border-top: 13px solid transparent;
+                      border-bottom: 13px solid transparent; border-left: 20px solid #000; }
+.arrow.left::after { left: 4px; top: 50%; margin-top: -13px; border-top: 13px solid transparent;
+                     border-bottom: 13px solid transparent; border-right: 20px solid #000; }
+.arrow span { position: absolute; font-family: "Segoe UI", system-ui, sans-serif; font-weight: 600; font-size: 29px;
+              line-height: 1.2; white-space: nowrap; background: #fff; }
+.arrow.down span, .arrow.up span { left: calc(50% + 24px); top: 50%; transform: translateY(-50%); }
+.arrow.right span, .arrow.left span { left: 50%; bottom: calc(50% + 10px); transform: translateX(-50%); }
+.arrow.long { height: 110px; }
+
+/* A screenshot is a card of the diagram like any other, in grey so the image stays black and white */
+.card.shot { padding: 18px; }
+.card.shot img { display: block; filter: grayscale(1); width: 100%; height: auto; max-height: 640px; object-fit: contain;
+                 border: 2px solid #000; border-radius: 8px; }
+
+/* Inline SVG diagrams (when cards and arrows in rows and columns cannot show it): black strokes, white fills */
+svg { display: block; max-width: 100%; }
+svg text { font-family: "Segoe UI", system-ui, sans-serif; fill: #000; }

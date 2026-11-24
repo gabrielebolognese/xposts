@@ -1,5 +1,6 @@
-// The article cover: renders the model's cover HTML at 2x and exports it as a PNG. Network requests are blocked (the
-// file must be self-contained). Prints {"problems": [...]} and exits 1 when text spills outside the frame or is cut off.
+// The article cover and the thread images: renders a model's HTML at 2x and exports it as a PNG (or JPEG for a .jpg
+// out). Network requests are blocked (the file must be self-contained). Prints {"problems": [...]} and exits 1 when text
+// spills outside the frame or is cut off, or an element marked data-fit holds more than fits in it.
 //   node pipeline/lib/article-shot.mjs cover.html cover.png 1500 600
 import { pathToFileURL } from 'node:url';
 import puppeteer from 'puppeteer-core';
@@ -38,6 +39,42 @@ try {
         found.push(`text outside the ${W}x${H} frame: "${text}"`);
       else if (el.scrollWidth > el.clientWidth + 2 && getComputedStyle(el).overflow !== 'visible')
         found.push(`text cut off: "${text}"`);
+    }
+    for (const box of document.querySelectorAll('[data-fit]')) {
+      const tall = box.scrollHeight - box.clientHeight, wide = box.scrollWidth - box.clientWidth;
+      if (tall > 2) found.push(`the content is ${tall}px taller than its area: shorten it or make it smaller`);
+      if (wide > 2) found.push(`the content is ${wide}px wider than its area`);
+    }
+    if (document.querySelector('[data-strict]')) { // a thread diagram: words only inside cards or on arrows
+      for (const el of document.body.querySelectorAll('*')) {
+        const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+        if (own && !el.closest('.card, .arrow, svg, script, style'))
+          found.push(`text outside a card or an arrow: "${el.textContent.trim().slice(0, 40)}"`);
+        const card = own && el.closest('.card');
+        if (card) { // a word wider than its card runs over the border
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const t = range.getBoundingClientRect(), c = card.getBoundingClientRect();
+          if (t.width && (t.right > c.right - 2 || t.left < c.left + 2))
+            found.push(`text runs over its card's border: "${el.textContent.trim().slice(0, 40)}": shorten the words or `
+              + 'give the card more width');
+        }
+      }
+      const main = document.querySelector('[data-strict]'), cs = getComputedStyle(main);
+      const room = main.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const parts = [...main.querySelectorAll('.card, .arrow, svg')].map((e) => e.getBoundingClientRect());
+      if (parts.length) {
+        const used = Math.max(...parts.map((r) => r.bottom)) - Math.min(...parts.map((r) => r.top));
+        if (used < room * 0.7) found.push(`the diagram fills only ${Math.round(100 * used / room)}% of the page height: make `
+          + 'the cards and their text larger, or show more of the part, so it fills at least 70%');
+      }
+      const boxes = [...document.querySelectorAll('.card')].map((c) => c.getBoundingClientRect());
+      boxes.forEach((a, i) => boxes.slice(i + 1).forEach((b) => {
+        if (a.left < b.right - 2 && b.left < a.right - 2 && a.top < b.bottom - 2 && b.top < a.bottom - 2
+            && !(a.left >= b.left && a.right <= b.right && a.top >= b.top && a.bottom <= b.bottom)
+            && !(b.left >= a.left && b.right <= a.right && b.top >= a.top && b.bottom <= a.bottom))
+          found.push('two cards overlap');
+      }));
     }
     return found;
   }, width, height)));

@@ -4,7 +4,8 @@
  "push": true,
  "slots": {
   "times": [
-   "07:00"
+   "07:00",
+   "12:00"
   ],
   "horizon_days": 4
  },
@@ -98,6 +99,14 @@
    "model": "opus",
    "effort": "high"
   },
+  "thread_images": {
+   "model": "opus",
+   "effort": "high"
+  },
+  "thread_images_critic": {
+   "model": "opus",
+   "effort": "medium"
+  },
   "limit_fallback": {
    "model": "opus",
    "effort": "medium"
@@ -117,7 +126,7 @@
   "limit_margin_seconds": 120
  },
  "discovery": {
-  "searches_per_day": 2,
+  "searches_per_day": 3,
   "candidates_per_search": 10,
   "first_since_days": 120,
   "gh_min_stars": 30,
@@ -125,7 +134,7 @@
   "signals_max": 40,
   "triage_min": 9,
   "revisit_min_days": 60,
-  "max_searches_per_day": 4
+  "max_searches_per_day": 6
  },
  "select": {
   "min_total": 16,
@@ -147,7 +156,7 @@
   "optimize_below": 80,
   "hook_weight": 0.65,
   "alternative_hooks": 10,
-  "min_per_day": 1,
+  "min_per_day": 2,
   "max_per_day": 3,
   "expire_days": 7
  },
@@ -242,5 +251,13 @@
  "own_posts": {
   "file": "../xAutoReply/data/own_posts.jsonl",
   "check_minutes": [60, 240]
+ },
+ "images": {
+  "size": [1080, 1350],
+  "fix_rounds": 3,
+  "min_score": 8,
+  "max_tries": 2,
+  "plan_minutes": 25,
+  "review_minutes": 15
  }
 }

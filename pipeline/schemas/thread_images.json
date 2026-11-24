@@ -1,0 +1,52 @@
+{
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "parts"
+ ],
+ "properties": {
+  "parts": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "part",
+     "kind",
+     "layout",
+     "body_html"
+    ],
+    "properties": {
+     "part": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "0 is the main post, then 1, 2 ... for the replies"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "card",
+       "github"
+      ]
+     },
+     "layout": {
+      "type": "string",
+      "enum": [
+       "flow",
+       "before_after",
+       "hub",
+       "steps",
+       "number",
+       "screenshot"
+      ]
+     },
+     "body_html": {
+      "type": "string",
+      "description": "The diagram: cards and arrows with the house classes"
+     }
+    }
+   }
+  }
+ }
+}

@@ -487,6 +487,78 @@ class Viral(unittest.TestCase):
             self.assertEqual(viral.article_key(date(2030, 1, 7)), "2030-01-07-2")
 
 
+class ThreadImages(unittest.TestCase):
+    FACTS = [{"claim": "It cut startup tokens by 64.3% in a test.", "quote": "64.3%"}]
+
+    def test_card_checks(self):
+        import thread_images as ti
+        good = ('<div class="col"><div class="card bold"><div class="n">64.3<small>%</small></div>'
+                '<div class="b">fewer startup tokens</div></div><div class="arrow down"><span>3 steps</span></div>'
+                '<div class="card"><div class="c">npx tool scan</div></div></div>')
+        self.assertEqual(ti.card_problems(good, "1. it saves 64.3%", self.FACTS), [])
+        bad = ('<script>x()</script><div class="card" style="color:#4f8cff; box-shadow: 0 0 4px #000">' + "word " * 80
+               + chr(0x2014) + " 999 users at example.com/x " + chr(0x1F680) + '</div><img src="https://cdn.example.com/a.png">')
+        probs = " | ".join(ti.card_problems(bad, "no numbers here", self.FACTS))
+        for want in ("self-contained", "no images", "no colours: #4f8cff", "no gradients, shadows", "at least 2 cards",
+                     "arrows joining", "at most 70", "dashes", "emojis", "web addresses", "999"):
+            self.assertIn(want, probs)
+        self.assertNotIn("no colours", " | ".join(ti.card_problems('<div class="card" style="border-color:#333">x</div>', "", [])))
+        self.assertIn("the diagram has no text", ti.card_problems("<div></div>", "", []))
+        self.assertEqual(ti.visible_text("<style>.a{}</style><div>One</div><div>Two &amp; three</div>"), "One\nTwo & three")
+
+    def test_fallback_card_and_stars(self):
+        import thread_images as ti
+        body = ti.fallback_body("3. The plugin moves dead skills aside. You can bring them back. Third one.", "claude-slim")
+        self.assertEqual(ti.card_problems(body, "", []), [])
+        self.assertIn("The plugin moves dead skills aside.", body)
+        self.assertIn("You can bring them back.", body)
+        self.assertNotIn("Third one", body)  # the first two sentences only
+        self.assertNotIn("3.", body)
+        with tempfile.TemporaryDirectory() as tmp:
+            shot = Path(tmp) / "github.png"
+            shot.write_bytes(ti.PNG)
+            with_shot = ti.fallback_body("It routes requests.", "opencodex", shot, "owner/opencodex")
+        self.assertIn("data:image/png;base64,", with_shot)
+        self.assertIn("owner/opencodex", with_shot)
+        self.assertNotIn(ti.SCREENSHOT, with_shot)
+        self.assertEqual((ti.stars(18696), ti.stars(43), ti.stars(2000)), ("18.7k stars", "43 stars", "2k stars"))
+
+    def test_complete_pending_and_queue_copy(self):
+        import thread_images as ti
+        import virality
+        with tempfile.TemporaryDirectory() as tmp:
+            runs, queue = Path(tmp) / "runs", Path(tmp) / "queue"
+            draft = {"hook": "h", "promise": "p", "replies": ["one 1", "two 2"]}
+            for name in ("a", "b", "c"):
+                core.save_json(runs / name / "draft.json", draft)
+                core.save_json(runs / name / "state.json", {"stage": "ready"})
+            for img in ("post.png", "reply1.png", "reply2.jpg"):
+                core.write_text(runs / "a" / "images" / img, "x")
+            core.save_json(runs / "c" / "state.json", {"stage": "ready", "image_tries": 2})
+            pool = {"a": {"run": "a", "status": "waiting", "score": 90, "slot": None},
+                    "b": {"run": "b", "status": "waiting", "score": 80, "slot": None},
+                    "c": {"run": "c", "status": "scheduled", "score": 70, "slot": "2030-01-01_0700"}}
+            with unittest.mock.patch.object(core, "RUNS", runs), unittest.mock.patch.object(virality, "QUEUE", queue):
+                self.assertTrue(ti.complete(runs / "a"))
+                self.assertFalse(ti.complete(runs / "b"))
+                self.assertEqual(ti.pending(pool), runs / "b")  # a is done, c failed twice
+                pool["c"]["status"], pool["b"]["status"] = "waiting", "posted"
+                self.assertIsNone(ti.pending(pool))
+                core.write_text(queue / "2030-01-01_0700" / "reply1.png", "stale")
+                self.assertTrue(virality.write_folder("2030-01-01_0700", "a"))
+                self.assertEqual(sorted(p.name for p in (queue / "2030-01-01_0700").iterdir()),
+                                 ["post.png", "post.txt", "reply1.png", "reply1.txt", "reply2.jpg", "reply2.txt"])
+                self.assertEqual((queue / "2030-01-01_0700" / "reply1.png").read_text(), "x")
+                self.assertTrue(virality.write_folder("2030-01-01_1200", "b"))  # no images yet: text only
+                self.assertEqual(sorted(p.name for p in (queue / "2030-01-01_1200").iterdir()),
+                                 ["post.txt", "reply1.txt", "reply2.txt"])
+
+    def test_two_slots_a_day(self):
+        start = datetime(2030, 1, 1, 8, 0, tzinfo=core.ROME)
+        self.assertEqual(virality.upcoming_slots(start, ["07:00", "12:00"], 2, 15),
+                         ["2030-01-01_1200", "2030-01-02_0700", "2030-01-02_1200", "2030-01-03_0700"])
+
+
 class OwnPosts(unittest.TestCase):
     def test_original_posts_are_told_to_xautoreply(self):
         import poster

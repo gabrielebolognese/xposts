@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { main, pause } from '../../post.js';
+import { chain, main, pause } from '../../post.js';
+import { decodeMedia } from '../../post-now.js';
 
 const noWait = async () => {};
 const DUE = '2026-11-14_1300';
@@ -125,4 +126,50 @@ test('a quote.txt without a post id fails the post instead of posting without th
   assert.equal(await main(client, onTime, noWait), true);
   assert.deepEqual(calls, []);
   assert.ok(fs.existsSync(path.join('queue', DUE)));
+});
+
+test('thread images: each part carries its own image, and the main post never takes the replies\' images', async () => {
+  const dir = setup(['1. one', '2. two', '3. three']);
+  for (const f of ['post.png', 'reply1.png', 'reply3.jpg']) fs.writeFileSync(path.join(dir, f), `fake ${f}`);
+  const { client, calls } = fakeClient('a');
+  const uploaded = [];
+  client.v2.uploadMedia = async (buf) => (uploaded.push(buf.toString()), `m${uploaded.length}`);
+  assert.equal(await main(client, onTime, noWait), false);
+  assert.deepEqual(uploaded, ['fake post.png', 'fake reply1.png', 'fake reply3.jpg']);
+  assert.deepEqual(calls, [
+    { text: 'the hook\n\nthe promise:', media: { media_ids: ['m1'] } },
+    { text: '1. one', reply: { in_reply_to_tweet_id: 'a1' }, media: { media_ids: ['m2'] } },
+    { text: '2. two', reply: { in_reply_to_tweet_id: 'a2' } },
+    { text: '3. three', reply: { in_reply_to_tweet_id: 'a3' }, media: { media_ids: ['m3'] } },
+  ]);
+});
+
+test('thread images: a resumed thread uploads only the images of the parts still to post', async () => {
+  const dir = setup(['1. one', '2. two']);
+  for (const f of ['post.png', 'reply1.png', 'reply2.png']) fs.writeFileSync(path.join(dir, f), `fake ${f}`);
+  fs.writeFileSync(path.join(dir, 'thread.json'), JSON.stringify({ ids: ['x1', 'x2'] }));
+  const { client, calls } = fakeClient('b');
+  const uploaded = [];
+  client.v2.uploadMedia = async (buf) => (uploaded.push(buf.toString()), 'm1');
+  assert.equal(await main(client, onTime, noWait), false);
+  assert.deepEqual(uploaded, ['fake reply2.png']);
+  assert.deepEqual(calls, [{ text: '2. two', reply: { in_reply_to_tweet_id: 'x2' }, media: { media_ids: ['m1'] } }]);
+});
+
+test('post now: MEDIA gives each part its image (null for none); a list of the wrong length is refused', async () => {
+  process.chdir(fs.mkdtempSync(path.join(os.tmpdir(), 'xposts-now-')));
+  fs.writeFileSync('a.png', 'fake a');
+  const b64 = (v) => Buffer.from(JSON.stringify(v)).toString('base64');
+  const media = decodeMedia(b64([path.resolve('a.png'), null, path.resolve('gone.png')]), 3);
+  assert.deepEqual(media, [path.resolve('a.png'), null, null]);
+  assert.throws(() => decodeMedia(b64([null]), 2), /one file path or null per part/);
+  assert.deepEqual(decodeMedia(undefined, 2), []);
+  const { client, calls } = fakeClient('c');
+  client.v2.uploadMedia = async () => 'm9';
+  await chain(client, ['main', '1. one', '2. two'], [], { wait: noWait, media });
+  assert.deepEqual(calls, [
+    { text: 'main', media: { media_ids: ['m9'] } },
+    { text: '1. one', reply: { in_reply_to_tweet_id: 'c1' } },
+    { text: '2. two', reply: { in_reply_to_tweet_id: 'c2' } },
+  ]);
 });

@@ -610,5 +610,79 @@
   "post": "claude code runs my x account now. ten minutes a day from me, the rest is a script i set up once. it is a lot simpler than people make it sound",
   "hook": "the claim that one simple automation replaced daily posting work, kept as the opening",
   "quote_article": ""
+ },
+ "thread_images": {
+  "parts": [
+   {
+    "part": 0,
+    "kind": "card",
+    "layout": "number",
+    "body_html": "<div class=\"col\"><div class=\"card\"><div class=\"t\">{NAME}</div></div><div class=\"arrow down\"></div><div class=\"card\"><div class=\"b\">Part 0 of the thread as a diagram</div></div></div>"
+   },
+   {
+    "part": 1,
+    "kind": "card",
+    "layout": "flow",
+    "body_html": "<div class=\"col\"><div class=\"card\"><div class=\"t\">{NAME}</div></div><div class=\"arrow down\"></div><div class=\"card\"><div class=\"b\">Part 1 of the thread as a diagram</div></div></div>"
+   },
+   {
+    "part": 2,
+    "kind": "card",
+    "layout": "before_after",
+    "body_html": "<div class=\"col\"><div class=\"card\"><div class=\"t\">{NAME}</div></div><div class=\"arrow down\"></div><div class=\"card\"><div class=\"b\">Part 2 of the thread as a diagram</div></div></div>"
+   },
+   {
+    "part": 3,
+    "kind": "card",
+    "layout": "hub",
+    "body_html": "<div class=\"col\"><div class=\"card\"><div class=\"t\">{NAME}</div></div><div class=\"arrow down\"></div><div class=\"card\"><div class=\"b\">Part 3 of the thread as a diagram</div></div></div>"
+   },
+   {
+    "part": 4,
+    "kind": "card",
+    "layout": "steps",
+    "body_html": "<div class=\"col\"><div class=\"card\"><div class=\"t\">{NAME}</div></div><div class=\"arrow down\"></div><div class=\"card\"><div class=\"b\">Part 4 of the thread as a diagram</div></div></div>"
+   },
+   {
+    "part": 5,
+    "kind": "card",
+    "layout": "steps",
+    "body_html": "<div class=\"col\"><div class=\"card\"><div class=\"t\">{NAME}</div></div><div class=\"arrow down\"></div><div class=\"card\"><div class=\"b\">Part 5 of the thread as a diagram</div></div></div>"
+   }
+  ]
+ },
+ "thread_images_critic": {
+  "parts": [
+   {
+    "part": 0,
+    "score": 9,
+    "issues": []
+   },
+   {
+    "part": 1,
+    "score": 9,
+    "issues": []
+   },
+   {
+    "part": 2,
+    "score": 9,
+    "issues": []
+   },
+   {
+    "part": 3,
+    "score": 9,
+    "issues": []
+   },
+   {
+    "part": 4,
+    "score": 9,
+    "issues": []
+   },
+   {
+    "part": 5,
+    "score": 9,
+    "issues": []
+   }
+  ]
  }
 }

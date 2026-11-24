@@ -3,7 +3,7 @@
 # Start it in Git Bash from the x-autopost folder:
 #   bash pipeline/run.sh          posts what is due every 30 seconds (the X keys come from .env), searches categories
 #                                 for tools, turns the best ones into threads scored for virality, and keeps queue/
-#                                 filled with the highest scored ones (1 a day, 4 days ahead); on Tuesday, Thursday
+#                                 filled with the highest scored ones (2 a day, each part with its image); on Tuesday, Thursday
 #                                 and Saturday it reads X's Trending tab
 #                                 from 06:20 and queues a trending post for 09:00 (pipeline/lib/trend.py); 3 times a
 #                                 day at random times it looks for viral outliers in the timeline and repurposes the

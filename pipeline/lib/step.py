@@ -1,6 +1,7 @@
 """One unit of work for the runner. First queue/ is brought in line with the virality queue (virality.arrange).
-Then: finish the open run; else stop for the day once max_per_day threads are ready; else search the next category
-while today's searches are not used up; else pick the best pending discovery and take it through every stage.
+Then: finish the open run; else make the images of a queued thread that has none yet (lib/thread_images.py); else
+stop for the day once max_per_day threads are ready; else search the next category while today's searches are not
+used up; else pick the best pending discovery and take it through every stage.
 Exit codes: 0 a thread joined the virality queue, 10 the discovery was dropped, 11 the thread went to review/,
 12 nothing to do (the runner waits), 13 a category search ran (the runner goes on at once), 1 an error (logged;
 the run resumes).
@@ -16,9 +17,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import core  # noqa: E402
 import discover  # noqa: E402
 import stages  # noqa: E402
+import thread_images  # noqa: E402
 import virality  # noqa: E402
 
 DONE = ("ready", "queued", "review", "dropped")
+
+
+def backfill() -> bool:
+    """The images of one thread in the virality queue that has none (made before thread images existed, or a failed
+    try): True when one was tried. A failure is counted per thread and never drops the thread itself."""
+    run = thread_images.pending(virality.load())
+    if run is None:
+        return False
+    core.say("STEP", f"images ({run.name})")
+    try:
+        thread_images.make(run)
+    except Exception as exc:  # noqa: BLE001  logged; pending() skips a thread after images.max_tries failures
+        tries = stages.state(run).get("image_tries", 0) + 1
+        stages.set_state(run, image_tries=tries)
+        core.say("WARN", f"thread images for {run.name} failed ({tries}): {core.undash(str(exc))[:200]}")
+    arrange()
+    return True
 
 
 def open_run() -> Path | None:
@@ -90,6 +109,8 @@ def main() -> int:
         stages.push_pending()
         arrange()
         run = open_run()
+        if run is None and backfill():
+            return 13
         if run is None:
             made, most = virality.made_today(), core.cfg("virality.max_per_day", 20)
             if made >= most:

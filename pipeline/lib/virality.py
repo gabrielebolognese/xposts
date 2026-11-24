@@ -9,6 +9,8 @@ Statuses: waiting (no slot), scheduled (in queue/), posted (its folder reached p
 now), lost (its run folder is gone). A thread whose folder went to missed/ (the PC was off for hours) goes back to
 waiting and gets a new slot. Runs posted with the dashboard's "Post thread now" are in data/posted-now.json (the
 posting loop writes it): those are never scheduled again and their slot goes to the next best thread.
+A thread gets a slot only once it has an image for every part (lib/thread_images.py); the images are copied into
+its queue folder (post.png, reply1.png ...), and a folder written before its images existed is rewritten with them.
 Usage: python pipeline/lib/virality.py   prints the virality queue, best first
 """
 from __future__ import annotations
@@ -22,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import core  # noqa: E402
 import discover  # noqa: E402
 import stages  # noqa: E402
+import thread_images  # noqa: E402
 
 POOL = core.DATA / "virality.json"
 POSTED_NOW = core.DATA / "posted-now.json"
@@ -82,6 +85,12 @@ def write_folder(slot: str, run: str) -> bool:
     core.write_text(folder / "post.txt", parts[0])
     for i, reply in enumerate(parts[1:], 1):
         core.write_text(folder / f"reply{i}.txt", reply)
+    for name in thread_images.part_names(len(parts)):  # each part's image, when the thread has them
+        for old in folder.glob(f"{name}.*"):
+            if old.suffix != ".txt":
+                old.unlink()
+        if img := thread_images.image_of(core.RUNS / run / thread_images.OUT, name):
+            shutil.copy(img, folder / img.name)
     return True
 
 
@@ -138,7 +147,9 @@ def _arrange() -> list[str]:
             if e["status"] == "scheduled" and core.slot_time(e["slot"]) > now + timedelta(minutes=lead)}
     slots = [s for s in upcoming_slots(now, core.cfg("slots.times"), core.cfg("slots.horizon_days", 4), lead)
              if s in ours or not (QUEUE / s).exists()]
-    want = assign([e for e in pool.values() if e["status"] == "waiting" or e in ours.values()], slots)
+    ready = [e for e in pool.values()  # a waiting thread needs its images before it gets a slot
+             if (e["status"] == "waiting" and thread_images.complete(core.RUNS / e["run"])) or e in ours.values()]
+    want = assign(ready, slots)
     for slot, e in ours.items():
         if want.get(slot) != e["run"]:
             shutil.rmtree(QUEUE / slot, ignore_errors=True)
@@ -148,6 +159,9 @@ def _arrange() -> list[str]:
     for slot, run in want.items():
         e = pool[run]
         if e["status"] == "scheduled" and e["slot"] == slot:
+            if thread_images.complete(core.RUNS / run) and not thread_images.image_of(QUEUE / slot, "post"):
+                write_folder(slot, run)  # scheduled before its images existed: now it gets them
+                touched.append(slot)
             continue
         if not write_folder(slot, run):
             e["status"] = "lost"

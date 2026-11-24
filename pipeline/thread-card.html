@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>/*STYLE*/</style>
+</head>
+<body>
+<main data-fit data-strict><div class="fitbox">/*BODY*/</div></main>
+<script>
+// A diagram a little taller than the page is shrunk to fit (down to 80%); anything bigger is left for the render to
+// report, so it gets redrawn.
+document.fonts.ready.then(() => {
+  const main = document.querySelector('main'), box = main.firstElementChild;
+  // a one-line command too long for its card is set smaller (down to 26px) so it stays on one line
+  for (const c of document.querySelectorAll('.c')) {
+    if (c.textContent.includes('\n')) continue;
+    c.style.whiteSpace = 'pre';
+    for (let s = 31; s > 26 && c.scrollWidth > c.clientWidth; s--) c.style.fontSize = s - 1 + 'px';
+    c.style.whiteSpace = '';
+  }
+  for (let z = 1; z >= 0.8 && main.scrollHeight > main.clientHeight + 1; z = Math.round((z - 0.02) * 100) / 100) {
+    box.style.zoom = z;
+  }
+});
+</script>
+</body>
+</html>

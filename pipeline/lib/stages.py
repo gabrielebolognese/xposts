@@ -482,6 +482,13 @@ def virality(run: Path) -> str:
         return f"dropped: virality {ev['final']} ({ev['classification']}): {ev['weaknesses'][:200]}"
     core.say("VIRAL", f"{ev['final']} {ev['classification']} (hook {ev['hook_score']}, thread {ev['thread_score']}): "
              f"{ev['title'][:80]}")
+    return "images"
+
+
+def images(run: Path) -> str:
+    """One image for every part of the thread (lib/thread_images.py), now that the text is final."""
+    import thread_images  # here: thread_images imports this module
+    thread_images.make(run)
     return "ready"
 
 
@@ -515,4 +522,5 @@ def push_pending() -> None:
         push()
 
 
-STAGES = {"analyze": analyze, "score": score, "hooks": hooks, "thread": thread, "inspect": inspect, "virality": virality}
+STAGES = {"analyze": analyze, "score": score, "hooks": hooks, "thread": thread, "inspect": inspect, "virality": virality,
+          "images": images}

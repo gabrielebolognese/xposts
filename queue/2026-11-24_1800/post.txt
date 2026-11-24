@@ -1,0 +1,18 @@
+claude code users running anything overnight
+My cap was $160. My bill was $174.17.
+
+I cap every unattended Claude Code session at $160 with --max-budget-usd. One project still came in at $174.17.
+
+Nothing broke. The cap did exactly what I set it up to do. That's what surprised me.
+
+If you budget autonomous runs the way I first did, your real ceiling isn't the number you typed. On paper, mine was a lot higher.
+
+So I pulled the full bill on 2 overnight builds: a heart simulation that stops and restarts after an infarct, and a from-scratch chess engine replaying Fischer's Game of the Century.
+
+$287.82 total. One number predicted the gap between them better than anything else. It wasn't the model, and it wasn't the hours.
+
+One of them cleared my Opus critic by 0.3 points, with zero retries left.
+
+Inside: the real costs, why the cap is not the bill, and the 8 rules every unattended session on my PC now runs on.
+
+The whole breakdown is in the article below.

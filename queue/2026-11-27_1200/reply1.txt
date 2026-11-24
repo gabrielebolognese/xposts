@@ -1,0 +1,1 @@
+1. Coding agents forget. Start a new session, run /compact, or switch from Claude Code to Codex, and you end up re-explaining decisions and re-debugging bugs you already fixed. Worse, Claude Code deletes transcripts older than 30 days by default, so that history quietly disappears.

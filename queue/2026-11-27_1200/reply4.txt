@@ -1,0 +1,3 @@
+4. Switching agents mid-task? Run:
+deja handoff --to codex
+It continues the active session's goal and state in Codex. For teams, deja repo add commits the decisions and dead ends you pick into .deja/memory.jsonl, so a teammate's agent recalls them after a clone. Price: free and open source under MIT. No account, no telemetry. 1,621 stars on GitHub.

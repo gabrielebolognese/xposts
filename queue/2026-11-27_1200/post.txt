@@ -1,0 +1,3 @@
+Claude Code or Cursor overwrote your uncommitted code? deja restore brings it back.
+
+What else this free local tool does across 48 coding agents:

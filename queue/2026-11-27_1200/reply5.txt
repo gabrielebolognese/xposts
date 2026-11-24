@@ -1,0 +1,1 @@
+5. Caveats. The benchmarks are self-reported. The README claims 97.2% R@5 on LongMemEval-S (MemPalace publishes 96.6%, agentmemory 95.2%), but the project's own benchmarks page notes the same code scores 88.2% without -skip-abs. The project is also young: repo created 2026-07-14, still on v0.24.2, so expect fast-moving releases.

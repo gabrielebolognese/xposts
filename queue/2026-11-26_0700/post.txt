@@ -1,0 +1,3 @@
+Claude Code rereads your CLAUDE.md every session. One dev's was 11,000 tokens; now it's 800.
+
+What it does, the exact commands, and the catches.

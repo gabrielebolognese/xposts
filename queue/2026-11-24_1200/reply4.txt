@@ -1,3 +1,1 @@
-4. A simple loop: run codeburn optimize, apply what makes sense, keep working, then open Compare periods. It puts two date ranges side by side and shows the difference, so you see if the fix actually cut spend.
-
-The data is also in a desktop app for macOS, Windows and Linux, plus the menu bar. Latest release v0.9.28 (2026-11-08) added quota-exhaustion forecasts in the menu bar and a loop guard.
+4. Privacy and footprint: parsing runs locally, and the graph stays on your machine or on a FalkorDB server you run. Setup registers the MCP server and skill with every agent it detects, including Claude Code, Codex, Cursor, Windsurf, GitHub Copilot, Gemini CLI and Aider. It writes only to ~/.auryn and the agent's own config, never to your repos. It's MIT licensed, so commercial use is allowed if you keep the license notice. 397 stars and 58 forks so far.

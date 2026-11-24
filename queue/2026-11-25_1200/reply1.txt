@@ -1,0 +1,1 @@
+1. Testing an AI app against live LLM APIs burns tokens, needs API keys and gives flaky results. aimock from CopilotKit is one npm package that runs a local mock server on one port. It stands in for LLM APIs, MCP, A2A, AG-UI, vector DBs and search, with zero dependencies. No keys, no network, no surprise bills. MIT licensed, so commercial use is allowed. 1,031 stars on GitHub.

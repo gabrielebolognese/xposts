@@ -1,3 +1,3 @@
-Find the files and MCP servers wasting your Claude Code tokens, each with an estimated saving.
+In FalkorDB's Django test, Claude Code went from 22% to 92% accuracy with this free codegraph.
 
-What it shows, how it cuts waste, and setup:
+How it works, the 2-command setup, and the catches:

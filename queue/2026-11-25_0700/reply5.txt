@@ -1,1 +1,5 @@
-5. A few things to watch. Set the SDK base URL before you build the client. Many SDKs cache it at construction, and then your tests quietly hit the real API. Replay timing is approximate: time to first token and average pace are kept, not per-token timing. It is also young, created in March 2026 and already at v1.48.1, so pin your version. And mocks test your plumbing, not real model quality.
+5. Pricing: 100% free and MIT licensed. No paid tier, no feature held back.
+
+Prompts, code and project names stay on your machine, and the CLI sends nothing. The desktop app asks about anonymous telemetry at first launch. It starts on outside the EU, EEA, UK and Switzerland.
+
+Catch: on subscription plans the dollar figures are API-equivalent estimates, not your invoice.

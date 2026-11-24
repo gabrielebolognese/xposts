@@ -1,5 +1,1 @@
-5. Pricing: 100% free and MIT licensed. No paid tier, no feature held back.
-
-Prompts, code and project names stay on your machine, and the CLI sends nothing. The desktop app asks about anonymous telemetry at first launch. It starts on outside the EU, EEA, UK and Switzerland.
-
-Catch: on subscription plans the dollar figures are API-equivalent estimates, not your invoice.
+5. The catches. You need Python 3.12 or newer. The embedded database only runs on macOS and on Linux with a recent glibc. On native Windows, point it at a remote FalkorDB with auryn install --backend remote. A reference to another repo only gets linked once that repo has been ingested too. It's also early software: v0.8.4, released 2026-11-23, with 28 open issues.

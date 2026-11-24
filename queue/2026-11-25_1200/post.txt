@@ -1,0 +1,3 @@
+Your tests pay OpenAI and Claude every CI run. One free MIT package mocks both, no keys.
+
+What it mocks, how to record fixtures, and the setup:

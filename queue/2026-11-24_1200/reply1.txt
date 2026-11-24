@@ -1,3 +1,1 @@
-1. Your AI bill gives you a month total. It doesn't break that down by project, model or task, and it doesn't show which part was wasted.
-
-CodeBurn (getagentseal/codeburn, about 11.9k stars) fixes that. It reads the session files your coding agents already write to disk and prices every token. No account, no sign-up, no API key.
+1. Coding agents usually find their way around a codebase by grepping and reading files. That breaks down on structural questions like callers of callers, or what a change will break. Auryn by FalkorDB parses your repo into a graph of functions, types, tables and endpoints, linked by CALLS, EXTENDS, READS/WRITES and DEPENDS_ON edges. Your agent queries it over MCP, follows calls across repos and languages, and every answer cites file and line. It covers 16 languages plus live SQL and Oracle schemas.

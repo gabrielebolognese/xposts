@@ -1,0 +1,6 @@
+6. Mini setup guide. Go to GitHub and search for: CopilotKit/aimock. Or do a web search for: aimock CopilotKit and open the official site.
+1. Check you have Node.js 20.15.0 or later.
+2. Install it in your project: npm install @copilotkit/aimock
+3. Start every mock on one port from a config file: npx @copilotkit/aimock --config aimock.json
+4. Before your SDK client is created, set its base URL environment variable to the local aimock port.
+5. Run your tests. No API keys needed. In CI, use strict mode so nothing slips through to a paid API.

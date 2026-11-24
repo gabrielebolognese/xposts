@@ -1,1 +1,3 @@
-1. Testing an AI app against live LLM APIs burns tokens, needs API keys and gives flaky results. aimock from CopilotKit is one npm package that runs a local mock server on one port. It stands in for LLM APIs, MCP, A2A, AG-UI, vector DBs and search, with zero dependencies. No keys, no network, no surprise bills. MIT licensed, so commercial use is allowed. 1,031 stars on GitHub.
+1. Your AI bill gives you a month total. It doesn't break that down by project, model or task, and it doesn't show which part was wasted.
+
+CodeBurn (getagentseal/codeburn, about 11.9k stars) fixes that. It reads the session files your coding agents already write to disk and prices every token. No account, no sign-up, no API key.

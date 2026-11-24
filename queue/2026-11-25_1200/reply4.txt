@@ -1,0 +1,1 @@
+4. Not on Node? Run the Docker image instead. It serves on port 4010 with your fixtures folder mounted, so apps in other languages work too, as long as their SDK lets you set a custom base URL. Point that base URL at the local port and your existing test suite runs offline, with the same responses on every run.

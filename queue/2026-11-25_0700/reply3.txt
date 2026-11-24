@@ -1,1 +1,8 @@
-3. You don't have to write fixtures by hand. Record mode proxies the real API, saves each response as a fixture and replays it deterministically after that. Run the CLI with --record and --provider-openai pointing at the real OpenAI endpoint, use your app as normal, then commit the fixtures folder. Auth headers are never saved, but prompts and responses are, so review them first. In CI, turn on strict mode: any unmatched request gets a 503 instead of reaching a paid API. Strict mode wins over record mode.
+3. codeburn optimize hunts waste: a file the agent re-reads every turn, an MCP server you never call, a CLAUDE.md that rides along in every request. Each finding gets a grade, a fix and an estimated saving.
+
+codeburn optimize --apply
+codeburn act undo --last
+
+The first reviews and applies the fixes, the second puts them back.
+
+For Claude Code there are opt-in Guard hooks: warn at $5 and stop at $15 by default. All limits are yours to change.

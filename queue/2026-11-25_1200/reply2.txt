@@ -1,0 +1,1 @@
+2. The coverage is wide. It mocks 11 providers across 22 API surfaces with full streaming: OpenAI, Claude, Gemini, Bedrock, Azure, Vertex AI, Ollama, Cohere, OpenRouter and more. Vector endpoints are compatible with Pinecone, Qdrant and ChromaDB, plus Tavily search, Cohere rerank and OpenAI moderation. v1.48.0 added deterministic multi-turn A2A conversations.

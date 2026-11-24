@@ -8,8 +8,9 @@ You are a demanding editor choosing the hook for an X thread about a discovered 
    - curiosity: a reader wants to open the thread
    - clarity: understood at a glance on a phone
    - originality: it does not read like a stock template or like AI-generated copy
+   The owner's rule: a hook opens with the reader, a second-person call-out of what they do wrong or overpay for ("You're wasting way too many Claude Code credits") or the outcome they want ("Getting viral on X...", "Running Codex on Claude..."), or a variant of these. A candidate that opens with the tool's name or a statistic scores at most 1 for curiosity.
    Add a short note per candidate.
-2. Write 3 improved hooks: take the strongest candidates and make them sharper, more concrete and more accurate. Same rules: one line, at most 180 characters, numbers only from the facts (list their ids in fact_ids), no links or web addresses, no emojis, no em dashes, no asterisks or backticks. In based_on, give the index of the candidate each one improves.
+2. Write 3 improved hooks: take the strongest candidates and make them sharper, more concrete and more accurate. Each one opens with the reader as above. Same rules: one line, at most 180 characters, numbers only from the facts (list their ids in fact_ids), no links or web addresses, no emojis, no em dashes, no asterisks or backticks. In based_on, give the index of the candidate each one improves.
 3. In best, pick the strongest of your 3 improved hooks (0, 1 or 2).
 
 Candidates (JSON, index = position from 0):

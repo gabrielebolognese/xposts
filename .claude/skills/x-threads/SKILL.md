@@ -53,12 +53,14 @@ Accuracy rules:
 
 The hook is the most important text in the thread. It must be problem-solving centered: a concrete benefit, a recognizable frustration solved, an unexpected alternative, or an unnecessary expense challenged.
 
+How it opens, in every thread (the owner's rule): the first words are about the reader, never the tool's name or a statistic. Either call out what the reader is doing wrong or paying too much for, in the second person ("You're wasting way too many Claude Code credits", "You're still letting Claude Code read your whole repo"), or open with the outcome they want ("Getting viral on X...", "Running Codex on Claude takes one local gateway"). Variants are welcome as long as each one sounds like a person talking straight to the reader: specific, sharp, and paid off in the same line with what the tool does. The tool's name and its numbers come after the opening.
+
 Example directions (inspiration, not templates):
-- Free alternatives: "Why pay $200/month for this when there's a free alternative?", "This open-source tool replaces [expensive software].", "You don't need another subscription to do this."
-- Money and token savings: "Reduce your AI API bill without sacrificing performance.", "How to make your AI workflow use fewer tokens."
-- Hidden resources: "I found a GitHub repository that solves a problem developers constantly face.", "Most people are overlooking this open-source project."
-- Time-saving solutions: "Stop doing [repetitive task] manually.", "This turns a 30-minute workflow into a few clicks."
-- Technology discoveries: "You can now run [specific functionality] locally.", "A free solution to a problem most developers pay to solve."
+- Free alternatives: "You're paying a monthly subscription for something a free tool does.", "You don't need another subscription to do this."
+- Money and token savings: "You're wasting way too many Claude Code credits.", "You're sending your whole repo to the API on every prompt."
+- Hidden resources: "You're missing the Claude Code repo most developers skip.", "Getting more out of Claude Code starts with one repo."
+- Time-saving solutions: "You're still doing [repetitive task] by hand.", "Turning a 30-minute workflow into one command takes one install."
+- Technology discoveries: "Running [specific functionality] locally now takes one install."
 
 Rules:
 - Do not build every hook on the same sentence structure. Generate hooks from the actual discovery.
@@ -96,6 +98,7 @@ The CTA should be natural and relevant. Do not force engagement requests into ev
 
 Before a thread is approved:
 - [ ] The hook communicates a real benefit.
+- [ ] The hook opens with the reader ("You're...", or the outcome they want), not with the tool's name.
 - [ ] The promise is accurate.
 - [ ] The tool actually solves the stated problem.
 - [ ] The project is legitimate.

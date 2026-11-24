@@ -16,6 +16,7 @@ Skip an angle the facts cannot honestly support. Do not change the actual discov
 
 Rules for every alternative:
 - one line, at most 100 characters, and it must fit before the promise line "{{PROMISE}}" within 150 characters
+- it opens with the reader, never the tool's name or a statistic (the owner's rule): a second-person call-out of what they do wrong or overpay for ("You're wasting way too many Claude Code credits") or the outcome they want ("Getting viral on X...", "Running Codex on Claude..."), in real variants specific to this tool
 - every number from the facts, with the ids of those facts in fact_ids
 - no links or web addresses, no emojis, no em dashes, no asterisks or backticks
 

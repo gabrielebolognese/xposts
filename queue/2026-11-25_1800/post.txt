@@ -1,0 +1,16 @@
+anyone building claude code or codex tools
+My pipeline found 195 of them. It published 11.
+
+Since 7 November, a pipeline on my PC has searched GitHub, Hacker News, Reddit and Hugging Face for new Claude Code and Codex tools. It scores every one before a thread ever gets written.
+
+I assumed most would fail on a weak idea. That's not what the data says.
+
+One of my four criteria hit the lowest possible score 32 times. Another hit it only 8 times. That gap shows exactly where new AI coding tools fall apart.
+
+Then there are the 24 tools that passed selection and still died. The pipeline wrote 10 alternative hooks for each of them first. It didn't save them.
+
+Even the threads that made it through average a virality score BELOW the line that triggers a rewrite. That surprised me more than the rejections did.
+
+If you're shipping one of these tools, or deciding which ones to trust in your own workflow, you want to know which test they fail first.
+
+Every gate and every drop, ranked, is in the article below.

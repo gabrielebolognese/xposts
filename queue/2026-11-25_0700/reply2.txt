@@ -1,3 +1,1 @@
-2. It auto-detects 42 AI coding tools, including Claude Code, Codex, Cursor and Gemini. Run codeburn and you get the total, then cost by tool, model, project and task. Task means coding, debugging or planning, worked out from the session itself. Same numbers in the browser with codeburn web.
-
-The branch view adds up every session you ran on a branch. That gives you the cost of a feature, useful if you quote clients per feature.
+2. Ponytail is an MIT-licensed skill for AI coding agents. Before writing anything, it reads the code the repo already has and asks whether new code is needed at all. Then it writes the smallest change that works. The rule is not fewest tokens. It is: write only what the task needs, and never cut validation, error handling, security or accessibility. It works with 20 agents, including Claude Code and Codex.

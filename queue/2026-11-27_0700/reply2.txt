@@ -1,6 +1,1 @@
-2. Start with the Drift report skill. Point it at a folder of design docs. The agent compares each doc with the current source code and reports where they diverge. You decide whether to update the doc or the code.
-
-To check one doc, README or PR plan against the live code, you don't need to write a new spec:
-/egm:egm-review docs/designs/webhooks.md
-
-Fresh agents review it across 5 stages. They check the design, its clarity, its fit with the code and its implementation plan.
+2. Most browser MCP servers just click and scrape. This one goes deep on debugging. It records performance traces and pulls out actionable insights. It runs Lighthouse audits for accessibility, SEO and performance. It has 14 memory tools to capture, compare and query heap snapshots when you hunt leaks. It also ships agent skills like a11y-debugging, memory-leak-debugging and debug-optimize-lcp. Automation runs on Puppeteer and waits for action results automatically.

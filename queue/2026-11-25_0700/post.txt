@@ -1,3 +1,3 @@
-Find the files and MCP servers wasting your Claude Code tokens, each with an estimated saving.
+You're reviewing 335 lines your agent wrote for one date field. Ponytail does it in 10.
 
-What it shows, how it cuts waste, and setup:
+The numbers, the commands, and the catch:

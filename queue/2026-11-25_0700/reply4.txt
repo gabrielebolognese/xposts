@@ -1,3 +1,1 @@
-4. A simple loop: run codeburn optimize, apply what makes sense, keep working, then open Compare periods. It puts two date ranges side by side and shows the difference, so you see if the fix actually cut spend.
-
-The data is also in a desktop app for macOS, Windows and Linux, plus the menu bar. Latest release v0.9.28 (2026-11-08) added quota-exhaustion forecasts in the menu bar and a loop guard.
+4. It also reviews code. The review command reads the code your change touches, not just the diff. It checks bugs, security, real load, missing tests, speed and what to cut. Maintainer-reported: it found 100% of planted problems (87% without the skill) and 100% of problems outside the diff (78% without). For the whole repo, run /ponytail-audit. It maps entry points and data flow first, then ranks what to fix first.

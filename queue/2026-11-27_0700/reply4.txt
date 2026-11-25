@@ -1,3 +1,1 @@
-4. It works on more than code docs. The built-in draft and design review flow targets software specs. For other documents, you pick the reviewers and standards with /egm-review-loop.
-
-v0.1.1, released 2026-11-06, also added a TRIZ inventive catalyst reviewer and improved how reviews handle context.
+4. Flags worth knowing, added to the args list. Set the isolated option to true to use a temporary user data directory instead of the persistent default profile. --slim exposes a reduced set of the 63 tools for basic browser tasks. --browser-url connects to a Chrome you already have running. Prefer no MCP at all? The package also ships a chrome-devtools CLI to control the browser from your terminal.

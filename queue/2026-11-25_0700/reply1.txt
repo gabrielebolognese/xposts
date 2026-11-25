@@ -1,3 +1,1 @@
-1. Your AI bill gives you a month total. It doesn't break that down by project, model or task, and it doesn't show which part was wasted.
-
-CodeBurn (getagentseal/codeburn, about 11.9k stars) fixes that. It reads the session files your coding agents already write to disk and prices every token. No account, no sign-up, no API key.
+1. The README has a clear example. Ask an agent to add a date field. Without Ponytail, it installs a date picker library or builds a whole calendar by hand: 335 lines. With Ponytail 5, it reuses the repo's existing Input component with the browser's native date picker: 10 lines. Same feature, far less code to review.

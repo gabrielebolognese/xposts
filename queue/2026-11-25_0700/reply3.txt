@@ -1,8 +1,1 @@
-3. codeburn optimize hunts waste: a file the agent re-reads every turn, an MCP server you never call, a CLAUDE.md that rides along in every request. Each finding gets a grade, a fix and an estimated saving.
-
-codeburn optimize --apply
-codeburn act undo --last
-
-The first reviews and applies the fixes, the second puts them back.
-
-For Claude Code there are opt-in Guard hooks: warn at $5 and stop at $15 by default. All limits are yours to change.
+3. The maintainer tested it in Claude Code, running the same agent with and without the skill: 39 tasks including a real FastAPI + React repo, Opus 5.5, 5 runs each. Reported results: 53% less code, 41% less time, 26% lower cost, 45% fewer tokens. 98% of risky logic shipped with a test, versus 68% without. On the six security tasks (SQL injection, path traversal, forged tokens and more) it passed all 30 runs.

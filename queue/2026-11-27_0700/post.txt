@@ -1,3 +1,3 @@
-Google open-sourced a Claude Code and Codex plugin that finds where your docs and code disagree.
+Stop pasting console errors into Claude Code. Let it read Chrome's console and network itself.
 
-How it works, setup commands, and the catch:
+Free, by the Chrome DevTools team. Setup below:

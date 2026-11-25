@@ -1,18 +1,8 @@
-6. Go to GitHub and search for: google/elephant-goldfish-model. Or do a web search for: Elephant-Goldfish Model EGM.
+6. Setup guide. Go to GitHub and search for: ChromeDevTools/chrome-devtools-mcp. Or search the web for Chrome DevTools MCP and open Chrome's official docs page.
 
-1. Claude Code (version 2.1.271 or later):
-claude plugin marketplace add google/elephant-goldfish-model
-claude plugin install egm@egm
-
-2. Codex CLI:
-codex plugin marketplace add google/elephant-goldfish-model
-codex plugin add egm@egm
-
-3. On Antigravity CLI, use the install line in the repo README.
-
-4. Start a new session after installing.
-
-5. Review a doc you already have:
-/egm:egm-review docs/designs/webhooks.md
-
-6. Run the Drift report skill on your design docs folder. For each mismatch, decide whether to fix the doc or the code.
+1. Install Node.js LTS, npm and Chrome current stable or newer.
+2. Claude Code: run /plugin marketplace add ChromeDevTools/chrome-devtools-mcp
+3. Then run /plugin install chrome-devtools-mcp@chrome-devtools-plugins
+4. Codex: run codex mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
+5. Any other MCP client: add a server named chrome-devtools with "command": "npx" and "args": ["-y", "chrome-devtools-mcp@latest"]. That pulls the latest version, currently v1.13.0.
+6. Restart the client, open your dev page and ask the agent to check the console, network requests and performance.

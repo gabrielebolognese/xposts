@@ -1,3 +1,1 @@
-5. The catches. It is early. v0.1.0 was the first tagged release, and its notes say it is not ready for stable-release claims. For v0.1.1, native end-to-end verification of the release ZIPs is still open. There are 120 open issues.
-
-It is not an officially supported Google product, so there is no official support. A review does not replace tests or human judgment. The plugin is free, but the reviewers run on your agent, so you still pay for that model usage.
+5. It's free and open source under Apache-2.0, but know the catches. Google collects usage statistics by default: add --no-usage-statistics to the args. Performance tools may send trace URLs to Google's CrUX API to fetch real-user data, and the README lists the flag to turn that off. The agent can inspect and modify any data in that browser, so use the isolated option and keep it off logged-in sensitive sites. Officially it supports only Google Chrome and Chrome for Testing.

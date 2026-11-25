@@ -1,5 +1,1 @@
-3. The isolation is enforced. If your agent cannot create fresh subagents, EGM stops the review.
-
-In Claude Code, isolation needs version 2.1.271 or later. Update before you trust the results.
-
-Claude Code, Codex and Antigravity CLI pass the project's automated installation and end-to-end workflow fixtures. v0.1.1 added experimental Cursor, OpenCode V1 and GitHub Copilot adapters.
+3. A practical loop: ask Claude Code to fix a frontend bug, then tell it to open the page, list the console messages and check the network requests. It sees the real error with a source-mapped stack trace, patches the code and reloads to verify. No more copying red text out of DevTools. New in v1.13.0, released 2026-11-11: logpoints built on the DevTools BreakpointManager and page-scoped network mocks.

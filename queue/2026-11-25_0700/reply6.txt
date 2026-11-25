@@ -1,12 +1,10 @@
-6. How to get it:
-Go to GitHub and search for: getagentseal/codeburn
-Or search for CodeBurn AI coding cost tracker and open the official website.
+6. Go to GitHub and search for: DietrichGebert/ponytail. Or search the web for: Ponytail lazy senior dev AI agent skill. MIT license, latest release v5.3.3. The plugin itself costs nothing. You still pay for your own model usage.
 
-1. Install Node.js 22.15 or newer.
-2. Try it without installing: npx codeburn
-3. To keep it: npm install -g codeburn or brew install codeburn
-4. Run codeburn for the terminal dashboard, or codeburn web for the browser.
-5. Open the branch view to see the cost of each feature.
-6. Run codeburn optimize --apply to review and apply fixes. Undo with codeburn act undo --last
+1. Claude Code: run /plugin marketplace add DietrichGebert/ponytail
+2. Then, as a separate prompt: /plugin install ponytail@ponytail
+3. Codex instead: codex plugin marketplace add DietrichGebert/ponytail then codex plugin add ponytail@ponytail
+4. In Codex, trust the plugin's lifecycle hooks, then start a new thread.
+5. Other agents: copy AGENTS.md into your project.
+6. Give it a normal task, then run /ponytail-audit to see what to fix first.
 
-No account and no API key needed.
+Install only from the official repo. The maintainer warns about copies.

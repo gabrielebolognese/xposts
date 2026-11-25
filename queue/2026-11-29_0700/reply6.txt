@@ -1,1 +1,0 @@
-6. Worth knowing: the team behind the editor itself publishes an official MCP server, jgraph/drawio-mcp. It's the simpler option, with no chat web app. Pick next-ai-draw-io if you want the web app, desktop app, version history and cloud icon libraries in one project. It's actively maintained: v0.5.1 shipped on 2026-10-31.

@@ -1,1 +1,3 @@
-4. Flags worth knowing, added to the args list. Set the isolated option to true to use a temporary user data directory instead of the persistent default profile. --slim exposes a reduced set of the 63 tools for basic browser tasks. --browser-url connects to a Chrome you already have running. Prefer no MCP at all? The package also ships a chrome-devtools CLI to control the browser from your terminal.
+4. Switching agents mid-task? Run:
+deja handoff --to codex
+It continues the active session's goal and state in Codex. For teams, deja repo add commits the decisions and dead ends you pick into .deja/memory.jsonl, so a teammate's agent recalls them after a clone. Price: free and open source under MIT. No account, no telemetry. 1,621 stars on GitHub.

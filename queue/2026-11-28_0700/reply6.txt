@@ -1,16 +1,1 @@
-6. How to set it up:
-1. Go to GitHub and search for: vshulcz/deja-vu (or search the web for: deja-vu vshulcz coding agent memory). Latest release is v0.24.2.
-2. One-step install that also wires your installed agents (needs Node):
-npx @vshulcz/deja-vu install --auto
-3. On Windows you can also use:
-scoop install deja-vu
-or
-winget install vshulcz.deja-vu
-4. Prefer a Claude Code plugin? Run:
-claude plugin marketplace add vshulcz/deja-vu
-then
-claude plugin install deja-vu@deja-vu
-5. When an agent wipes uncommitted work, run restore with the file path, for example:
-deja restore internal/auth/jwt.go
-6. To move the current session to Codex:
-deja handoff --to codex
+6. Privacy and price. DOM, network bodies, console, state and source stay on your machine unless you link a project. Anonymous usage counts are sent by default. Turn them off with reticle telemetry disable, RETICLE_TELEMETRY=0 or DO_NOT_TRACK=1. Every npm package is Apache-2.0. The hosted dashboard is free to start with no card. A new account gets free Harness credits, and a card starts a 14-day trial with 500 credits. Team plans go through sales, no public prices.

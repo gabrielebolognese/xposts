@@ -1,5 +1,1 @@
-2. Step 1 needs no setup. In your app folder run:
-
-npx @reticlehq/server
-
-No account, no coding agent, and no file in your project changes. It checks that the page loads, that there is no console error and no failed request, and that each same-origin link opens (8 at most). It ends in verified: yes or verified: no. All you need is a dev server you run locally.
+2. It runs as an MCP server for Claude Code, Codex, Cursor and VS Code. Your agent draws on a live canvas in your browser. The editor ships inside the package and works offline. You can fix things by hand, or select a few shapes and tell the agent to change only those. Every AI change becomes a version you can compare, restore or undo. The npm package is at 0.4.15 and needs Node 18 or later.

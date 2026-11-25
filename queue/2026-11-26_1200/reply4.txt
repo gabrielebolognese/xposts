@@ -1,1 +1,5 @@
-4. Two more worth knowing. cto compress shrinks a markdown file with fixed rules: it drops blank lines, verbose fences, long lists, HTML comments and inline SVGs. It's lossy, so review the result. cto audit runs 19 structural checks, has a --json flag for CI, --fix creates missing files, and it exits 1 on errors, so it can fail a build. Or let Claude Code do the setup: ask it to back up your CLAUDE.md, follow the repo's AGENTS.md, and show the token count before and after.
+4. The detector also runs without an agent, in your terminal or in CI:
+
+npx impeccable detect --sarif src/
+
+That outputs SARIF 2.1.0, so the findings show up in GitHub code scanning. Every PR gets checked against the same 62 rules for AI design tells, with no model calls and no API key to manage.

@@ -1,16 +1,8 @@
-6. How to set it up:
-1. Go to GitHub and search for: vshulcz/deja-vu (or search the web for: deja-vu vshulcz coding agent memory). Latest release is v0.24.2.
-2. One-step install that also wires your installed agents (needs Node):
-npx @vshulcz/deja-vu install --auto
-3. On Windows you can also use:
-scoop install deja-vu
-or
-winget install vshulcz.deja-vu
-4. Prefer a Claude Code plugin? Run:
-claude plugin marketplace add vshulcz/deja-vu
-then
-claude plugin install deja-vu@deja-vu
-5. When an agent wipes uncommitted work, run restore with the file path, for example:
-deja restore internal/auth/jwt.go
-6. To move the current session to Codex:
-deja handoff --to codex
+6. Setup guide. Go to GitHub and search for: ChromeDevTools/chrome-devtools-mcp. Or search the web for Chrome DevTools MCP and open Chrome's official docs page.
+
+1. Install Node.js LTS, npm and Chrome current stable or newer.
+2. Claude Code: run /plugin marketplace add ChromeDevTools/chrome-devtools-mcp
+3. Then run /plugin install chrome-devtools-mcp@chrome-devtools-plugins
+4. Codex: run codex mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
+5. Any other MCP client: add a server named chrome-devtools with "command": "npx" and "args": ["-y", "chrome-devtools-mcp@latest"]. That pulls the latest version, currently v1.13.0.
+6. Restart the client, open your dev page and ask the agent to check the console, network requests and performance.

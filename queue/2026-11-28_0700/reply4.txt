@@ -1,1 +1,3 @@
-4. Why it catches more: it works from inside the app, not just from screenshots or the DOM. The project's own benchmark: 85/88 injected bugs caught vs 59/88 for a Playwright script. Re-verifying a four-flow suite over 100 runs took 128k tokens with Reticle vs 12.1M with Playwright MCP. Both numbers come from their own harness on a controlled app, so treat them as a claim, not an independent test.
+4. Switching agents mid-task? Run:
+deja handoff --to codex
+It continues the active session's goal and state in Codex. For teams, deja repo add commits the decisions and dead ends you pick into .deja/memory.jsonl, so a teammate's agent recalls them after a clone. Price: free and open source under MIT. No account, no telemetry. 1,621 stars on GitHub.

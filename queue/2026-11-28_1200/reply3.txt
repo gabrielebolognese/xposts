@@ -1,0 +1,5 @@
+3. Step 2 connects your agent:
+
+npx @reticlehq/server init
+
+It adds the dev-only SDK to your app and registers Reticle with every coding agent it finds on the machine. Config is written automatically for Claude Code, Cursor, Windsurf, VS Code and Zed, and any MCP client works. After that your agent can act on the app and check the expected requests, store state and console instead of guessing. Needs Node 20.11+.

@@ -1,5 +1,5 @@
-2. Step 1 needs no setup. In your app folder run:
+2. The tool is deja-vu (vshulcz/deja-vu), one Go binary called deja. It indexes the session transcripts that 48 coding agents, including Claude Code, Codex and Cursor, already save to disk. Zero LLM calls, 0.7 ms lookup. The README reports 13.6 s to index 19,195 sessions, so your old sessions are searchable on day one.
 
-npx @reticlehq/server
-
-No account, no coding agent, and no file in your project changes. It checks that the page loads, that there is no console error and no failed request, and that each same-origin link opens (8 at most). It ends in verified: yes or verified: no. All you need is a dev server you run locally.
+The fix from the hook, when an agent overwrote a file you never committed:
+deja restore internal/auth/jwt.go
+It recovers code an agent overwrote before git commit.

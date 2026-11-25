@@ -1,5 +1,1 @@
-2. The tool is deja-vu (vshulcz/deja-vu), one Go binary called deja. It indexes the session transcripts that 48 coding agents, including Claude Code, Codex and Cursor, already save to disk. Zero LLM calls, 0.7 ms lookup. The README reports 13.6 s to index 19,195 sessions, so your old sessions are searchable on day one.
-
-The fix from the hook, when an agent overwrote a file you never committed:
-deja restore internal/auth/jwt.go
-It recovers code an agent overwrote before git commit.
+2. Most browser MCP servers just click and scrape. This one goes deep on debugging. It records performance traces and pulls out actionable insights. It runs Lighthouse audits for accessibility, SEO and performance. It has 14 memory tools to capture, compare and query heap snapshots when you hunt leaks. It also ships agent skills like a11y-debugging, memory-leak-debugging and debug-optimize-lcp. Automation runs on Puppeteer and waits for action results automatically.

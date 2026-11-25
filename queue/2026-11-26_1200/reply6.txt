@@ -1,9 +1,11 @@
-6. Mini setup guide.
-Find it: go to GitHub and search for nadimtuhin/claude-token-optimizer, or do a web search for claude-token-optimizer npm.
-1. Make sure you have Node 20 or newer.
-2. Open your project folder and back up first: cp CLAUDE.md CLAUDE.md.mine
-3. See your startup load: npx -y claude-token-optimizer measure
-4. Move old session notes and finished tasks into side files: npx -y claude-token-optimizer prune --yes
-5. Run measure again and compare before and after.
-6. Optional: install globally with npm install -g claude-token-optimizer, then use the short command cto.
-7. Keep your own backup. The tool saves CLAUDE.md.bak, but the next run replaces it.
+6. Mini setup guide:
+Go to GitHub and search for: pbakaus/impeccable
+Or search the web for: Impeccable design skill by Paul Bakaus
+
+1. In your project root, run: npx impeccable install
+2. Reload your coding tool. It supports 19 agents, including Claude Code, Cursor, Codex CLI and GitHub Copilot.
+3. Run /impeccable init in your agent ($impeccable init on Codex). It writes PRODUCT.md.
+4. Start narrow. It's strongest on pages that already exist, so point one command at one target: /impeccable bolder the pricing cards
+5. Optional CI check: npx impeccable detect --sarif src/
+
+Node is only needed for npx. The license is Apache-2.0, so commercial use is allowed if you keep the license and attribution notices.

@@ -1,0 +1,5 @@
+2. Step 1 needs no setup. In your app folder run:
+
+npx @reticlehq/server
+
+No account, no coding agent, and no file in your project changes. It checks that the page loads, that there is no console error and no failed request, and that each same-origin link opens (8 at most). It ends in verified: yes or verified: no. All you need is a dev server you run locally.

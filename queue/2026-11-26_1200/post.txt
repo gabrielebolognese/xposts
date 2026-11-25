@@ -1,3 +1,3 @@
-Claude Code rereads your CLAUDE.md every session. One dev's was 11,000 tokens; now it's 800.
+Your Claude Code UIs all look the same. A free skill with 116k stars gives it real design commands.
 
-What it does, the exact commands, and the catches.
+What it does, how to install it, and the catches:

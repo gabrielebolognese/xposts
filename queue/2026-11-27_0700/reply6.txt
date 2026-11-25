@@ -1,8 +1,9 @@
-6. Setup guide. Go to GitHub and search for: ChromeDevTools/chrome-devtools-mcp. Or search the web for Chrome DevTools MCP and open Chrome's official docs page.
-
-1. Install Node.js LTS, npm and Chrome current stable or newer.
-2. Claude Code: run /plugin marketplace add ChromeDevTools/chrome-devtools-mcp
-3. Then run /plugin install chrome-devtools-mcp@chrome-devtools-plugins
-4. Codex: run codex mcp add chrome-devtools -- npx chrome-devtools-mcp@latest
-5. Any other MCP client: add a server named chrome-devtools with "command": "npx" and "args": ["-y", "chrome-devtools-mcp@latest"]. That pulls the latest version, currently v1.13.0.
-6. Restart the client, open your dev page and ask the agent to check the console, network requests and performance.
+6. Mini setup guide.
+Find it: go to GitHub and search for nadimtuhin/claude-token-optimizer, or do a web search for claude-token-optimizer npm.
+1. Make sure you have Node 20 or newer.
+2. Open your project folder and back up first: cp CLAUDE.md CLAUDE.md.mine
+3. See your startup load: npx -y claude-token-optimizer measure
+4. Move old session notes and finished tasks into side files: npx -y claude-token-optimizer prune --yes
+5. Run measure again and compare before and after.
+6. Optional: install globally with npm install -g claude-token-optimizer, then use the short command cto.
+7. Keep your own backup. The tool saves CLAUDE.md.bak, but the next run replaces it.

@@ -1,0 +1,18 @@
+people who let claude code work while they sleep
+Neither of my builds got it right the first time.
+
+Every night Claude Code builds one complex project on my PC with nobody awake. A separate Opus critic scores frames of the result. 8/10 to pass, at most 2 fix rounds.
+
+I set up those 2 fix rounds as a safety net. I assumed it would rarely get used.
+
+Then I pulled the numbers on my last two builds. One is a GPU heart simulation where a single premature beat sets off a spiral wave.
+
+The other is a chess engine written from scratch. It reviews Fischer's famous queen sacrifice move by move, with its search drawn live across 8 Web Workers.
+
+Both cleared the bar. How they got there changed how I plan every overnight run.
+
+If you size your budget, your time window or your quality bar around the first attempt, you may be planning for a version that never ships.
+
+There's also a line in the article about my critic that I didn't expect to write. It's about what a higher score actually buys you once it's over the bar.
+
+Every round, every dollar and what I'd set up differently are in the article below.

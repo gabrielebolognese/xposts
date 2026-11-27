@@ -1,0 +1,25 @@
+Today Claude Opus 5.5 ran my reply tool for a FULL day on its own while splitting the 3D video work into two parallel lanes.
+
+This is day 15 of building in public.
+
+On X today: 200 replies written and 16,000 views.
+
+My phone chat helper got a menu and a help command today.
+
+- The 3D video and montage projects now take short commands
+- Fixed a restart that cut answers short
+- Phone replies are no longer held back
+- A live check of that fix is still to come
+
+The fun one was a brand new video tool. It gathers free clips from saved posts, cuts out the fart moments, and makes three videos: wide, tall, and mixed. So far I have only tested it with fake posts and fake sound.
+
+Part one of the 3D video project is finished, and part two now runs in two parallel lanes to go faster.
+
+The reply tool ran on its own for a full day across twenty-two chats. It drafted twenty-eight replies from the home feed and search results, all waiting for my review. The social site changed its layout again, and a saved fix got the tool past it.
+
+And the game project just had its first build session, which has been running for over an hour.
+
+See you on day 16
+
+1000 followers ❌
+monetization ❌

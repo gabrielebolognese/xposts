@@ -1,0 +1,14 @@
+anyone deciding whether to let claude code run overnight
+I put an hourly rate on Claude Code working alone.
+
+Two complex projects, built start to finish on my PC with nobody awake. A GPU heart simulation and a chess engine written from scratch. I logged every dollar and every turn.
+
+Then I did the math I'd been putting off. What does one hour of autonomous work actually cost? And what does one FINISHED project cost once the fix rounds are in?
+
+The two builds didn't land on the same hourly rate. Same model, same PC, same caps, and still a gap of about $8 an hour between them.
+
+If you're weighing an overnight run against doing the work yourself, the cap you typed is not your hourly rate. You need the real one before you decide.
+
+The article also lays out my whole setup as 8 copyable rules, down to the exact one-line command I use to cap spend. Keep the shape, change the numbers to fit your budget.
+
+Both rates, the cost per finished project and the full bill are waiting in the article below.

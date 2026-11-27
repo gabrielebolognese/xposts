@@ -1,5 +1,1 @@
-4. In Claude Code you can also install it as a plugin from the community marketplace. You need Claude Code 2.1.275 or later:
-
-/plugin install next-ai-drawio --marketplace anthropics/claude-plugins-community
-
-Then ask for a diagram in plain words, for example the request flow of your API. The canvas opens in your browser and the agent keeps editing it as you talk.
+4. Why it catches more: it works from inside the app, not just from screenshots or the DOM. The project's own benchmark: 85/88 injected bugs caught vs 59/88 for a Playwright script. Re-verifying a four-flow suite over 100 runs took 128k tokens with Reticle vs 12.1M with Playwright MCP. Both numbers come from their own harness on a controlled app, so treat them as a claim, not an independent test.

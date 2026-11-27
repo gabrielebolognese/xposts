@@ -1,5 +1,1 @@
-2. Step 1 needs no setup. In your app folder run:
-
-npx @reticlehq/server
-
-No account, no coding agent, and no file in your project changes. It checks that the page loads, that there is no console error and no failed request, and that each same-origin link opens (8 at most). It ends in verified: yes or verified: no. All you need is a dev server you run locally.
+2. Each agent plays a persona, for example an iPhone SE in Swedish at the largest text size, a Pixel 7 at 200%, an iPad in German, or Arabic right to left. It uses your app like a new user and writes a bug report with screenshots. It works with Flutter, React Native, Expo, native Kotlin and Swift, Kotlin Multiplatform, Capacitor and .NET MAUI.

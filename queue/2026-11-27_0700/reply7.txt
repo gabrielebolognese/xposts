@@ -1,13 +1,8 @@
-7. How to get it running:
-
-Go to GitHub and search for: reticlehq/reticle
-Or search the web for: Reticle coding agent verification MCP
-
-1. Install Node 20.11+ and start your web app's dev server.
-2. In the app folder run: npx @reticlehq/server
-3. Read the result: verified: yes or verified: no.
-4. To give your coding agent the tool, run: npx @reticlehq/server init
-5. Open Claude Code, Cursor or any MCP agent and ask it to check its change with Reticle before it says done.
-6. Optional: set DO_NOT_TRACK=1 to turn off the usage counts.
-
-Use the scoped package. Don't run npx reticle, it fetches an unrelated package.
+7. Setup. Go to GitHub and search for: pierridotite/mobile-agent-testers. Or search the web for: mobile-agent-testers Claude Code.
+You need a GitHub account, the gh CLI, and a Claude subscription or an Anthropic-compatible API key. No Mac needed.
+1. gh repo create my-testers --public --template pierridotite/mobile-agent-testers --clone
+2. cd my-testers && ./setup.sh (it stores a Claude token and secrets in your repo, so read it first)
+3. gh workflow run agent-testers.yml
+4. bash scripts/collect.sh <run id> to decrypt the reports and write SUMMARY.md
+Want Claude to set it up for you? Run /plugin marketplace add pierridotite/mobile-agent-testers, then /plugin install mobile-agent-testers@mobile-agent-testers.
+On a plan with a usage limit, start with a batch of 6-10 phones. Use test accounts, never real ones.

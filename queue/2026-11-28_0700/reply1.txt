@@ -1,0 +1,1 @@
+1. Mermaid and other diagram-as-code formats are easy for an agent to write. But you can't drag a box, nudge an arrow or restyle one shape by hand. DayuanJiang/next-ai-draw-io gives your agent a real diagram canvas instead. The result is a normal .drawio file you can edit like any other. It's open source under Apache 2.0, with about 37.2k GitHub stars and 3.8k forks.

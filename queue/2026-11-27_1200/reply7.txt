@@ -1,9 +1,13 @@
-7. Setup guide:
-Go to GitHub and search for: DayuanJiang/next-ai-draw-io. For the web demo, search for Next AI Draw.io and open the official website.
+7. How to get it running:
 
-1. Install Node.js 18 or later.
-2. Claude Code: claude mcp add --scope user drawio -- npx @next-ai-drawio/mcp-server@latest
-3. Codex CLI: codex mcp add drawio -- npx @next-ai-drawio/mcp-server@latest
-4. Start a new session and ask: draw the architecture of this repo with AWS icons.
-5. A live canvas opens in your browser. Drag things around by hand, or select shapes and ask for changes.
-6. Export the result as .drawio, .png or .svg and keep it next to your docs.
+Go to GitHub and search for: reticlehq/reticle
+Or search the web for: Reticle coding agent verification MCP
+
+1. Install Node 20.11+ and start your web app's dev server.
+2. In the app folder run: npx @reticlehq/server
+3. Read the result: verified: yes or verified: no.
+4. To give your coding agent the tool, run: npx @reticlehq/server init
+5. Open Claude Code, Cursor or any MCP agent and ask it to check its change with Reticle before it says done.
+6. Optional: set DO_NOT_TRACK=1 to turn off the usage counts.
+
+Use the scoped package. Don't run npx reticle, it fetches an unrelated package.

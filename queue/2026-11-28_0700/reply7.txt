@@ -1,0 +1,9 @@
+7. Setup guide:
+Go to GitHub and search for: DayuanJiang/next-ai-draw-io. For the web demo, search for Next AI Draw.io and open the official website.
+
+1. Install Node.js 18 or later.
+2. Claude Code: claude mcp add --scope user drawio -- npx @next-ai-drawio/mcp-server@latest
+3. Codex CLI: codex mcp add drawio -- npx @next-ai-drawio/mcp-server@latest
+4. Start a new session and ask: draw the architecture of this repo with AWS icons.
+5. A live canvas opens in your browser. Drag things around by hand, or select shapes and ask for changes.
+6. Export the result as .drawio, .png or .svg and keep it next to your docs.

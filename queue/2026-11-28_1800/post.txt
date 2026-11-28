@@ -1,0 +1,16 @@
+people running automated pipelines with nobody watching
+Most of my rejects cost me almost nothing.
+
+My PC runs two unattended systems. Claude Code builds one project every night, and a pipeline hunts for new Claude Code and Codex tools to write about.
+
+That pipeline has dropped 140 tools after full analysis. I expected the drops to be spread across every stage. It wasn't close.
+
+One gate caught more than all the others combined. Those tools never got a single word written about them.
+
+Then there were the ones that slipped past it and died late, after the pipeline had already written the thread and tried to rescue it. That's the part I'd fix first in any setup.
+
+If your costly step runs before your strictest filter, you pay full price for every reject. Every single day, while you sleep.
+
+The article ranks all 5 places the drops happened. It also covers the boring automatic check that caught 2 tools that looked alive and weren't.
+
+Where my gates sit, and what each drop actually cost, is in the article below.
